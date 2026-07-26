@@ -32,30 +32,38 @@ if %errorlevel% neq 0 (
 )
 echo [OK] javascript-obfuscator found.
 
-:: Set paths
+:: Set paths — look for extension\ folder, or latest v* version folder
 set "SRC=%~dp0extension"
+
+:: If extension\ doesn't exist, try to find a v8.* folder (latest version)
+if not exist "%SRC%" (
+    set "SRC="
+    for /d %%D in ("%~dp0v*") do set "SRC=%%D"
+)
+
 set "OUT=%~dp0release\CoderSnap"
 set "ZIP=%~dp0CoderSnap_RELEASE.zip"
 
 :: Verify extension folder exists
-if not exist "%SRC%" (
-    echo [ERROR] Cannot find extension\ folder!
+if not defined SRC (
+    echo [ERROR] Cannot find extension files!
     echo         Looking in: %~dp0
     echo.
-    echo         Make sure build_release.bat is in the SAME folder as extension\
-    echo         Example:
-    echo           F:\Automation\Amazon\newSniper\build_release.bat
-    echo           F:\Automation\Amazon\newSniper\extension\
+    echo         Make sure you have either:
+    echo           extension\     folder, OR
+    echo           v8.7.x.x\     folder (from update_sniper.bat)
     echo.
     pause
     exit /b 1
 )
 if not exist "%SRC%\manifest.json" (
-    echo [ERROR] extension\ folder found but manifest.json is missing!
+    echo [ERROR] Found folder but manifest.json is missing!
     echo         Path: %SRC%
     pause
     exit /b 1
 )
+
+echo [OK] Source folder: %SRC%
 
 :: Step 1: Clean and copy
 echo.
