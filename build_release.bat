@@ -126,35 +126,9 @@ call javascript-obfuscator "!OUT!\Createapp.js" --output "!OUT!\Createapp.js" --
 echo.
 echo       All files obfuscated.
 
-:: ── Step 3: Calculate SHA-256 hashes ────────────────────────────
+:: ── Step 3: Create zip ──────────────────────────────────────────
 echo.
-echo [3/5] Calculating integrity hashes...
-
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\license.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_LICENSE=%%H"
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\fetch.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_FETCH=%%H"
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\content.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_CONTENT=%%H"
-
-echo       license.js: !HASH_LICENSE!
-echo       fetch.js:   !HASH_FETCH!
-echo       content.js: !HASH_CONTENT!
-
-:: ── Step 4: Update hashes in background.js ──────────────────────
-echo.
-echo [4/5] Updating integrity hashes in background.js...
-
-:: Replace the old hashes with new ones in the obfuscated background.js
-powershell -Command ^
-    "$content = Get-Content '!OUT!\background.js' -Raw; ^
-    $content = $content -replace 'f33c5fe19a716f91519c293273b671f1686574c5b5591743982e5891ce53b9d6', '!HASH_LICENSE!'; ^
-    $content = $content -replace 'fb0720bb286b0d81a6fe2e7c00df608b07940f0b699ae56ce7002239c77a8ab6', '!HASH_FETCH!'; ^
-    $content = $content -replace '59f26f8f5a27b20dae904d13536fb14c2be1b5fcf9bc7562c57b9d246ee91699', '!HASH_CONTENT!'; ^
-    Set-Content '!OUT!\background.js' -Value $content -NoNewline"
-
-echo       Hashes updated in background.js
-
-:: ── Step 5: Create zip ──────────────────────────────────────────
-echo.
-echo [5/5] Creating distribution zip...
+echo [3/3] Creating distribution zip...
 if exist "!ZIP!" del "!ZIP!"
 powershell -Command "Compress-Archive -Path '%~dp0release\CoderSnap' -DestinationPath '!ZIP!' -Force"
 echo       Created: CoderSnap_RELEASE.zip
@@ -173,7 +147,6 @@ echo   They extract it and Load Unpacked in Chrome.
 echo.
 echo   Security layers active:
 echo     [x] Code obfuscated (unreadable)
-echo     [x] SHA-256 file integrity check
 echo     [x] Server heartbeat (30-min re-verify)
 echo     [x] Anti-debugging (DevTools detection)
 echo     [x] License gate + email binding

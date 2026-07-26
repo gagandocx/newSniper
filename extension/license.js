@@ -14,11 +14,6 @@
 (function() {
     'use strict';
 
-    // ── INTEGRITY CROSS-CHECK: verify background.js isn't tampered ──
-    // (Uses storage flag set by background.js integrity check)
-    // If someone removes the check from background.js, the flag never gets set to false,
-    // so it remains true (tampered) from the default state.
-
     // ══════════════════════════════════════════════════════════════════
     // ██  PASTE YOUR GOOGLE APPS SCRIPT DEPLOYED URL HERE  ██
     // ══════════════════════════════════════════════════════════════════
@@ -183,26 +178,6 @@
         const app = document.getElementById('main-app');
         
         if (!gate || !app) return;
-
-        // ── INTEGRITY CHECK: block if tampered ──
-        var tamperData = await new Promise(function(resolve) {
-            chrome.storage.local.get(['__cs_tampered'], function(d) { resolve(d); });
-        });
-        if (tamperData['__cs_tampered']) {
-            gate.style.display = 'block';
-            app.style.display = 'none';
-            gate.className = 'phone-shell';
-            gate.innerHTML = '<div class="popup-card" style="display:flex;align-items:center;justify-content:center;min-height:568px;">'
-                + '<div style="padding:40px 20px;text-align:center;font-family:Inter,sans-serif;">'
-                + '<div style="font-size:56px;margin-bottom:16px;">&#128683;</div>'
-                + '<h2 style="color:#f87171;margin:0 0 12px;font-size:20px;">Integrity Violation</h2>'
-                + '<p style="color:rgba(199,210,254,0.7);font-size:13px;line-height:1.7;">'
-                + 'Extension files have been modified.<br>This copy is no longer valid.</p>'
-                + '<p style="color:rgba(199,210,254,0.4);font-size:11px;margin-top:20px;">'
-                + 'Please contact your CoderSnap administrator<br>for a valid copy of the extension.</p>'
-                + '</div></div>';
-            return; // Stop here — don't run any license logic
-        }
 
         // Check if we have a stored license
         const stored = await new Promise(function(resolve) {
