@@ -1361,9 +1361,20 @@
         if (!b) {
             // First-time wizard removed — Groq guide is shown after PIN in C()
             if (!g) {
-                const O = y(i);
-                window['location']['href'] = 'https://auth.hiring.amazon.ca/#/login';
-                return;
+                // Re-check storage — g might not be loaded yet on fresh page
+                var _storedEmail = await chrome['storage']['local']['get']('__un')['then'](function(d) { return d['__un'] || null; });
+                if (_storedEmail) {
+                    g = _storedEmail;
+                } else {
+                    // Truly no email — but don't redirect to login if we just came FROM login
+                    if (window.location.href.includes('redirectUrl') || window.location.href.includes('jobSearch')) {
+                        console.log('[fetch.js] L() — no email but on redirect/jobSearch page, waiting...');
+                        return;
+                    }
+                    const O = y(i);
+                    window['location']['href'] = 'https://auth.hiring.amazon.ca/#/login';
+                    return;
+                }
             }
             if (g) {
                 const P = y(i);
@@ -1556,6 +1567,8 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
 (function() {
     'use strict';
     function checkSignInAgain() {
+        // Don't trigger on redirectUrl pages — that's normal post-login flow
+        if (window.location.href.includes('redirectUrl=')) return;
         // Check for SweetAlert "Please sign-in again" popup
         const swalPopup = document.querySelector('.swal2-popup.swal2-show, .swal2-container.swal2-shown .swal2-popup');
         if (swalPopup) {
