@@ -32,149 +32,141 @@ if %errorlevel% neq 0 (
 )
 echo [OK] javascript-obfuscator found.
 
-:: Set paths — look for extension\ folder, or latest v* version folder
-set "SRC=%~dp0extension"
+:: ── Find the source folder ──────────────────────────────────────
+:: Priority: extension\ folder first, then latest v* folder
+set "SRC="
 
-:: If extension\ doesn't exist, try to find a v8.* folder (latest version)
-if not exist "%SRC%" (
-    set "SRC="
-    for /d %%D in ("%~dp0v*") do set "SRC=%%D"
+if exist "%~dp0extension\manifest.json" (
+    set "SRC=%~dp0extension"
+    goto :found_source
 )
 
-set "OUT=%~dp0release\CoderSnap"
-set "ZIP=%~dp0CoderSnap_RELEASE.zip"
+:: Look for v* folders (update_sniper.bat creates these)
+for /d %%D in ("%~dp0v*") do (
+    if exist "%%D\manifest.json" set "SRC=%%D"
+)
 
-:: Verify extension folder exists
-if not defined SRC (
+if "!SRC!"=="" (
+    echo.
     echo [ERROR] Cannot find extension files!
     echo         Looking in: %~dp0
     echo.
     echo         Make sure you have either:
     echo           extension\     folder, OR
-    echo           v8.7.x.x\     folder (from update_sniper.bat)
+    echo           v8.7.x.x\     folder
+    echo.
+    echo         with manifest.json inside it.
     echo.
     pause
     exit /b 1
 )
-if not exist "%SRC%\manifest.json" (
-    echo [ERROR] Found folder but manifest.json is missing!
-    echo         Path: %SRC%
-    pause
-    exit /b 1
-)
 
-echo [OK] Source folder: %SRC%
+:found_source
+echo [OK] Source folder: !SRC!
 
-:: Step 1: Clean and copy
+set "OUT=%~dp0release\CoderSnap"
+set "ZIP=%~dp0CoderSnap_RELEASE.zip"
+
+:: ── Step 1: Clean and copy ──────────────────────────────────────
 echo.
 echo [1/5] Copying extension to release folder...
 if exist "%~dp0release" rmdir /s /q "%~dp0release"
-mkdir "%OUT%"
-xcopy "%SRC%" "%OUT%" /E /I /Q /Y >nul
-:: Remove _metadata (Chrome regenerates it)
-if exist "%OUT%\_metadata" rmdir /s /q "%OUT%\_metadata"
+mkdir "!OUT!"
+xcopy "!SRC!" "!OUT!" /E /I /Q /Y >nul
+if exist "!OUT!\_metadata" rmdir /s /q "!OUT!\_metadata"
 echo       Done.
 
-:: Step 2: Obfuscate JS files
+:: ── Step 2: Obfuscate JS files ──────────────────────────────────
 echo.
 echo [2/5] Obfuscating JavaScript files...
 echo       (This takes 30-60 seconds)
 echo.
 
-:: Obfuscate license.js
 echo       - license.js
-call javascript-obfuscator "%OUT%\license.js" --output "%OUT%\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\license.js" --output "!OUT!\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate license.js
     pause
     exit /b 1
 )
 
-:: Obfuscate fetch.js
 echo       - fetch.js
-call javascript-obfuscator "%OUT%\fetch.js" --output "%OUT%\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\fetch.js" --output "!OUT!\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate fetch.js
     pause
     exit /b 1
 )
 
-:: Obfuscate content.js
 echo       - content.js
-call javascript-obfuscator "%OUT%\content.js" --output "%OUT%\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\content.js" --output "!OUT!\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate content.js
     pause
     exit /b 1
 )
 
-:: Obfuscate background.js (lighter settings — has integrity checker)
 echo       - background.js
-call javascript-obfuscator "%OUT%\background.js" --output "%OUT%\background.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate background.js
     pause
     exit /b 1
 )
 
-:: Obfuscate other JS files (lighter — less critical)
 echo       - auth.js
-call javascript-obfuscator "%OUT%\auth.js" --output "%OUT%\auth.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+
 echo       - notif_block.js
-call javascript-obfuscator "%OUT%\notif_block.js" --output "%OUT%\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "!OUT!\notif_block.js" --output "!OUT!\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
+
 echo       - Createapp.js
-call javascript-obfuscator "%OUT%\Createapp.js" --output "%OUT%\Createapp.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "!OUT!\Createapp.js" --output "!OUT!\Createapp.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
 
 echo.
 echo       All files obfuscated.
 
-:: Step 3: Calculate SHA-256 hashes of the obfuscated files
+:: ── Step 3: Calculate SHA-256 hashes ────────────────────────────
 echo.
 echo [3/5] Calculating integrity hashes...
 
-:: Use PowerShell to compute SHA-256
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '%OUT%\license.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_LICENSE=%%H"
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '%OUT%\fetch.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_FETCH=%%H"
-for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '%OUT%\content.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_CONTENT=%%H"
+for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\license.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_LICENSE=%%H"
+for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\fetch.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_FETCH=%%H"
+for /f "delims=" %%H in ('powershell -Command "(Get-FileHash '!OUT!\content.js' -Algorithm SHA256).Hash.ToLower()"') do set "HASH_CONTENT=%%H"
 
-echo       license.js: %HASH_LICENSE%
-echo       fetch.js:   %HASH_FETCH%
-echo       content.js: %HASH_CONTENT%
+echo       license.js: !HASH_LICENSE!
+echo       fetch.js:   !HASH_FETCH!
+echo       content.js: !HASH_CONTENT!
 
-:: Step 4: Update background.js with correct hashes
+:: ── Step 4: Update hashes in background.js ──────────────────────
 echo.
 echo [4/5] Updating integrity hashes in background.js...
 
-:: Use PowerShell to do the string replacement in the obfuscated background.js
-:: The obfuscated file still contains the hash strings (they're in the string array)
-:: We need to replace the OLD hashes with the NEW ones
-
-:: Read background.js, replace hash placeholders
+:: Replace the old hashes with new ones in the obfuscated background.js
 powershell -Command ^
-    "$content = Get-Content '%OUT%\background.js' -Raw; ^
-    $content = $content -replace 'f33c5fe19a716f91519c293273b671f1686574c5b5591743982e5891ce53b9d6', '%HASH_LICENSE%'; ^
-    $content = $content -replace 'fb0720bb286b0d81a6fe2e7c00df608b07940f0b699ae56ce7002239c77a8ab6', '%HASH_FETCH%'; ^
-    $content = $content -replace '59f26f8f5a27b20dae904d13536fb14c2be1b5fcf9bc7562c57b9d246ee91699', '%HASH_CONTENT%'; ^
-    Set-Content '%OUT%\background.js' -Value $content -NoNewline"
+    "$content = Get-Content '!OUT!\background.js' -Raw; ^
+    $content = $content -replace 'f33c5fe19a716f91519c293273b671f1686574c5b5591743982e5891ce53b9d6', '!HASH_LICENSE!'; ^
+    $content = $content -replace 'fb0720bb286b0d81a6fe2e7c00df608b07940f0b699ae56ce7002239c77a8ab6', '!HASH_FETCH!'; ^
+    $content = $content -replace '59f26f8f5a27b20dae904d13536fb14c2be1b5fcf9bc7562c57b9d246ee91699', '!HASH_CONTENT!'; ^
+    Set-Content '!OUT!\background.js' -Value $content -NoNewline"
 
 echo       Hashes updated in background.js
 
-:: Step 5: Create zip
+:: ── Step 5: Create zip ──────────────────────────────────────────
 echo.
 echo [5/5] Creating distribution zip...
-if exist "%ZIP%" del "%ZIP%"
-powershell -Command "Compress-Archive -Path '%~dp0release\CoderSnap' -DestinationPath '%ZIP%' -Force"
+if exist "!ZIP!" del "!ZIP!"
+powershell -Command "Compress-Archive -Path '%~dp0release\CoderSnap' -DestinationPath '!ZIP!' -Force"
 echo       Created: CoderSnap_RELEASE.zip
 
-:: Done!
+:: ── Done! ───────────────────────────────────────────────────────
 echo.
 echo  ============================================
 echo   BUILD COMPLETE!
 echo  ============================================
 echo.
 echo   Output: CoderSnap_RELEASE.zip
-echo   Size:   
-for %%A in ("%ZIP%") do echo           %%~zA bytes
+for %%A in ("!ZIP!") do echo   Size:   %%~zA bytes
 echo.
 echo   This zip is ready to send to clients.
 echo   They extract it and Load Unpacked in Chrome.
