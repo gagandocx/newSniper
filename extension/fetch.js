@@ -1,13 +1,11 @@
 (async function (a) {
-    // ── LICENSE CHECK — Block scanning if no valid license ──────────────────
+    // ── LICENSE + EMAIL CHECK — Block scanning if no valid license or wrong email ──
     var _csLicenseOk = false;
+    var _csLicensedEmail = null;
     async function _checkLicense() {
         return new Promise(function(resolve) {
-            chrome.storage.local.get(['__cs_license_key', '__cs_license_device'], function(data) {
-                if (!data['__cs_license_key'] || !data['__cs_license_device']) {
-                    resolve(false); return;
-                }
-                if (data['__cs_license_device'] !== chrome.runtime.id) {
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email'], function(data) {
+                if (!data['__cs_license_key'] || !data['__cs_license_email']) {
                     resolve(false); return;
                 }
                 // Validate key algorithmically
@@ -20,15 +18,46 @@
                     sum = (sum + payload.charCodeAt(i) * (i + 1)) & 0xFFFF;
                 }
                 var expected = ((sum % 676) + 10).toString(36).toUpperCase().padStart(2, '0');
-                resolve(checksum === expected);
+                if (checksum !== expected) { resolve(false); return; }
+                _csLicensedEmail = data['__cs_license_email'].toLowerCase().trim();
+                resolve(true);
             });
         });
     }
+
+    // ── Email enforcement: block if user tries to use a different Amazon account ──
+    function _enforceEmailBinding() {
+        setInterval(function() {
+            if (!_csLicensedEmail) return;
+            chrome.storage.local.get(['__un'], function(data) {
+                var currentEmail = (data['__un'] || '').toLowerCase().trim();
+                if (currentEmail && currentEmail !== _csLicensedEmail) {
+                    console.log('[CoderSnap] Email mismatch! Licensed:', _csLicensedEmail, '| Current:', currentEmail);
+                    chrome.storage.local.set({ '__ap': false });
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '🚫 License Violation',
+                            html: '<div style="text-align:left;font-family:Inter,sans-serif;font-size:13px;color:rgba(199,210,254,0.85);">'
+                                + '<p>This license is bound to:<br><b style="color:#22d3ee;">' + _csLicensedEmail + '</b></p>'
+                                + '<p style="margin-top:10px;">You are logged into:<br><b style="color:#f87171;">' + currentEmail + '</b></p>'
+                                + '<p style="margin-top:14px;color:rgba(199,210,254,0.5);font-size:11px;">Each license works with one Amazon account only. Contact admin for a new license.</p></div>',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            allowEscapeKey: false,
+                            allowOutsideClick: false
+                        });
+                    }
+                }
+            });
+        }, 10000);
+    }
+
     _csLicenseOk = await _checkLicense();
     if (!_csLicenseOk) {
         console.log('[CoderSnap] No valid license — scanning disabled');
-        return; // Exit entire content script — extension won't work without license
+        return;
     }
+    _enforceEmailBinding();
     // ─────────────────────────────────────────────────────────────────────────
 
     // Load Nunito font for consistent Swal dialog typography (matches popup theme)
@@ -626,6 +655,26 @@
             })['then'](a0 => {
                 return chrome['storage']['local']['set']({ '__un': a0['value'] }), a0['value'];
             }));
+            // ── LICENSE EMAIL ENFORCEMENT: Block if email doesn't match license ──
+            if (g && _csLicensedEmail && g.toLowerCase().trim() !== _csLicensedEmail) {
+                await Swal['fire']({
+                    'title': '🚫 Wrong Account',
+                    'html': '<div style="text-align:left;font-family:Inter,sans-serif;font-size:13px;color:rgba(199,210,254,0.85);">'
+                        + '<p>Your license is bound to:</p>'
+                        + '<p style="margin:8px 0;"><b style="color:#22d3ee;font-size:14px;">' + _csLicensedEmail + '</b></p>'
+                        + '<p>You entered:</p>'
+                        + '<p style="margin:8px 0;"><b style="color:#f87171;font-size:14px;">' + g + '</b></p>'
+                        + '<p style="margin-top:14px;color:rgba(199,210,254,0.5);font-size:11px;">You can only use this extension with the Amazon account linked to your license. Contact admin for help.</p></div>',
+                    'icon': 'error',
+                    'confirmButtonText': 'OK',
+                    'allowEscapeKey': false,
+                    'allowOutsideClick': false
+                });
+                g = null;
+                chrome['storage']['local']['remove']('__un');
+                return;
+            }
+            // ─────────────────────────────────────────────────────────────────────
             if (!h) {
                 h = await Swal['fire']({
                     'title': 'Security Verification',

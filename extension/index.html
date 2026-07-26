@@ -33,10 +33,17 @@
           <div class="api-input-row">
             <input type="text" id="license-key-input" placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
                    autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;font-family:monospace;">
-            <span id="license_ok" class="api-badge saved" style="display:none;">✓ Valid</span>
-            <span id="license_err" class="api-badge error" style="display:none;">✗ Invalid Key</span>
           </div>
         </div>
+        <div class="api-field" style="margin-top:10px;">
+          <span>AMAZON ACCOUNT EMAIL</span>
+          <div class="api-input-row">
+            <input type="email" id="license-email-input" placeholder="your@email.com"
+                   autocomplete="off" style="letter-spacing:0.3px;">
+          </div>
+        </div>
+        <span id="license_ok" class="api-badge saved" style="display:none;margin-top:8px;">✓ Activated</span>
+        <span id="license_err" class="api-badge error" style="display:none;margin-top:8px;">✗ Invalid Key</span>
         <button id="activate-license-btn" type="button" style="
           width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;
           background:linear-gradient(135deg,#16f5ff,#a341ff);color:#fff;
@@ -45,7 +52,7 @@
           Activate License
         </button>
         <p style="margin-top:12px;font-size:11px;color:rgba(199,210,254,0.4);text-align:center;">
-          One license per device. Contact admin to get your key.
+          One license per Amazon account. Your key is permanently bound to this email.
         </p>
       </div>
     </div>
