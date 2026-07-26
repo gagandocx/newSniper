@@ -98,7 +98,7 @@
                 const result = await callServer('verify', data['__cs_license_key'], data['__cs_license_email']);
                 
                 if (result.success && result.valid) {
-                    resolve({ valid: true });
+                    resolve({ valid: true, daysRemaining: result.daysRemaining || null });
                 } else {
                     resolve({ valid: false, error: result.error || 'Verification failed' });
                 }
@@ -166,9 +166,10 @@
             const verification = await verifyStoredLicense();
             
             if (verification.valid) {
-                // Show LICENSED badge
+                // Show LICENSED badge with days remaining
                 if (badge) {
-                    badge.innerHTML = '&#10024; LICENSED';
+                    var daysText = verification.daysRemaining ? ' (' + verification.daysRemaining + 'd left)' : '';
+                    badge.innerHTML = '&#10024; LICENSED' + daysText;
                     badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#22d3a8,#3b82f6);'
                         + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
                         + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(34,211,168,0.4);';
@@ -186,8 +187,8 @@
                 // Mark as invalid — fetch.js will not scan
                 chrome.storage.local.set({ '__cs_license_valid': false });
                 
-                // If it's a device/email mismatch, clear stored data and show gate
-                if (verification.error && (verification.error.includes('mismatch') || verification.error.includes('revoked'))) {
+                // If it's a device/email mismatch or expired or revoked, clear stored data and show gate
+                if (verification.error && (verification.error.includes('mismatch') || verification.error.includes('revoked') || verification.error.includes('expired'))) {
                     chrome.storage.local.remove(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_valid']);
                     gate.style.display = 'block';
                     app.style.display = 'none';

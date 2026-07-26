@@ -131,9 +131,12 @@ function handleActivate(params) {
   var existingDevice = String(rowData[2] || '').trim();
   var status = String(rowData[5] || '').toLowerCase().trim();
   
-  // Check if key is revoked
+  // Check if key is revoked or expired
   if (status === 'revoked') {
     return { success: false, error: 'This key has been revoked' };
+  }
+  if (status === 'expired') {
+    return { success: false, error: 'This key has expired' };
   }
   
   // Check if already activated by someone else
@@ -185,11 +188,31 @@ function handleVerify(params) {
   var rowData = data[keyRow];
   var existingEmail = String(rowData[1] || '').toLowerCase().trim();
   var existingDevice = String(rowData[2] || '').trim();
+  var activatedAt = rowData[3] || '';
   var status = String(rowData[5] || '').toLowerCase().trim();
   
   // Check if revoked
   if (status === 'revoked') {
     return { success: true, valid: false, error: 'License revoked' };
+  }
+  
+  // Check if expired (1 year = 365 days from activation)
+  if (status === 'expired') {
+    return { success: true, valid: false, error: 'License expired — 1 year has passed since activation' };
+  }
+  
+  if (activatedAt) {
+    var activationDate = new Date(activatedAt);
+    var now = new Date();
+    var diffMs = now.getTime() - activationDate.getTime();
+    var diffDays = diffMs / (1000 * 60 * 60 * 24);
+    
+    if (diffDays >= 365) {
+      // Auto-expire: update status in sheet to 'expired'
+      var row = keyRow + 1;
+      sheet.getRange(row, 6).setValue('expired');
+      return { success: true, valid: false, error: 'License expired — 1 year has passed since activation' };
+    }
   }
   
   // Check if not yet activated
@@ -211,7 +234,15 @@ function handleVerify(params) {
   var row = keyRow + 1;
   sheet.getRange(row, 5).setValue(new Date().toISOString());
   
-  return { success: true, valid: true, email: existingEmail };
+  // Calculate days remaining for client display
+  var daysRemaining = 365;
+  if (activatedAt) {
+    var activationDate = new Date(activatedAt);
+    var diffMs = new Date().getTime() - activationDate.getTime();
+    daysRemaining = Math.max(0, 365 - Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+  }
+  
+  return { success: true, valid: true, email: existingEmail, daysRemaining: daysRemaining };
 }
 
 // ── LIST: Admin view of all keys ──────────────────────────────────
