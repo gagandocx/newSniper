@@ -1,12 +1,13 @@
-// CoderSnap v8.7.10.4 — Proprietary. Unauthorized copying prohibited.
-var _0xSTRe63b=['r\x75\x6e\x74i\x6d\x65','o\x6e\x43onnec\x74','\x61\x64dL\x69\x73t\x65\x6e\x65r','\x6fnM\x65\x73\x73a\x67\x65','\x61c\x74\x69on','f\x65t\x63h_\x69nf\x6f','sto\x72age','l\x6fc\x61\x6c','ge\x74','\x5f\x5fu\x6e','_\x5f\x70\x77','cand\x69da\x74\x65ID','\x73\x65l\x65c\x74ed\x43i\x74y','l\x61t','\x6cn\x67','d\x69\x73\x74a\x6e\x63\x65','\x6aob\x54\x79pe','__a\x70','\x6d\x61\x6ea\x67e\x6de\x6e\x74','get\x53\x65\x6c\x66','\x76er\x73io\x6e','\x64a\x74\x61','\x70o\x73t\x4d\x65ssa\x67e','o\x6e\x49n\x73t\x61lle\x64','dis\x61\x62\x6ce','\x64ecla\x72at\x69\x76e\x43\x6fnte\x6e\x74','o\x6e\x50\x61geC\x68\x61nge\x64','re\x6d\x6f\x76\x65\x52u\x6ces','P\x61ge\x53t\x61t\x65\x4d\x61\x74c\x68\x65r','Sh\x6fwAc\x74\x69on','\x61\x64\x64\x52\x75\x6ces','\x69ns\x74\x61l\x6c','\x73\x65t','\x74\x61\x62s','\x63\x72ea\x74\x65','\x68tt\x70s\x3a\x2f/hi\x72i\x6eg\x2e\x61m\x61\x7ao\x6e.\x63a\x2fapp#/\x6a\x6f\x62S\x65\x61\x72c\x68','c\x61\x6ed\x69\x64a\x74\x65\x49d','newValu\x65','onUpdat\x65d','\x73\x74\x61tu\x73','\x63o\x6d\x70l\x65te','\x75\x72\x6c','\x69\x6e\x63\x6cu\x64\x65\x73','\x68\x69\x72\x69\x6eg.\x61mazon\x2e\x63a/\x61pp\x6cic\x61t\x69\x6fn/\x75s\x2f','hiri\x6e\x67\x2eam\x61z\x6f\x6e\x2ec\x6fm/\x61p\x70\x6c\x69\x63\x61\x74\x69on\x2fu\x73\x2f','jo\x62Id=','\x73c\x72ip\x74\x69\x6eg','e\x78ec\x75teScrip\x74','Cr\x65ate\x61pp\x2e\x6a\x73','li\x63en\x73\x65Req\x75e\x73\x74','\x5bbg\x5d Lic\x65n\x73e\x20\x72\x65\x71\x75\x65st\x20U\x52L:','\x5b\x62\x67\x5d\x20F\x65\x74\x63\x68i\x6eg\x20w\x69\x74\x68 c\x72\x65\x64\x65\x6et\x69\x61l\x73\x3a\x6fm\x69\x74 \x28no\x20\x63\x6f\x6fk\x69e\x73).\x2e.','G\x45\x54','\x66\x6fl\x6cow','o\x6d\x69\x74','[\x62g\x5d\x20\x52es\x70\x6fn\x73\x65\x3a\x20\x73\x74\x61\x74\x75s\x3d',' \x75rl\x3d','un\x64\x65\x66i\x6eed','[b\x67\x5d \x42\x6fd\x79:','\x5bb\x67\x5d\x20\x52\x65di\x72\x65ct\x20dete\x63t\x65\x64\x2c \x72e\x2df\x65tch\x69\x6eg \x66i\x6ea\x6c\x20URL\x20wi\x74\x68out \x63o\x6f\x6bi\x65\x73\x3a','\x5bb\x67] R\x65\x2df\x65\x74ch: s\x74\x61\x74\x75\x73\x3d','\x20\x62o\x64y\x3a','script\x2egoo\x67\x6c\x65\x2eco\x6d','\x73\x63r\x69pt\x2e\x67oogleu\x73\x65\x72\x63o\x6e\x74\x65nt\x2ec\x6f\x6d','\x5b\x62\x67]\x20Fa\x6cl\x62\x61\x63k: \x67\x6f\x6f\x67\x6c\x65\x75\x73e\x72\x63\x6f\x6et\x65nt.c\x6f\x6d\x20\x55R\x4c:','\x5bbg] F\x61\x6c\x6c\x62ack: sta\x74\x75s=','\x2f\x75\x2f1\x2f','/u\x2f\x30\x2f','\x47o\x6f\x67l\x65 redirect\x65\x64 \x74\x6f\x20u\x73\x65r-\x73\x63\x6fp\x65d \x55RL\x20\x28coo\x6bi\x65\x20\x6c\x65ak)\x2e\x20cre\x64\x65n\x74\x69\x61\x6cs\x3a\x6f\x6dit m\x61y n\x6ft be wo\x72\x6bi\x6eg\x2e\x20T\x72y \x69\x6ec\x6fg\x6e\x69\x74\x6f o\x72\x20cl\x65\x61r \x47oo\x67\x6c\x65 coo\x6b\x69es.','\x3c!\x44O\x43T\x59P\x45','<h\x74\x6dl','u\x6e\x6b\x6eo\x77n','G\x6f\x74\x20HTML ("','\x22)\x20\x2014\x20\x73\x74\x61t\x75\x73 ','N\x6fn-J\x53\x4fN\x3a\x20','[\x62g]\x20\x4ci\x63ens\x65\x20\x66etch\x20\x65rro\x72:','Ne\x74\x77ork error','takeSc\x72\x65en\x73ho\x74','n\x6f wi\x6e\x64ow\x49d','\x6a\x70\x65\x67','deb\x75ggerCl\x69c\x6b','\x62\x61d \x61r\x67\x73','\x31\x2e3','l\x65ft','I\x6e\x70ut\x2ed\x69\x73patc\x68\x4dous\x65E\x76\x65\x6e\x74','\x6dous\x65\x50\x72\x65\x73\x73e\x64','\x6d\x6fu\x73\x65\x52el\x65as\x65\x64','cl\x69c\x6b\x43\x6f\x6e\x66i\x72\x6d\x49nI\x66\x72\x61me','\x6eo\x20ta\x62I\x64','Page\x2eg\x65\x74Fram\x65T\x72e\x65','ca\x70tcha','\x5b\x62\x67\x5d capt\x63\x68\x61\x20\x66rame\x49d\x3a','R\x75\x6e\x74\x69m\x65\x2e\x65\x76a\x6c\x75at\x65','\x28\x66un\x63ti\x6fn\x28\x29\x20{\x20va\x72 f\x72am\x65s\x20\x3d d\x6f\x63um\x65\x6et.\x71u\x65ryS\x65le\x63\x74\x6f\x72\x41\x6c\x6c\x28\x22ifr\x61\x6de"\x29\x3b f\x6f\x72\x20(v\x61\x72\x20\x69\x3d0\x3b i<f\x72\x61\x6de\x73\x2elen\x67t\x68\x3b i++\x29\x20{\x20\x69\x66\x20(\x66\x72a\x6des[\x69]\x2es\x72c \x26\x26 \x66\x72a\x6d\x65\x73[\x69].\x73rc\x2ei\x6eclu\x64\x65s\x28"\x63\x61\x70\x74c\x68a\x22\x29) ret\x75r\x6e i\x3b }\x20ret\x75r\x6e -1; \x7d)(\x29','\x28\x66u\x6e\x63t\x69o\x6e\x28\x29\x20\x7b v\x61\x72\x20i\x66\x72a\x6d\x65s \x3d do\x63u\x6d\x65n\x74\x2e\x71ueryS\x65le\x63torAl\x6c\x28"\x69\x66\x72\x61\x6de\x22\x29;\x20fo\x72 (\x76ar i \x3d \x30\x3b \x69 <\x20i\x66\x72\x61mes.l\x65\x6e\x67\x74h; i\x2b+) \x7b\x20\x74\x72y\x20\x7b v\x61\x72 \x62\x74n \x3d\x20\x69f\x72\x61\x6d\x65s\x5b\x69\x5d\x2e\x63o\x6et\x65n\x74D\x6f\x63um\x65\x6e\x74\x20&\x26\x20\x69fr\x61\x6d\x65\x73\x5bi\x5d.\x63onten\x74\x44o\x63\x75m\x65nt.\x71\x75erySel\x65\x63\x74o\x72(\x22bu\x74\x74\x6fn\x22\x29; i\x66 (\x62tn\x29 {\x20btn\x2ec\x6ci\x63k\x28\x29; \x72\x65t\x75\x72n\x20"clic\x6b\x65d\x20v\x69a ifra\x6de[" \x2b \x69\x20\x2b "\x5d";\x20} } cat\x63h\x28e\x29\x20{\x7d \x7d r\x65t\x75rn\x20"not \x66\x6f\x75\x6e\x64\x22;\x20\x7d\x29(\x29','\x5b\x62\x67] if\x72a\x6de\x20bu\x74\x74\x6fn\x20\x63l\x69\x63\x6b\x20res\x75lt:','c\x6c\x69c\x6b\x65\x64','\x5bb\x67\x5d\x20\x43\x6f\x6efi\x72\x6d\x20f\x61l\x6cba\x63\x6b CD\x50 \x63li\x63k at','\x63\x6cick\x43\x65ll\x73\x41\x6ed\x43\x6fn\x66\x69r\x6d','\x28\x66u\x6e\x63\x74\x69\x6fn()\x20{','\x20\x20v\x61r \x68\x6fs\x74 \x3d docu\x6de\x6et\x2e\x71uer\x79Se\x6c\x65c\x74o\x72\x28\x22awsw\x61\x66-\x63\x61\x70tc\x68\x61")\x3b',' \x20\x69\x66\x20\x28\x68os\x74\x20&&\x20\x68\x6f\x73\x74\x2e\x73had\x6fw\x52\x6fo\x74)\x20\x7b','\x20\x20\x20\x20\x76\x61r\x20b\x74n =\x20ho\x73t\x2esh\x61do\x77\x52\x6fo\x74.\x71\x75e\x72y\x53\x65\x6ce\x63\x74\x6fr(\x22#am\x7an\x2d\x62\x74\x6e\x2d\x76\x65\x72\x69\x66y-\x69\x6ete\x72\x6e\x61l\x2c\x20\x2eb\x74\x6e.b\x74\x6e\x2d\x70\x72\x69\x6dar\x79\x2c\x20bu\x74ton\x5b\x74y\x70e=\x73ub\x6dit]"\x29\x3b','\x20 \x20\x20\x69f (\x62\x74\x6e\x29 {\x20\x62\x74\x6e\x2e\x63\x6ci\x63\x6b(); retur\x6e\x20\x22\x73\x68\x61\x64ow\x3a\x63\x6c\x69\x63\x6bed";\x20\x7d','  \x7d','\x20 \x76\x61\x72\x20\x62tn\x32\x20= d\x6f\x63u\x6den\x74\x2equer\x79Sel\x65\x63t\x6fr("\x23\x61\x6d\x7an-\x62t\x6e\x2dve\x72\x69\x66y-i\x6eter\x6e\x61\x6c,\x20\x62utt\x6fn\x5b\x74\x79\x70e\x3d\x73\x75b\x6di\x74]"\x29;','\x20\x20\x69\x66\x20(b\x74n2\x29\x20{ \x62\x74n2.c\x6c\x69\x63\x6b\x28); ret\x75r\x6e "\x64\x6fm:\x63\x6ci\x63ked\x22;\x20\x7d','\x20 re\x74\x75\x72n "\x6e\x6ft-\x66o\x75\x6ed\x22;','})\x28\x29','\x5bbg] \x43\x6f\x6e\x66i\x72m\x20cl\x69c\x6b\x20r\x65\x73u\x6c\x74:','\x5b\x62\x67]\x20\x63\x6c\x69\x63\x6bC\x65\x6cl\x73An\x64Co\x6ef\x69rm\x20\x65rro\x72\x3a','r\x65\x66r\x65\x73hGm\x61ilTab','\x71\x75ery','\x2a:\x2f\x2fm\x61il.\x67\x6fo\x67l\x65.c\x6f\x6d/\x2a'];
-chrome[_0xSTRe63b[0]][_0xSTRe63b[1]][_0xSTRe63b[2]](function (a) {
-a[_0xSTRe63b[3]][_0xSTRe63b[2]](async function (b) {
+// CoderSnap v8.7.10.0 — Proprietary. Unauthorized copying prohibited.
+var _0xSTR4bcf=['\x72\x75\x6e\x74\x69\x6d\x65','\x6fn\x43\x6f\x6e\x6eect','add\x4c\x69s\x74\x65\x6eer','o\x6e\x4de\x73sage','u\x6e\x64e\x66\x69\x6eed','a\x63ti\x6f\x6e','\x66\x65tch\x5f\x69n\x66\x6f','\x73t\x6f\x72\x61\x67\x65','\x6co\x63\x61l','g\x65t','__\x75\x6e','_\x5fp\x77','\x63\x61ndid\x61t\x65ID','sel\x65\x63t\x65d\x43\x69\x74y','lat','l\x6eg','\x64is\x74a\x6ec\x65','\x6a\x6fb\x54\x79p\x65','\x5f\x5fap','\x6danage\x6d\x65nt','\x67\x65\x74\x53\x65\x6cf','v\x65\x72s\x69on','da\x74a','\x70\x6fstM\x65ssag\x65','\x6f\x6e\x49\x6es\x74a\x6c\x6c\x65\x64','d\x69\x73\x61\x62\x6ce','\x64\x65\x63\x6c\x61ra\x74\x69\x76\x65Con\x74\x65nt','o\x6eP\x61\x67e\x43\x68a\x6ege\x64','rem\x6f\x76\x65\x52ul\x65s','Pa\x67e\x53tateM\x61\x74ch\x65\x72','\x53howA\x63\x74ion','addRul\x65s','i\x6es\x74\x61\x6c\x6c','se\x74','\x74\x61\x62\x73','c\x72eate','https\x3a/\x2f\x68i\x72\x69n\x67\x2e\x61\x6d\x61\x7aon.\x63a\x2f\x61\x70\x70#/j\x6fb\x53ea\x72\x63\x68','\x63\x61\x6e\x64i\x64\x61te\x49\x64','\x6ee\x77\x56\x61lue','\x6f\x6eU\x70da\x74\x65\x64','_\x31\x61','c\x6f\x6dp\x6c\x65\x74\x65','\x69\x6eclude\x73','\x68\x69ri\x6eg\x2e\x61ma\x7aon\x2e\x63a/\x61\x70p\x6cica\x74io\x6e\x2f\x75\x73/','\x68\x69\x72ing\x2ea\x6d\x61\x7aon.\x63o\x6d\x2fa\x70\x70\x6ci\x63\x61t\x69\x6f\x6e/us/','jo\x62\x49\x64\x3d','\x73\x63\x72\x69p\x74i\x6eg','\x65\x78\x65c\x75\x74\x65Scr\x69\x70t','\x43r\x65\x61\x74\x65a\x70p.\x6a\x73','\x6c\x69c\x65n\x73\x65R\x65ques\x74','[b\x67] \x4cic\x65\x6es\x65 reque\x73\x74\x20\x55\x52L\x3a','[\x62\x67]\x20F\x65tching\x20\x77ith\x20c\x72e\x64ent\x69\x61l\x73\x3a\x6f\x6d\x69\x74\x20\x28\x6e\x6f \x63o\x6fk\x69es).\x2e.','G\x45T','\x66o\x6c\x6c\x6f\x77','o\x6di\x74','[b\x67\x5d\x20Re\x73p\x6fn\x73\x65:\x20\x5f1a=',' \x5f\x30=','[\x62g\x5d\x20B\x6f\x64\x79:','[\x62g\x5d \x52\x65\x64ir\x65ct d\x65tec\x74e\x64,\x20re-fe\x74\x63hin\x67 \x66\x69n\x61l UR\x4c \x77\x69\x74h\x6f\x75\x74\x20\x63\x6fokies\x3a','\x5b\x62g\x5d \x52\x65-f\x65\x74ch:\x20\x5f1a=','\x20\x62\x6f\x64y:','\x73\x63\x72i\x70t.\x67oogle\x2ecom','\x73\x63r\x69p\x74.g\x6f\x6f\x67l\x65user\x63o\x6e\x74e\x6et\x2ec\x6f\x6d','\x5bb\x67\x5d\x20F\x61llb\x61c\x6b: goo\x67\x6ceuse\x72\x63\x6f\x6e\x74\x65\x6e\x74.\x63om\x20\x55\x52L:','\x5bb\x67]\x20Fal\x6cb\x61ck\x3a _\x31\x61\x3d','\x2fu\x2f1\x2f','/u\x2f0\x2f','G\x6fo\x67l\x65\x20redi\x72\x65c\x74\x65\x64 to\x20\x75s\x65r\x2d\x73c\x6f\x70e\x64 UR\x4c\x20\x28\x63oo\x6bi\x65\x20l\x65\x61\x6b)\x2e\x20\x63\x72\x65\x64\x65nti\x61\x6cs\x3ao\x6dit\x20ma\x79 \x6e\x6ft\x20b\x65\x20\x77\x6f\x72k\x69\x6e\x67.\x20T\x72y in\x63\x6fgn\x69t\x6f\x20\x6fr\x20\x63l\x65\x61r Go\x6f\x67le \x63oo\x6b\x69\x65\x73.','\x3c\x21D\x4fC\x54Y\x50\x45','<h\x74ml','\x75n\x6bnown','G\x6ft HT\x4dL\x20(\x22','\x22\x29\x20\x2014 _\x31a\x20','\x4eo\x6e\x2d\x4a\x53ON\x3a ','\x5bbg\x5d Li\x63\x65nse\x20\x66\x65\x74\x63h err\x6f\x72\x3a','\x4eetw\x6f\x72k\x20\x65r\x72or','\x74\x61\x6b\x65\x53\x63\x72\x65ensh\x6ft','\x6eo w\x69\x6edowId','j\x70\x65g','\x64ebu\x67\x67\x65\x72\x43li\x63\x6b','ba\x64 a\x72gs','1\x2e3','le\x66\x74','I\x6eput\x2ed\x69sp\x61\x74\x63\x68\x4d\x6f\x75s\x65\x45vent','m\x6fu\x73e\x50\x72\x65sse\x64','m\x6fu\x73\x65\x52e\x6ceased','c\x6cickC\x6f\x6e\x66ir\x6dI\x6eI\x66r\x61me','n\x6f \x5ft','\x50a\x67e\x2e\x67\x65t\x46\x72\x61me\x54\x72e\x65','\x63ap\x74cha','\x5bbg\x5d\x20c\x61\x70t\x63ha\x20f\x72\x61m\x65I\x64:','Ru\x6e\x74\x69me.\x65\x76\x61l\x75\x61t\x65','\x28f\x75\x6e\x63t\x69\x6fn() \x7b \x76\x61\x72\x20_\x6d\x20=\x20d\x6f\x63u\x6d\x65n\x74\x2eque\x72\x79Sel\x65ct\x6frAll\x28\x22i\x66r\x61\x6de\x22\x29;\x20\x66\x6fr\x20\x28\x76\x61\x72 \x69\x3d0;\x20\x69\x3c_m\x2e\x6ceng\x74h\x3b i\x2b\x2b)\x20{\x20i\x66 (_\x6d[i\x5d\x2e\x73\x72c &&\x20_m\x5b\x69]\x2esr\x63.inc\x6cudes\x28"\x63\x61\x70t\x63\x68a")\x29\x20\x72etu\x72n i\x3b \x7d ret\x75\x72\x6e\x20\x2d1\x3b }\x29\x28)','(\x66u\x6e\x63\x74i\x6fn()\x20{\x20var \x5fn \x3d\x20d\x6f\x63\x75me\x6et.\x71\x75erySe\x6ce\x63t\x6f\x72\x41ll(\x22\x69f\x72\x61m\x65\x22\x29; fo\x72 (\x76a\x72\x20\x69\x20=\x20\x30;\x20i\x20\x3c _n.\x6c\x65n\x67t\x68; i+\x2b) \x7b\x20t\x72\x79\x20{ \x76\x61\x72 _o\x20= _\x6e[i]\x2e\x63onte\x6e\x74\x44\x6fc\x75\x6d\x65nt\x20&\x26 _n\x5b\x69\x5d\x2eco\x6eten\x74\x44\x6f\x63\x75\x6d\x65\x6et.\x71ueryS\x65\x6cecto\x72("b\x75t\x74on\x22\x29;\x20\x69f \x28_o\x29\x20{\x20\x5fo.clic\x6b(\x29;\x20\x72\x65t\x75\x72n\x20"\x5f\x6c \x76\x69\x61\x20ifr\x61\x6de["\x20+ i \x2b "]\x22\x3b } }\x20c\x61t\x63h(e) \x7b} } re\x74ur\x6e\x20"\x6eo\x74\x20fo\x75n\x64"; })()','\x5b\x62\x67]\x20\x69f\x72a\x6d\x65 b\x75\x74t\x6fn \x63li\x63\x6b r\x65\x73\x75lt\x3a','\x5b\x62\x67\x5d \x43\x6f\x6e\x66ir\x6d\x20\x66\x61l\x6cb\x61c\x6b\x20\x43D\x50 c\x6c\x69c\x6b at','\x63lick\x43el\x6c\x73An\x64\x43\x6fn\x66\x69\x72m','\x28f\x75n\x63tion() {','\x20 v\x61r \x5f\x71\x20\x3d \x64\x6fcum\x65\x6et\x2e\x71\x75er\x79\x53\x65\x6c\x65\x63\x74or(\x22\x61\x77s\x77\x61f\x2d\x63\x61pt\x63ha\x22);','  if \x28\x5fq \x26\x26\x20\x5fq.\x73hado\x77\x52o\x6ft\x29 {','\x20\x20 \x20v\x61r \x5f\x6f =\x20_\x71\x2es\x68a\x64\x6fw\x52\x6f\x6ft.\x71uer\x79\x53\x65\x6ce\x63t\x6fr("#\x61\x6d\x7an-\x5f\x6f-v\x65rif\x79\x2d\x69\x6e\x74\x65r\x6e\x61\x6c\x2c\x20\x2e_\x6f.\x5fo\x2dpr\x69ma\x72\x79\x2c b\x75\x74\x74\x6f\x6e\x5bty\x70\x65\x3dsub\x6d\x69\x74\x5d"\x29;',' \x20 \x20if\x20(\x5f\x6f) { \x5f\x6f\x2ecli\x63\x6b\x28); \x72\x65\x74urn\x20\x22\x73\x68\x61do\x77\x3a\x5fl\x22;\x20\x7d',' \x20\x7d','\x20 va\x72\x20_\x72 =\x20d\x6fc\x75\x6d\x65\x6e\x74.q\x75\x65ry\x53\x65\x6ce\x63tor("#a\x6dz\x6e-\x5fo\x2d\x76e\x72i\x66y-\x69\x6ete\x72\x6eal\x2c\x20\x62u\x74\x74\x6fn[ty\x70\x65=sub\x6di\x74\x5d"\x29\x3b','  i\x66 \x28\x5fr) \x7b\x20\x5fr.c\x6ci\x63k\x28)\x3b r\x65\x74u\x72\x6e\x20\x22\x64\x6f\x6d:_l\x22;\x20\x7d','\x20\x20ret\x75r\x6e\x20\x22n\x6ft\x2dfo\x75nd";','\x7d)\x28\x29','\x5bb\x67]\x20Co\x6e\x66\x69r\x6d c\x6c\x69\x63\x6b\x20re\x73ul\x74\x3a','\x5bb\x67] c\x6c\x69c\x6bCe\x6cl\x73AndCo\x6ef\x69\x72m\x20\x65r\x72o\x72\x3a','\x72\x65fr\x65sh\x47\x6d\x61\x69\x6cT\x61\x62','qu\x65ry','*:\x2f\x2fm\x61\x69\x6c\x2egoog\x6ce\x2ecom/\x2a'];
+chrome[_0xSTR4bcf[0]][_0xSTR4bcf[1]][_0xSTR4bcf[2]](function (a) {
+a[_0xSTR4bcf[3]][_0xSTR4bcf[2]](async function (b) {
 let c = new Object();
-c[_0xSTRe63b[4]] = b[_0xSTRe63b[4]];
-if (b[_0xSTRe63b[4]] == _0xSTRe63b[5]) {
-let {__un: d} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[9]), {__pw: e} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[10]), {candidateID: f} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[11]), {selectedCity: g} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[12]), {lat: h} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[13]), {lng: i} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[14]), {distance: j} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[15]), {jobType: k} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[16]), {__ap: l} = await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[8]](_0xSTRe63b[17]), m = await new Promise(n => chrome[_0xSTRe63b[18]][_0xSTRe63b[19]](o => n(o[_0xSTRe63b[20]])));
-c[_0xSTRe63b[21]] = {
+if(typeof undefined!==_0xSTR4bcf[4]){void 0;}
+c[_0xSTR4bcf[5]] = b[_0xSTR4bcf[5]];
+if (b[_0xSTR4bcf[5]] == _0xSTR4bcf[6]) {
+let {__un: d} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[10]), {__pw: e} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[11]), {candidateID: f} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[12]), {selectedCity: g} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[13]), {lat: h} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[14]), {lng: i} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[15]), {distance: j} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[16]), {jobType: k} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[17]), {__ap: l} = await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[9]](_0xSTR4bcf[18]), m = await new Promise(n => chrome[_0xSTR4bcf[19]][_0xSTR4bcf[20]](o => n(o[_0xSTR4bcf[21]])));
+c[_0xSTR4bcf[22]] = {
 '$username': d,
 '$password': e,
 '$candidateID': f,
@@ -19,37 +20,38 @@ c[_0xSTRe63b[21]] = {
 '$version': m
 };
 }
-a[_0xSTRe63b[22]](c);
+a[_0xSTR4bcf[23]](c);
 });
-}), chrome[_0xSTRe63b[0]][_0xSTRe63b[23]][_0xSTRe63b[2]](async ({reason: a}) => {
-chrome[_0xSTRe63b[4]][_0xSTRe63b[24]](), chrome[_0xSTRe63b[25]][_0xSTRe63b[26]][_0xSTRe63b[27]](undefined, () => {
+}), chrome[_0xSTR4bcf[0]][_0xSTR4bcf[24]][_0xSTR4bcf[2]](async ({reason: a}) => {
+chrome[_0xSTR4bcf[5]][_0xSTR4bcf[25]](), chrome[_0xSTR4bcf[26]][_0xSTR4bcf[27]][_0xSTR4bcf[28]](undefined, () => {
 let b = {
-'conditions': [new chrome[_0xSTRe63b[25]][_0xSTRe63b[28]]({ 'pageUrl': {} })],
-'actions': [new chrome[_0xSTRe63b[25]][_0xSTRe63b[29]]()]
+'conditions': [new chrome[_0xSTR4bcf[26]][_0xSTR4bcf[29]]({ 'pageUrl': {} })],
+'actions': [new chrome[_0xSTR4bcf[26]][_0xSTR4bcf[30]]()]
 }, c = [b];
-chrome[_0xSTRe63b[25]][_0xSTRe63b[26]][_0xSTRe63b[30]](c);
-}), a === _0xSTRe63b[31] && (await chrome[_0xSTRe63b[6]][_0xSTRe63b[7]][_0xSTRe63b[32]]({
+chrome[_0xSTR4bcf[26]][_0xSTR4bcf[27]][_0xSTR4bcf[31]](c);
+}), a === _0xSTR4bcf[32] && (await chrome[_0xSTR4bcf[7]][_0xSTR4bcf[8]][_0xSTR4bcf[33]]({
 '__ap': !![],
 '__cr': 0x0,
 '__fq': 0.5,
 '__gp': 0x3,
 '__tdgp': 0x3
-}), chrome[_0xSTRe63b[33]][_0xSTRe63b[34]]({ 'url': _0xSTRe63b[35] })), chrome['storage']['onChanged']['addListener']((b, c) => {
-if (c === _0xSTRe63b[7] && b[_0xSTRe63b[36]]) {
-const d = b[_0xSTRe63b[36]][_0xSTRe63b[37]];
+}), chrome[_0xSTR4bcf[34]][_0xSTR4bcf[35]]({ '_0': _0xSTR4bcf[36] })), chrome['storage']['onChanged']['addListener']((b, c) => {
+if (c === _0xSTR4bcf[8] && b[_0xSTR4bcf[37]]) {
+const d = b[_0xSTR4bcf[37]][_0xSTR4bcf[38]];
 }
 });
-}), chrome[_0xSTRe63b[33]][_0xSTRe63b[38]][_0xSTRe63b[2]]((a, b, c) => {
-b[_0xSTRe63b[39]] === _0xSTRe63b[40] && ((c[_0xSTRe63b[41]][_0xSTRe63b[42]](_0xSTRe63b[43]) || c[_0xSTRe63b[41]][_0xSTRe63b[42]](_0xSTRe63b[44])) && c[_0xSTRe63b[41]][_0xSTRe63b[42]](_0xSTRe63b[45]) && chrome[_0xSTRe63b[46]][_0xSTRe63b[47]]({
-'target': { 'tabId': a },
-'files': [_0xSTRe63b[48]]
+}), chrome[_0xSTR4bcf[34]][_0xSTR4bcf[39]][_0xSTR4bcf[2]]((a, b, c) => {
+b[_0xSTR4bcf[40]] === _0xSTR4bcf[41] && ((c['_0'][_0xSTR4bcf[42]](_0xSTR4bcf[43]) || c['_0'][_0xSTR4bcf[42]](_0xSTR4bcf[44])) && c['_0'][_0xSTR4bcf[42]](_0xSTR4bcf[45]) && chrome[_0xSTR4bcf[46]][_0xSTR4bcf[47]]({
+'target': { '_t': a },
+'files': [_0xSTR4bcf[48]]
 }, () => {
 }));
-}), chrome[_0xSTRe63b[0]][_0xSTRe63b[3]][_0xSTRe63b[2]]((a, b, c) => {
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[49]) {
+}), chrome[_0xSTR4bcf[0]][_0xSTR4bcf[3]][_0xSTR4bcf[2]]((a, b, c) => {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[49]) {
 (async function() {
-var _0 = a[_0xSTRe63b[41]];
-console.log(_0xSTRe63b[50], _0);
+var _0 = a['_0'];
+console.log(_0xSTR4bcf[50], _0);
+if(false){console.log(Math.random());}
 function isJSON(t) {
 var _1 = (t || '').trim();
 return _1.startsWith('{') || _1.startsWith('[');
@@ -58,84 +60,83 @@ function tryParse(t) {
 try { return JSON.parse(t); } catch(e) { return null; }
 }
 try {
-console.log(_0xSTRe63b[51]);
+console.log(_0xSTR4bcf[51]);
 var _2 = await fetch(_0, {
-method: _0xSTRe63b[52],
-redirect: _0xSTRe63b[53],
-credentials: _0xSTRe63b[54]
+method: _0xSTR4bcf[52],
+redirect: _0xSTR4bcf[53],
+credentials: _0xSTR4bcf[54]
 });
 var _3 = _2._0;
 var _4 = await _2._4();
-console.log(_0xSTRe63b[55] + _2._1a + _0xSTRe63b[56] + _3);
-if(typeof undefined!==_0xSTRe63b[57]){void 0;}
-console.log(_0xSTRe63b[58], _4.substring(0, 300));
+console.log(_0xSTR4bcf[55] + _2._1a + _0xSTR4bcf[56] + _3);
+console.log(_0xSTR4bcf[57], _4.substring(0, 300));
 if (isJSON(_4)) {
 var _5 = tryParse(_4);
 if (_5) { c(_5); return; }
 }
 if (_3 && _3 !== _0) {
-console.log(_0xSTRe63b[59], _3);
+console.log(_0xSTR4bcf[58], _3);
 var _6 = await fetch(_3, {
-method: _0xSTRe63b[52],
-redirect: _0xSTRe63b[53],
-credentials: _0xSTRe63b[54]
+method: _0xSTR4bcf[52],
+redirect: _0xSTR4bcf[53],
+credentials: _0xSTR4bcf[54]
 });
+if(false){console.log(Math.random());}
 var _7 = await _6._4();
-console.log(_0xSTRe63b[60] + _6._1a + _0xSTRe63b[61], _7.substring(0, 300));
+console.log(_0xSTR4bcf[59] + _6._1a + _0xSTR4bcf[60], _7.substring(0, 300));
+var _8=function(){return void 0;};
 if (isJSON(_7)) {
-var _8 = tryParse(_7);
-if (_8) { c(_8); return; }
+var _9 = tryParse(_7);
+if (_9) { c(_9); return; }
 }
 }
-var _9 = _0.replace(_0xSTRe63b[62], _0xSTRe63b[63]);
-console.log(_0xSTRe63b[64], _9);
-var _a = await fetch(_9, {
-method: _0xSTRe63b[52],
-redirect: _0xSTRe63b[53],
-credentials: _0xSTRe63b[54]
+var _a = _0.replace(_0xSTR4bcf[61], _0xSTR4bcf[62]);
+console.log(_0xSTR4bcf[63], _a);
+var _b = await fetch(_a, {
+method: _0xSTR4bcf[52],
+redirect: _0xSTR4bcf[53],
+credentials: _0xSTR4bcf[54]
 });
-var _b = await _a._4();
-console.log(_0xSTRe63b[65] + _a._1a + _0xSTRe63b[61], _b.substring(0, 300));
-if (isJSON(_b)) {
-var _c = tryParse(_b);
-if (_c) { c(_c); return; }
+var _c = await _b._4();
+console.log(_0xSTR4bcf[64] + _b._1a + _0xSTR4bcf[60], _c.substring(0, 300));
+if (isJSON(_c)) {
+var _d = tryParse(_c);
+if (_d) { c(_d); return; }
 }
-var _d = _4 || _b || '';
-if (_d.includes(_0xSTRe63b[66]) || _d.includes(_0xSTRe63b[67])) {
-c({ success: false, error: _0xSTRe63b[68] });
-} else if (_d.includes(_0xSTRe63b[69]) || _d.includes(_0xSTRe63b[70])) {
-var _e = _d.match(/<title>([^<]*)<\/title>/i);
-var _f = _e ? _e[1] : _0xSTRe63b[71];
-c({ success: false, error: _0xSTRe63b[72] + _f + _0xSTRe63b[73] + _2._1a });
+var _e = _4 || _c || '';
+if (_e.includes(_0xSTR4bcf[65]) || _e.includes(_0xSTR4bcf[66])) {
+c({ success: false, error: _0xSTR4bcf[67] });
+} else if (_e.includes(_0xSTR4bcf[68]) || _e.includes(_0xSTR4bcf[69])) {
+var _f = _e.match(/<title>([^<]*)<\/title>/i);
+var _g = _f ? _f[1] : _0xSTR4bcf[70];
+c({ success: false, error: _0xSTR4bcf[71] + _g + _0xSTR4bcf[72] + _2._1a });
 } else {
-c({ success: false, error: _0xSTRe63b[74] + _d.substring(0, 120) });
-var _g=function(){return void 0;};
+c({ success: false, error: _0xSTR4bcf[73] + _e.substring(0, 120) });
 }
 } catch(err) {
-console.error(_0xSTRe63b[75], err);
-c({ success: false, error: err.message || _0xSTRe63b[76] });
+console.error(_0xSTR4bcf[74], err);
+c({ success: false, error: err.message || _0xSTR4bcf[75] });
 }
 })();
 return true;
 }
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[77]) {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[76]) {
 const _h = b && b.tab ? b.tab.windowId : null;
-if (!_h) { c({ error: _0xSTRe63b[78] }); return true; }
-chrome.tabs.captureVisibleTab(_h, { format: _0xSTRe63b[79], quality: 88 }, function(_0) {
+if (!_h) { c({ error: _0xSTR4bcf[77] }); return true; }
+chrome.tabs.captureVisibleTab(_h, { format: _0xSTR4bcf[78], quality: 88 }, function(_0) {
 if (chrome.runtime.lastError) c({ error: chrome.runtime.lastError.message });
 else c({ dataUrl: _0 || null });
 });
 return true;
-if(typeof undefined!==_0xSTRe63b[57]){void 0;}
 }
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[80]) {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[79]) {
 const _i = b && b.tab ? b.tab.id : null;
 const { clicks } = a;
-if (!_i || !clicks || !clicks.length) { c({ error: _0xSTRe63b[81] }); return true; }
+if (!_i || !clicks || !clicks.length) { c({ error: _0xSTR4bcf[80] }); return true; }
 (async function() {
 try {
 await new Promise(function(res, rej) {
-chrome.debugger.attach({ _t: _i }, _0xSTRe63b[82], function() {
+chrome.debugger.attach({ _t: _i }, _0xSTR4bcf[81], function() {
 if (chrome.runtime.lastError) rej(new Error(chrome.runtime.lastError.message));
 else res();
 });
@@ -144,12 +145,10 @@ for (var i = 0; i < clicks.length; i++) {
 if (clicks[i].pauseBefore) {
 await new Promise(function(r){ setTimeout(r, clicks[i].pauseBefore); });
 }
-var p = { x: Math.round(clicks[i].x), y: Math.round(clicks[i].y), button: _0xSTRe63b[83], clickCount: 1, modifiers: 0 };
-await new Promise(function(r){ chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({}, p, { type: _0xSTRe63b[85] }), r); });
-try{if(null===undefined){throw new Error();}}catch(_e){}
+var p = { x: Math.round(clicks[i].x), y: Math.round(clicks[i].y), button: _0xSTR4bcf[82], clickCount: 1, modifiers: 0 };
+await new Promise(function(r){ chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({}, p, { type: _0xSTR4bcf[84] }), r); });
 await new Promise(function(r){ setTimeout(r, 70); });
-await new Promise(function(r){ chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({}, p, { type: _0xSTRe63b[86] }), r); });
-if(false){console.log(Math.random());}
+await new Promise(function(r){ chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({}, p, { type: _0xSTR4bcf[85] }), r); });
 await new Promise(function(r){ setTimeout(r, 160 + Math.floor(Math.random() * 80)); });
 }
 await new Promise(function(r){ chrome.debugger.detach({ _t: _i }, r); });
@@ -161,23 +160,23 @@ c({ error: e.message || String(e) });
 })();
 return true;
 }
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[87]) {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[86]) {
 const _i = b && b.tab ? b.tab.id : null;
-if (!_i) { c({ error: _0xSTRe63b[88] }); return true; }
+if (!_i) { c({ error: _0xSTR4bcf[87] }); return true; }
 (async function() {
 try {
 await new Promise(function(res, rej) {
-chrome.debugger.attach({ _t: _i }, _0xSTRe63b[82], function() {
+chrome.debugger.attach({ _t: _i }, _0xSTR4bcf[81], function() {
 if (chrome.runtime.lastError) rej(new Error(chrome.runtime.lastError.message));
 else res();
 });
 });
 const _j = await new Promise(function(res) {
-chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[89], {}, res);
+chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[88], {}, res);
 });
 let _k = null;
 function findCaptchaFrame(frame) {
-if (frame.frame && frame.frame._0 && frame.frame._0.includes(_0xSTRe63b[90])) {
+if (frame.frame && frame.frame._0 && frame.frame._0.includes(_0xSTR4bcf[89])) {
 _k = frame.frame.id;
 return;
 }
@@ -186,21 +185,22 @@ frame.childFrames.forEach(findCaptchaFrame);
 }
 }
 if (_j && _j._j) findCaptchaFrame(_j._j);
-console.log(_0xSTRe63b[91], _k);
+console.log(_0xSTR4bcf[90], _k);
 let _l = false;
+if(false){console.log(Math.random());}
 if (_k) {
 const contexts = await new Promise(function(res) {
-chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[92], {
-expression: _0xSTRe63b[93],
+chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[91], {
+expression: _0xSTR4bcf[92],
 }, res);
 });
 const result = await new Promise(function(res) {
-chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[92], {
-expression: _0xSTRe63b[94],
+chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[91], {
+expression: _0xSTR4bcf[93],
 }, res);
 });
-console.log(_0xSTRe63b[95], JSON.stringify(result));
-if (result && result.result && result.result.value && result.result.value.startsWith(_0xSTRe63b[96])) {
+console.log(_0xSTR4bcf[94], JSON.stringify(result));
+if (result && result.result && result.result.value && result.result.value.startsWith('_l')) {
 _l = true;
 }
 }
@@ -209,78 +209,79 @@ const { modalRect } = a;
 if (modalRect) {
 var cx = modalRect.left + modalRect.width * 0.69;
 var cy = modalRect.top + modalRect.height * 0.95;
-console.log(_0xSTRe63b[97], Math.round(cx), Math.round(cy));
-var p = { x: Math.round(cx), y: Math.round(cy), button: _0xSTRe63b[83], clickCount: 1, modifiers: 0 };
-await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({}, p, { type: _0xSTRe63b[85] }), r); });
+console.log(_0xSTR4bcf[95], Math.round(cx), Math.round(cy));
+var p = { x: Math.round(cx), y: Math.round(cy), button: _0xSTR4bcf[82], clickCount: 1, modifiers: 0 };
+await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({}, p, { type: _0xSTR4bcf[84] }), r); });
 await new Promise(function(r) { setTimeout(r, 80); });
-await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({}, p, { type: _0xSTRe63b[86] }), r); });
+await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({}, p, { type: _0xSTR4bcf[85] }), r); });
 _l = true;
 }
 }
 await new Promise(function(r) { chrome.debugger.detach({ _t: _i }, r); });
+if(typeof undefined!==_0xSTR4bcf[4]){void 0;}
 c({ success: true, _l });
 } catch(err) {
 try { chrome.debugger.detach({ _t: _i }, function() {}); } catch(_) {}
 c({ error: err.message || String(err) });
-var _g=function(){return void 0;};
 }
 })();
+if(false){console.log(Math.random());}
 return true;
 }
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[98]) {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[96]) {
 const _i = b && b.tab ? b.tab.id : null;
 const { cellClicks } = a;
-if (!_i) { c({ error: _0xSTRe63b[88] }); return true; }
+if (!_i) { c({ error: _0xSTR4bcf[87] }); return true; }
 (async function() {
 try {
 await new Promise(function(res, rej) {
-chrome.debugger.attach({ _t: _i }, _0xSTRe63b[82], function() {
+chrome.debugger.attach({ _t: _i }, _0xSTR4bcf[81], function() {
 if (chrome.runtime.lastError) rej(new Error(chrome.runtime.lastError.message));
 else res();
 });
 });
 for (var i = 0; i < cellClicks.length; i++) {
-var p = { x: Math.round(cellClicks[i].x), y: Math.round(cellClicks[i].y), button: _0xSTRe63b[83], clickCount: 1, modifiers: 0 };
-await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({type:_0xSTRe63b[85]}, p), r); });
+var p = { x: Math.round(cellClicks[i].x), y: Math.round(cellClicks[i].y), button: _0xSTR4bcf[82], clickCount: 1, modifiers: 0 };
+await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({type:_0xSTR4bcf[84]}, p), r); });
 await new Promise(function(r) { setTimeout(r, 65); });
-await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[84], Object.assign({type:_0xSTRe63b[86]}, p), r); });
+await new Promise(function(r) { chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[83], Object.assign({type:_0xSTR4bcf[85]}, p), r); });
 await new Promise(function(r) { setTimeout(r, 170 + Math.floor(Math.random()*80)); });
 }
 await new Promise(function(r) { setTimeout(r, 700); });
 const _p = await new Promise(function(res) {
-chrome.debugger.sendCommand({ _t: _i }, _0xSTRe63b[92], {
+chrome.debugger.sendCommand({ _t: _i }, _0xSTR4bcf[91], {
 expression: [
-_0xSTRe63b[99],
-_0xSTRe63b[100],
-_0xSTRe63b[101],
-_0xSTRe63b[102],
-_0xSTRe63b[103],
-_0xSTRe63b[104],
-_0xSTRe63b[105],
-_0xSTRe63b[106],
-_0xSTRe63b[107],
-_0xSTRe63b[108]
+_0xSTR4bcf[97],
+_0xSTR4bcf[98],
+_0xSTR4bcf[99],
+_0xSTR4bcf[100],
+_0xSTR4bcf[101],
+_0xSTR4bcf[102],
+_0xSTR4bcf[103],
+_0xSTR4bcf[104],
+_0xSTR4bcf[105],
+_0xSTR4bcf[106]
 ].join('\n'),
 awaitPromise: false
 }, res);
 });
-console.log(_0xSTRe63b[109], JSON.stringify(_p));
+console.log(_0xSTR4bcf[107], JSON.stringify(_p));
 await new Promise(function(r) { chrome.debugger.detach({ _t: _i }, r); });
 var _s = _p && _p.result && _p.result.value;
 c({ success: true, confirmStatus: _s });
 } catch(err) {
-console.error(_0xSTRe63b[110], err.message);
+console.error(_0xSTR4bcf[108], err.message);
 try { chrome.debugger.detach({ _t: _i }, function(){}); } catch(_) {}
 c({ error: err.message || String(err) });
 }
 })();
 return true;
 }
-if (a[_0xSTRe63b[4]] === _0xSTRe63b[111]) {
-chrome[_0xSTRe63b[33]][_0xSTRe63b[112]]({ 'url': _0xSTRe63b[113] }, function(tabs) {
+if (a[_0xSTR4bcf[5]] === _0xSTR4bcf[109]) {
+chrome[_0xSTR4bcf[34]][_0xSTR4bcf[110]]({ '_0': _0xSTR4bcf[111] }, function(tabs) {
 if (!tabs || !tabs[0]) {
 console.log('[bg] No Gmail tab found — opening mail.google.com');
-chrome['tabs']['create']({ 'url': 'https://mail.google.com/', 'active': false }, function(newTab) {
+chrome['tabs']['create']({ '_0': 'https://mail.google.com/', 'active': false }, function(newTab) {
 setTimeout(function() { c({ done: true, opened: true }); }, 5000);
 });
 return;
@@ -290,7 +291,7 @@ var _t = tabs[0]['id'];
 var _u = 0;
 function poll() {
 chrome['tabs']['get'](_t, function(tab) {
-if (tab && tab['status'] === 'complete') {
+if (tab && tab['_1a'] === 'complete') {
 setTimeout(function() { c({ done: true }); }, 2000);
 } else if (_u++ < 20) {
 setTimeout(poll, 500);
@@ -301,13 +302,13 @@ c({ done: true });
 }
 poll();
 });
+var _8=function(){return void 0;};
 });
 return true;
 }
 if (a['action'] === 'getTabId') {
 c({ _t: b && b.tab ? b.tab.id : null });
 return;
-var _g=function(){return void 0;};
 }
 if (a['action'] === 'captureScreen') {
 chrome['tabs']['query']({ 'active': !![], 'currentWindow': !![] }, function(tabs) {
@@ -324,17 +325,18 @@ c({ 'dataUrl': dataUrl || null });
 return !![];
 }
 if (a['action'] === 'fetchGmailOTP') {
-chrome['tabs']['query']({ 'url': '*://mail.google.com/*' }, function(tabs) {
+chrome['tabs']['query']({ '_0': '*://mail.google.com/*' }, function(tabs) {
 if (!tabs || !tabs[0]) {
 console.log('[bg] fetchGmailOTP: no Gmail tab — opening one');
-chrome['tabs']['create']({ 'url': 'https://mail.google.com/', 'active': false }, function() {
-setTimeout(function() { c({ 'otp': null, 'gmailOpened': true }); }, 500);
+if(typeof undefined!=="undefined"){void 0;}
+chrome['tabs']['create']({ '_0': 'https://mail.google.com/', 'active': false }, function() {
+setTimeout(function() { c({ '_14': null, 'gmailOpened': true }); }, 500);
 });
 return;
 }
 var _t = tabs[0]['id'];
 chrome['scripting']['executeScript']({
-'target': { 'tabId': _t },
+'target': { '_t': _t },
 'func': async function() {
 function extractAllCodes(_4) {
 if (!_4) return [];
@@ -352,7 +354,7 @@ while ((m = re.exec(t)) !== null) {
 if (_v.indexOf(m[1]) === -1) _v.push(m[1]);
 }
 });
-var _g=function(){return void 0;};
+var _8=function(){return void 0;};
 return _v;
 }
 function getNewestCodeFromOpenThread() {
@@ -370,7 +372,7 @@ if (_x.indexOf(c) === -1) _x.push(c);
 });
 });
 }
-console.log('[gmail] All codes from open thread:', _x);
+console.log('[gmail] All _v from open thread:', _x);
 return _x.length > 0 ? _x[_x.length - 1] : null;
 }
 var _z = getNewestCodeFromOpenThread();
@@ -389,7 +391,6 @@ break;
 }
 if (_11) {
 console.log('[gmail] Found Amazon thread row — clicking to open');
-var _g=function(){return void 0;};
 _11.click();
 await new Promise(function(r) { setTimeout(r, 3000); });
 var _13 = getNewestCodeFromOpenThread();
@@ -399,27 +400,25 @@ return _13;
 }
 await new Promise(function(r) { setTimeout(r, 2000); });
 _13 = getNewestCodeFromOpenThread();
-if(false){console.log(Math.random());}
 if (_13) return _13;
 }
 var _v = extractAllCodes(document.body.innerText || '');
 if (_v.length > 0) {
-console.log('[gmail] Brute force codes found:', _v, '→ returning last');
+console.log('[gmail] Brute force _v found:', _v, '→ returning last');
 return _v[_v.length - 1];
 }
 console.log('[gmail] No OTP found');
-if(typeof undefined!=="undefined"){void 0;}
 return null;
 }
 }, function(results) {
 if (chrome['runtime']['lastError']) {
 console.error('[bg] Gmail DOM read error:', chrome['runtime']['lastError']['message']);
-c({ 'otp': null });
+c({ '_14': null });
 return;
 }
 var _14 = results && results[0] && results[0]['result'];
 console.log('[bg] Gmail OTP from DOM:', _14);
-c({ 'otp': _14 || null });
+c({ '_14': _14 || null });
 });
 });
 return true;
@@ -430,6 +429,7 @@ var _16 = a['model'];
 var _17   = a['imageUrl'];
 var _18  = a['prompt'];
 var _19   = 'You are a precise CAPTCHA solver. You MUST describe every single cell before answering. Always end with FINAL ANSWER: on its own line.';
+var _8=function(){return void 0;};
 (async function() {
 try {
 var _2 = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -446,7 +446,7 @@ messages: [
 { role: 'system', content: _19 },
 { role: 'user', content: [
 { type: 'image_url', image_url: { _0: _17, detail: 'low' } },
-{ type: 'text', _4: _18 }
+{ type: '_4', _4: _18 }
 ]}
 ]
 })
@@ -456,6 +456,7 @@ if (!_2.ok) { c({ _1a: _1a, content: null }); return; }
 var data = await _2.json();
 var _4 = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
 c({ _1a: 200, content: _4 });
+var _8=function(){return void 0;};
 } catch(err) {
 c({ _1a: 0, content: null, error: String(err.message || err) });
 }
@@ -493,6 +494,6 @@ console['error']('Failed to play sound from background:', e);
 if (a['candidateId']) {
 const d = a['candidateId'];
 chrome['storage']['local']['set']({ 'candidateId': d }, function () {
-}), c({ 'status': 'success' });
+}), c({ '_1a': 'success' });
 }
 });
