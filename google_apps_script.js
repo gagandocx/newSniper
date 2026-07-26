@@ -165,7 +165,7 @@ function handleActivate(params) {
   sheet.getRange(row, 5).setValue(new Date().toISOString()); // E: last_verified
   sheet.getRange(row, 6).setValue('active');        // F: status
   
-  return { success: true, message: 'License activated successfully' };
+  return { success: true, message: 'License activated successfully', daysRemaining: 365 };
 }
 
 // ── VERIFY: Check if license is valid ─────────────────────────────

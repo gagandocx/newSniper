@@ -251,11 +251,11 @@
                     setTimeout(function() {
                         gate.style.display = 'none';
                         app.style.display = 'block';
-                        // Show licensed badge
+                        // Show licensed badge with days remaining
                         const badge = document.getElementById('access-badge');
                         if (badge) {
                             badge.style.display = 'inline-block';
-                            badge.innerHTML = '&#10024; LICENSED';
+                            badge.innerHTML = '&#10024; LICENSED (365d left)';
                             badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#22d3a8,#3b82f6);'
                                 + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
                                 + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(34,211,168,0.4);';
