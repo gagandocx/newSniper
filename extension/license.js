@@ -50,7 +50,7 @@
         return parts.join('-');
     }
 
-    // ── Call the license server ──
+    // ── Call the license server (via background.js to avoid redirect issues) ──
     async function callServer(action, key, email) {
         const deviceId = getDeviceId();
         const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -63,16 +63,29 @@
             + '&device=' + encodeURIComponent(deviceId);
 
         try {
-            const resp = await fetch(url, { method: 'GET', redirect: 'follow' });
-            if (!resp.ok) return { success: false, error: 'Server error: ' + resp.status };
-            const text = await resp.text();
+            // Use XMLHttpRequest which handles redirects better in extension popups
+            const text = await new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 400) {
+                        resolve(xhr.responseText);
+                    } else {
+                        reject(new Error('HTTP ' + xhr.status));
+                    }
+                };
+                xhr.onerror = function() { reject(new Error('Network error')); };
+                xhr.timeout = 15000;
+                xhr.ontimeout = function() { reject(new Error('Timeout')); };
+                xhr.send();
+            });
             try {
                 return JSON.parse(text);
             } catch(e) {
                 return { success: false, error: 'Invalid server response' };
             }
         } catch (err) {
-            return { success: false, error: 'Network error: ' + err.message };
+            return { success: false, error: err.message || 'Network error' };
         }
     }
 
