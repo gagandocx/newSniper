@@ -1366,29 +1366,21 @@
                 return;
             }
             if (g) {
-                const P = y(i);
-                // Flag: tell checkRedirect not to interrupt us while we fetch candidateID
-                window['_candidateIDFetching'] = true;
-                window['location']['href'] = 'https://hiring.amazon.ca/app#/contactInformation', await f();
-                let Q = null;
-                const R = document['querySelector']('input[data-test-id=\x22input-test-id-emailId\x22]');
-                if (R && R['value']) {
-                    Q = R['value'];
+                // Skip contactInformation — go directly to jobSearch
+                // The email is already stored in __un from login, no need to navigate away
+                if (!window.location.href.includes('jobSearch')) {
                     window['location']['href'] = 'https://hiring.amazon.ca/app#/jobSearch';
+                    return; // Page will reload on jobSearch → L() called again → starts scan
                 }
-                window['_candidateIDFetching'] = false;
+
                 if (p) {
                     // UNLIMITED: skip server config check entirely
                     await chrome['storage']['local']['set']({
                         '__cr': 9999,
                         '__isProUser': true
                     });
-                    // Credits check bypassed — unlimited usage
                 }
                 if (p) { _startScan(); }
-                else {
-                }
-            } else {
             }
         }
     }
@@ -1722,35 +1714,15 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
         chrome.storage.local.get(['_pendingJobRedirect'], function(data) {
             console.log('[fetch.js] checkRedirect: flag=', !!data._pendingJobRedirect, 'url=', url.slice(0,70));
 
-            // Redirect from contactInformation — or reload if stuck
+            // Redirect from contactInformation — go straight to jobSearch
             if (url.includes('contactInformation')) {
-                // ── Smart stuck detection: reload page after 5s if still here ──
-                // Amazon's SPA sometimes shows loading spinner on this page indefinitely.
-                // A page reload lets it complete the redirect naturally.
-                if (!window['_ssContactReloadTimer']) {
-                    window['_ssContactReloadTimer'] = setTimeout(function() {
-                        if (window.location.href.includes('contactInformation')) {
-                            if (_popupIsOpen()) { return; } // never reload while popup open
-                            console.log('[fetch.js] Stuck on contactInformation — reloading page');
-                            window.location.reload();
-                        }
-                    }, 5000);
-                }
-                // ─────────────────────────────────────────────────────────────
                 if (window['_candidateIDFetching']) {
                     console.log('[fetch.js] checkRedirect: candidateID fetch in progress — waiting');
                     setTimeout(checkRedirect, 4000);
                     return;
                 }
                 console.log('[fetch.js] On contactInformation — redirecting to jobSearch');
-                var saveBtn = [...document.querySelectorAll('button')]
-                    .find(function(b) { return /^save$/i.test(b.textContent.trim()) && !b.disabled; });
-                if (saveBtn) {
-                    saveBtn.click();
-                    setTimeout(function() { doRedirect('contactInfo-saved'); }, 1500);
-                } else {
-                    doRedirect('contactInfo-direct');
-                }
+                doRedirect('contactInfo-to-jobSearch');
                 return;
             }
 
