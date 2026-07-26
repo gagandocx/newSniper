@@ -31,32 +31,19 @@
     (function _antiDebug() {
         var _dbDetected = false;
 
-        // Method 1: debugger statement timing
+        // Method: debugger statement timing
         // When DevTools is open, debugger pauses execution — causing timing diff
+        // Only triggers if execution takes >100ms (DevTools pauses on debugger statement)
         function _checkDebugger() {
             var start = performance.now();
             debugger;
             var diff = performance.now() - start;
-            if (diff > 50) {
+            // 100ms threshold — debugger statement is instant without DevTools
+            // but pauses indefinitely when DevTools is open
+            if (diff > 100) {
                 _lockOnDebug();
             }
         }
-
-        // Method 2: Window size difference (DevTools docked changes inner dimensions)
-        function _checkWindowSize() {
-            var threshold = 160;
-            var widthDiff = window.outerWidth - window.innerWidth > threshold;
-            var heightDiff = window.outerHeight - window.innerHeight > threshold;
-            if (widthDiff || heightDiff) {
-                _lockOnDebug();
-            }
-        }
-
-        // Method 3: console.log override detection
-        var _consoleImg = new Image();
-        Object.defineProperty(_consoleImg, 'id', {
-            get: function() { _lockOnDebug(); }
-        });
 
         function _lockOnDebug() {
             if (_dbDetected) return;
@@ -69,12 +56,8 @@
                 + '<p style="color:rgba(199,210,254,0.5);font-size:12px;">Unauthorized inspection detected.</p></div>';
         }
 
-        // Run checks periodically (every 2s)
-        setInterval(_checkWindowSize, 2000);
-        // Debugger check less frequently (causes brief pause when devtools open)
-        setInterval(_checkDebugger, 4000);
-        // Console trap
-        setInterval(function() { console.log('%c', _consoleImg); }, 5000);
+        // Debugger check every 3s — only triggers when DevTools is actually open
+        setInterval(_checkDebugger, 3000);
     })();
     // ─────────────────────────────────────────────────────────────────
 
