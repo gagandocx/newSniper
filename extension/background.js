@@ -1,29 +1,95 @@
 // ── License server proxy (background has no CORS/redirect restrictions) ──────
+// Google Apps Script returns 302 → script.googleusercontent.com
+// Chrome MV3 service worker fetch() sometimes fails to follow this redirect.
+// Strategy: try redirect:'follow' first, if that returns HTML/opaque, manually
+// follow the redirect by fetching with redirect:'manual' and reading Location.
 chrome['runtime']['onMessage']['addListener'](function(a, b, c) {
     if (a['action'] === 'licenseRequest') {
-        fetch(a['url'], {
-            method: 'GET',
-            redirect: 'follow',
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(function(resp) { return resp.text(); })
-        .then(function(text) {
-            console.log('[bg] License response:', text.substring(0, 200));
+        (async function() {
+            var url = a['url'];
+            console.log('[bg] License request URL:', url);
+
             try {
-                c(JSON.parse(text));
-            } catch(e) {
-                // Google might return HTML login page — extract error
-                if (text.includes('<!DOCTYPE') || text.includes('<html')) {
-                    c({ success: false, error: 'Google auth redirect — deploy as "Anyone"' });
-                } else {
-                    c({ success: false, error: 'Parse error: ' + text.substring(0, 100) });
+                // ── Attempt 1: Normal fetch with redirect:follow ──
+                var resp = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                var text = await resp.text();
+                console.log('[bg] License response (attempt 1, status ' + resp.status + '):', text.substring(0, 300));
+
+                // Check if we got valid JSON
+                if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+                    try {
+                        c(JSON.parse(text));
+                        return;
+                    } catch(e) { /* fall through to attempt 2 */ }
                 }
+
+                // If we got HTML or non-JSON, the redirect wasn't followed properly
+                console.log('[bg] Attempt 1 returned non-JSON, trying manual redirect...');
+
+                // ── Attempt 2: Manual redirect handling ──
+                var resp2 = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+
+                console.log('[bg] Manual redirect response: status=' + resp2.status + ' type=' + resp2.type);
+
+                // For 302/301/307/308 redirects, get the Location header
+                var redirectUrl = null;
+                if (resp2.status >= 300 && resp2.status < 400) {
+                    redirectUrl = resp2.headers.get('Location');
+                    console.log('[bg] Got redirect Location header:', redirectUrl);
+                } else if (resp2.type === 'opaqueredirect') {
+                    // opaqueredirect: headers are hidden. Construct the known Google redirect URL.
+                    // Google Apps Script always redirects to: https://script.googleusercontent.com/macros/echo?...
+                    // Try fetching the URL directly without redirect:manual to see if it works this time
+                    redirectUrl = resp2.url || null;
+                    console.log('[bg] Opaque redirect, resp2.url:', redirectUrl);
+                }
+
+                if (redirectUrl) {
+                    console.log('[bg] Following redirect to:', redirectUrl);
+                    var resp3 = await fetch(redirectUrl, {
+                        method: 'GET',
+                        redirect: 'follow',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    var text3 = await resp3.text();
+                    console.log('[bg] Final response (status ' + resp3.status + '):', text3.substring(0, 300));
+
+                    if (text3.trim().startsWith('{') || text3.trim().startsWith('[')) {
+                        c(JSON.parse(text3));
+                        return;
+                    }
+                }
+
+                // ── Attempt 3: Fetch with no Accept header and mode: no-cors fallback ──
+                console.log('[bg] Attempt 3: fetch with no special headers...');
+                var resp4 = await fetch(url, { method: 'GET', redirect: 'follow' });
+                var text4 = await resp4.text();
+                console.log('[bg] Attempt 3 response (status ' + resp4.status + '):', text4.substring(0, 300));
+
+                if (text4.trim().startsWith('{') || text4.trim().startsWith('[')) {
+                    c(JSON.parse(text4));
+                    return;
+                }
+
+                // All attempts failed — return whatever we have as error
+                if (text4.includes('<!DOCTYPE') || text4.includes('<html')) {
+                    c({ success: false, error: 'Google returned HTML — ensure Apps Script is deployed as "Anyone" with no auth' });
+                } else {
+                    c({ success: false, error: 'Non-JSON response: ' + (text4 || text || '').substring(0, 100) });
+                }
+            } catch(err) {
+                console.error('[bg] License fetch error:', err);
+                c({ success: false, error: err.message || 'Network error' });
             }
-        })
-        .catch(function(err) {
-            console.error('[bg] License fetch error:', err);
-            c({ success: false, error: err.message || 'Network error' });
-        });
+        })();
         return true; // keep message channel open for async response
     }
 });
