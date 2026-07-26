@@ -1,3 +1,24 @@
+// ── License server proxy (background has no CORS/redirect restrictions) ──────
+chrome['runtime']['onMessage']['addListener'](function(a, b, c) {
+    if (a['action'] === 'licenseRequest') {
+        (async function() {
+            try {
+                var resp = await fetch(a['url'], { method: 'GET', redirect: 'follow' });
+                var text = await resp.text();
+                try {
+                    c(JSON.parse(text));
+                } catch(e) {
+                    c({ success: false, error: 'Invalid response from server' });
+                }
+            } catch(err) {
+                c({ success: false, error: err.message || 'Network error' });
+            }
+        })();
+        return true; // keep message channel open for async response
+    }
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 chrome['runtime']['onConnect']['addListener'](function (a) {
     a['onMessage']['addListener'](async function (b) {
         let c = new Object();
