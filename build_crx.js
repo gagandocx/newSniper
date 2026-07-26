@@ -204,10 +204,10 @@ class Obfuscator {
 
     /**
      * Rename local variables (conservative — only var/let/const declarations)
+     * IMPORTANT: Does NOT rename inside string literals to avoid breaking IDs
      */
     renameLocals(code) {
         // Find function-scoped variable declarations and rename them
-        // This is conservative to avoid breaking things
         const localVars = new Set();
         const declRegex = /\b(?:var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
         let match;
@@ -225,7 +225,6 @@ class Obfuscator {
         }
         
         let result = code;
-        const renameMap = {};
         let counter = 0;
         
         for (const varName of localVars) {
@@ -234,15 +233,51 @@ class Obfuscator {
             if (occurrences < 2) continue;
             
             const newName = '_' + (counter++).toString(36);
-            // Use word boundary replacement
+            
+            // Replace ONLY outside of string literals
+            // Split code into string/non-string segments, only replace in non-string parts
             try {
-                result = result.replace(new RegExp('\\b' + varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'), newName);
+                const varRegex = new RegExp('\\b' + varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+                result = this.replaceOutsideStrings(result, varRegex, newName);
             } catch(e) {
                 // Skip if regex fails
             }
         }
         
         return result;
+    }
+
+    /**
+     * Replace regex matches only outside of string literals
+     */
+    replaceOutsideStrings(code, regex, replacement) {
+        // Split into segments: code and strings
+        const segments = [];
+        let lastIdx = 0;
+        const stringRegex = /(?<!\\)(['"`])((?:(?!\1|\\).|\\.)*)\1/g;
+        let m;
+        
+        while ((m = stringRegex.exec(code)) !== null) {
+            // Push code before this string
+            if (m.index > lastIdx) {
+                segments.push({ type: 'code', text: code.substring(lastIdx, m.index) });
+            }
+            // Push the string as-is (don't modify)
+            segments.push({ type: 'string', text: m[0] });
+            lastIdx = m.index + m[0].length;
+        }
+        // Push remaining code
+        if (lastIdx < code.length) {
+            segments.push({ type: 'code', text: code.substring(lastIdx) });
+        }
+        
+        // Replace only in code segments
+        return segments.map(seg => {
+            if (seg.type === 'code') {
+                return seg.text.replace(regex, replacement);
+            }
+            return seg.text;
+        }).join('');
     }
 
     /**
