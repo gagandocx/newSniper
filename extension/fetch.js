@@ -1,4 +1,36 @@
 (async function (a) {
+    // ── LICENSE CHECK — Block scanning if no valid license ──────────────────
+    var _csLicenseOk = false;
+    async function _checkLicense() {
+        return new Promise(function(resolve) {
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_device'], function(data) {
+                if (!data['__cs_license_key'] || !data['__cs_license_device']) {
+                    resolve(false); return;
+                }
+                if (data['__cs_license_device'] !== chrome.runtime.id) {
+                    resolve(false); return;
+                }
+                // Validate key algorithmically
+                var key = data['__cs_license_key'];
+                if (key.length !== 20 || !key.startsWith('CS')) { resolve(false); return; }
+                var payload = key.substring(0, 18);
+                var checksum = key.substring(18, 20);
+                var sum = 0;
+                for (var i = 0; i < payload.length; i++) {
+                    sum = (sum + payload.charCodeAt(i) * (i + 1)) & 0xFFFF;
+                }
+                var expected = ((sum % 676) + 10).toString(36).toUpperCase().padStart(2, '0');
+                resolve(checksum === expected);
+            });
+        });
+    }
+    _csLicenseOk = await _checkLicense();
+    if (!_csLicenseOk) {
+        console.log('[CoderSnap] No valid license — scanning disabled');
+        return; // Exit entire content script — extension won't work without license
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Load Nunito font for consistent Swal dialog typography (matches popup theme)
     if (!document.querySelector('link[href*="Nunito"]')) {
         var _fl = document.createElement('link');
@@ -417,12 +449,12 @@
         if (b) { clearTimeout(b); b = null; }
         _hideRing();
         var result = await Swal['fire']({
-            'title': '&#128279; Allow Pop-ups for ShiftSniper',
+            'title': '&#128279; Allow Pop-ups for CoderSnap',
             'html':
                 '<div style="text-align:left;font-family:Inter,sans-serif;font-size:13px;'
                 + 'color:rgba(199,210,254,0.9);line-height:1.7;">'
                 + '<p style="margin-bottom:14px;color:rgba(199,210,254,0.75);">Follow these steps to allow '
-                + 'ShiftSniper to open job pages automatically:</p>'
+                + 'CoderSnap to open job pages automatically:</p>'
 
                 + '<div style="counter-reset:steps;">'
 
@@ -494,7 +526,7 @@
             'html':
                 '<div style="text-align:left;font-family:Inter,sans-serif;">'
                 + '<p style="margin-bottom:12px;color:rgba(199,210,254,0.8);font-size:13px;">'
-                + 'ShiftSniper uses <b style="color:#c7d2fe;">Groq AI</b> to auto-solve CAPTCHAs so login never stops. '
+                + 'CoderSnap uses <b style="color:#c7d2fe;">Groq AI</b> to auto-solve CAPTCHAs so login never stops. '
                 + 'Get your <b style="color:#22d3ee;">free key</b> in 2 minutes:</p>'
                 + '<div style="display:flex;flex-direction:column;gap:7px;">'
 
@@ -507,7 +539,7 @@
                 + '<div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:10px 13px;">'
                 + '<div style="font-size:10px;font-weight:800;color:#818cf8;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">&#9313; Create API Key</div>'
                 + '<div style="font-size:12px;color:rgba(199,210,254,0.8);line-height:1.5;">'
-                + 'Click <b style="color:#c7d2fe;">+ Create API Key</b> &rarr; Enter any name (e.g. <i style="color:#a5f3fc;">ShiftSniper</i>)'
+                + 'Click <b style="color:#c7d2fe;">+ Create API Key</b> &rarr; Enter any name (e.g. <i style="color:#a5f3fc;">CoderSnap</i>)'
                 + ' &rarr; Keep expiry as <b style="color:#c7d2fe;">No expiration</b> &rarr; Click <b style="color:#c7d2fe;">Submit</b></div></div>'
 
                 + '<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:10px 13px;">'
@@ -520,7 +552,7 @@
                 + '<div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 13px;">'
                 + '<div style="font-size:10px;font-weight:800;color:#f59e0b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">&#9315; Paste in Extension</div>'
                 + '<div style="font-size:12px;color:rgba(199,210,254,0.8);line-height:1.5;">'
-                + 'Open the <b style="color:#c7d2fe;">ShiftSniper</b> popup &rarr; <b style="color:#c7d2fe;">&#9670; AI Captcha Solver</b>'
+                + 'Open the <b style="color:#c7d2fe;">CoderSnap</b> popup &rarr; <b style="color:#c7d2fe;">&#9670; AI Captcha Solver</b>'
                 + ' &rarr; Paste in <b style="color:#c7d2fe;">GROQ API KEY</b> field &rarr; Saves automatically when valid</div></div>'
 
                 + '</div>'
@@ -557,7 +589,7 @@
                 else {
                 }
                 i = await Swal['fire']({
-                    'title': 'ShiftSniper Setup',
+                    'title': 'CoderSnap Setup',
                     'html': '<b>Choose your target region</b><br><small style="color:#aaa;">Select the country where you want to hunt for warehouse shifts.</small>',
                     'input': 'select',
                     'inputOptions': {
@@ -1000,7 +1032,7 @@
         try {
             const Q = y(i);
             const jobUrl = 'https://' + Q['domain'] + '/app#/jobDetail?jobId=' + matchedJob['jobId'] + '&locale=' + Q['locale'];
-            let msg = '🎯 *ShiftSniper — Job Found!*\n\n';
+            let msg = '🎯 *CoderSnap — Job Found!*\n\n';
             msg += '📋 *' + (matchedJob['jobTitle'] || 'Warehouse Associate') + '*\n';
             msg += '📍 ' + (matchedJob['city'] || 'N/A') + '\n';
             if (matchedJob['distance']) msg += '📏 ' + parseFloat(matchedJob['distance']).toFixed(1) + ' km away\n';
@@ -1162,7 +1194,7 @@
     async function showFirstTimeWizard() {
         if (typeof Swal === 'undefined') return;
         await Swal['fire']({
-            'title': '🎯 Welcome to ShiftSniper!',
+            'title': '🎯 Welcome to CoderSnap!',
             'html':
                 '<div style="text-align:left;font-family:Inter,sans-serif;">'
                 + '<p style="margin-bottom:14px;color:rgba(199,210,254,0.8);font-size:13px;">'
@@ -1170,14 +1202,14 @@
                 + '<div style="display:flex;flex-direction:column;gap:8px;">'
 
                 + '<div style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.22);border-radius:10px;padding:11px 13px;">'
-                + '<div style="font-size:10px;font-weight:800;color:#22d3ee;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">① What ShiftSniper Does</div>'
+                + '<div style="font-size:10px;font-weight:800;color:#22d3ee;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">① What CoderSnap Does</div>'
                 + '<div style="font-size:12.5px;color:rgba(199,210,254,0.8);">'
                 + 'Automatically scans Amazon Jobs every <b style="color:#c7d2fe;">2 seconds</b>, finds matching shifts, and applies for you — hands free.</div></div>'
 
                 + '<div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:11px 13px;">'
                 + '<div style="font-size:10px;font-weight:800;color:#fbbf24;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">② Set Up Groq API Key (Required for CAPTCHA)</div>'
                 + '<div style="font-size:12.5px;color:rgba(199,210,254,0.8);">'
-                + 'When Amazon shows a CAPTCHA, ShiftSniper uses <b style="color:#c7d2fe;">Groq AI</b> to solve it automatically. '
+                + 'When Amazon shows a CAPTCHA, CoderSnap uses <b style="color:#c7d2fe;">Groq AI</b> to solve it automatically. '
                 + 'Without a key, you must solve CAPTCHAs manually every time.<br><br>'
                 + '<b style="color:#fbbf24;">→ Get your free key:</b> Visit <a href="https://console.groq.com/keys" target="_blank" '
                 + 'style="color:#818cf8;font-weight:700;">console.groq.com/keys</a> → Sign up free → Create API Key → '
@@ -1187,7 +1219,7 @@
                 + '<div style="background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.22);border-radius:10px;padding:11px 13px;">'
                 + '<div style="font-size:10px;font-weight:800;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">③ Paste Key in Extension</div>'
                 + '<div style="font-size:12.5px;color:rgba(199,210,254,0.8);">'
-                + 'Click the <b style="color:#c7d2fe;">ShiftSniper</b> icon in your toolbar → Find <b style="color:#c7d2fe;">◈ AI Captcha Solver</b> '
+                + 'Click the <b style="color:#c7d2fe;">CoderSnap</b> icon in your toolbar → Find <b style="color:#c7d2fe;">◈ AI Captcha Solver</b> '
                 + '→ Paste your key in the <b style="color:#c7d2fe;">GROQ API KEY</b> field → It saves automatically when valid.</div></div>'
 
                 + '</div>'
@@ -1332,7 +1364,7 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
   <div style="background:linear-gradient(135deg,rgba(22,245,255,0.12),rgba(163,65,255,0.12));border-radius:14px;padding:16px 18px;margin-bottom:14px;border:1px solid rgba(22,245,255,0.2);text-align:center;">
     <div style="font-size:26px;margin-bottom:4px;">🎯</div>
     <div style="font-size:18px;font-weight:800;color:#e2e8f0;">How to Get Shifts Fast</div>
-    <div style="font-size:12px;color:rgba(199,210,254,0.55);margin-top:3px;">ShiftSniper Setup Guide</div>
+    <div style="font-size:12px;color:rgba(199,210,254,0.55);margin-top:3px;">CoderSnap Setup Guide</div>
   </div>
   <div style="background:rgba(22,245,255,0.05);border-left:3px solid #22d3ee;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:10px;text-align:left;">
     <div style="font-weight:800;color:#22d3ee;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;">🌍 REGION — Search Center</div>

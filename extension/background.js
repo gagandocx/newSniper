@@ -458,7 +458,7 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
                 chrome['notifications']['create']('ss_job_' + Date.now(), {
                     'type': 'basic',
                     'iconUrl': chrome['runtime']['getURL']('images/logo.png'),
-                    'title': '🎯 ShiftSniper — Job Found!',
+                    'title': '🎯 CoderSnap — Job Found!',
                     'message': (a['jobTitle'] || 'A matching warehouse shift') + ' — Applying now...',
                     'priority': 2,
                     'requireInteraction': false

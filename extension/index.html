@@ -10,7 +10,50 @@
 </head>
 <body style="background:#131620;">
 
-<div class="phone-shell">
+<!-- ── LICENSE GATE (shown if not activated) ── -->
+<div id="license-gate" class="phone-shell" style="display:none;">
+  <div class="popup-card">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <div class="scope"></div>
+          <img src="images/logo.png" alt="Logo" class="brand-logo">
+        </div>
+        <div>
+          <h1>CODER<span class="purple">SNAP</span></h1>
+          <p>LICENSE ACTIVATION</p>
+        </div>
+      </div>
+    </div>
+    <div class="block" style="margin-top:16px;">
+      <h3>🔑 ACTIVATE YOUR LICENSE</h3>
+      <div style="margin-top:12px;">
+        <div class="api-field">
+          <span>LICENSE KEY</span>
+          <div class="api-input-row">
+            <input type="text" id="license-key-input" placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
+                   autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;font-family:monospace;">
+            <span id="license_ok" class="api-badge saved" style="display:none;">✓ Valid</span>
+            <span id="license_err" class="api-badge error" style="display:none;">✗ Invalid Key</span>
+          </div>
+        </div>
+        <button id="activate-license-btn" type="button" style="
+          width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;
+          background:linear-gradient(135deg,#16f5ff,#a341ff);color:#fff;
+          font-weight:800;font-size:13px;letter-spacing:1px;cursor:pointer;
+          text-transform:uppercase;">
+          Activate License
+        </button>
+        <p style="margin-top:12px;font-size:11px;color:rgba(199,210,254,0.4);text-align:center;">
+          One license per device. Contact admin to get your key.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN APP (shown only after license activated) ── -->
+<div id="main-app" class="phone-shell" style="display:none;">
   <div class="popup-card">
 
     <!-- ── HEADER ─────────────────────────── -->
@@ -21,7 +64,7 @@
           <img src="images/logo.png" alt="Logo" class="brand-logo">
         </div>
         <div>
-          <h1>SHIFT<span class="purple">SNIPER</span></h1>
+          <h1>CODER<span class="purple">SNAP</span></h1>
           <p>WAREHOUSE AUTO-APPLY ENGINE</p>
         </div>
       </div>
@@ -171,7 +214,6 @@
         </span>
         <span>Guide</span>
       </button>
-      <!-- Upgrade button removed — unlimited version -->
 
     </div>
 
@@ -180,6 +222,7 @@
   </div>
 </div>
 
+<script src="license.js"></script>
 <script src="content.js"></script>
 </body>
 </html>

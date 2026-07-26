@@ -119,7 +119,7 @@
             'title': '🤖 Groq API Key Required',
             'html': '<div style="text-align:left;font-family:Inter,sans-serif;">'
                 + '<p style="margin-bottom:14px;color:rgba(199,210,254,0.8);font-size:13px;">'
-                + 'ShiftSniper uses <b style="color:#c7d2fe;">Groq AI</b> to automatically solve CAPTCHAs. '
+                + 'CoderSnap uses <b style="color:#c7d2fe;">Groq AI</b> to automatically solve CAPTCHAs. '
                 + 'Get your <b style="color:#c7d2fe;">free</b> API key in 2 minutes:</p>'
                 + '<div style="display:flex;flex-direction:column;gap:8px;">'
                 + '<div style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.2);border-radius:10px;padding:11px 13px;">'
@@ -134,7 +134,7 @@
                 + '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;">'
                 + '<div style="font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">③ Paste in Extension</div>'
                 + '<div style="font-size:12.5px;color:rgba(199,210,254,0.75);">'
-                + 'Click the <b style="color:#c7d2fe;">ShiftSniper</b> icon in toolbar → Find <b style="color:#c7d2fe;">🤖 Groq API Key</b> → Paste → Saved automatically</div></div>'
+                + 'Click the <b style="color:#c7d2fe;">CoderSnap</b> icon in toolbar → Find <b style="color:#c7d2fe;">🤖 Groq API Key</b> → Paste → Saved automatically</div></div>'
                 + '</div>'
                 + '<p style="margin-top:12px;font-size:11px;color:rgba(199,210,254,0.35);text-align:center;">'
                 + 'Without API key, you must solve CAPTCHAs manually every time.</p></div>',
@@ -183,7 +183,7 @@
         // No fallback key — user must enter their own key in the popup
         if (!groqKey) {
             // Guide is shown after PIN entry (in fetch.js) — just remind here
-            toast('&#9888; <b style="color:#f59e0b;">No Groq API key!</b> Open the ShiftSniper popup &rarr; AI Captcha Solver &rarr; paste your <span style="color:#22d3ee;font-family:monospace;">gsk_</span> key. Solving manually for now.', 8000);
+            toast('&#9888; <b style="color:#f59e0b;">No Groq API key!</b> Open the CoderSnap popup &rarr; AI Captcha Solver &rarr; paste your <span style="color:#22d3ee;font-family:monospace;">gsk_</span> key. Solving manually for now.', 8000);
             return;
         }
 
@@ -454,7 +454,7 @@
                 'html':
                     '<div style="text-align:left;font-family:Inter,sans-serif;">' +
                     '<p style="margin-bottom:14px;color:rgba(199,210,254,0.8);font-size:13px;">' +
-                    'ShiftSniper reads your Amazon verification code <b style="color:#c7d2fe;">automatically</b> ' +
+                    'CoderSnap reads your Amazon verification code <b style="color:#c7d2fe;">automatically</b> ' +
                     'from Gmail — no manual typing needed. Complete this one-time setup to go fully ' +
                     '<b style="color:#22d3ee;">24/7 automatic</b>.</p>' +
                     '<div style="display:flex;flex-direction:column;gap:8px;">' +
@@ -471,7 +471,7 @@
 
                     '<div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;">' +
                     '<div style="font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;">③ Never close Gmail while hunting</div>' +
-                    '<div style="font-size:12.5px;color:rgba(199,210,254,0.75);">ShiftSniper will open Gmail automatically each time it needs a code, ' +
+                    '<div style="font-size:12.5px;color:rgba(199,210,254,0.75);">CoderSnap will open Gmail automatically each time it needs a code, ' +
                     'scroll to the <b style="color:#c7d2fe;">latest email</b>, extract the code and fill it in — ' +
                     'completely hands-free.</div></div>' +
                     '</div>' +

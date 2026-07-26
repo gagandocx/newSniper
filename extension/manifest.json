@@ -81,7 +81,7 @@
    "incognito": "spanning",
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqr1E5JvUAnnn54o4abay5041RG1b7o5eYBppXJkt4aNFcGmcxfpoQ7uIQ9JbO8XkJ8Ua8nV+XLVSQQYQ6qawcE+aTukXl3E1InZXw8L3CprTVvP9cHP6hClfOFzQUgg5VoGYvjqlznWI34x0540Kwg01cPg645IEI8h6LoRjmezFXhrFILxpDedddHIcYYbDBY3CiD/i9yEuT71+1VagNwOrvJwAKPNDPRmjArsARVWZLiRAfarBsySjqEvc3nKBtLqqBK3IlgeWlzk/qXF0Vg87gbgWb88RNXQMHiQVJtEZ4aO3HYNgWa0eYc735jSI/InoojjQV30UBBem+JJkZQIDAQAB",
    "manifest_version": 3,
-   "name": "ShiftSniper \u2014 Amazon Warehouse Job Hunter",
+   "name": "CoderSnap \u2014 Amazon Warehouse Job Hunter",
    "permissions": [
       "tabs",
       "storage",
@@ -92,7 +92,7 @@
       "debugger"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.7.8.7",
+   "version": "8.7.8.8",
    "web_accessible_resources": [
       {
          "matches": [
