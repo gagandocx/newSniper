@@ -1,8 +1,5 @@
 # Private signing key — NEVER commit this
 codersnap.pem
 
-# Build output folder (obfuscated extension)
-dist/
-
 # Zip artifacts
 *.zip
