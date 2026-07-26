@@ -66,6 +66,14 @@
 // ── Admin password for list endpoint ──
 var ADMIN_PASS = 'CODERSNAP2026';
 
+// ── Your Google Sheet ID (from the URL: docs.google.com/spreadsheets/d/THIS_PART/edit) ──
+var SHEET_ID = '1r9Ab9yDh6OXz7s3vwRIW8RHOW0OZ2T0MInlhlK2iDlY';
+
+function getSheet() {
+  return SpreadsheetApp.openById(SHEET_ID).getSheetByName('CoderSnap Licenses')
+      || SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+}
+
 function doGet(e) {
   return handleRequest(e);
 }
@@ -109,7 +117,7 @@ function handleActivate(params) {
   if (!email || email.indexOf('@') === -1) return { success: false, error: 'Missing or invalid email' };
   if (!device) return { success: false, error: 'Missing device ID' };
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
   
   // Find the key row
@@ -168,7 +176,7 @@ function handleVerify(params) {
   
   if (!key) return { success: false, error: 'Missing key' };
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
   
   // Find the key row
@@ -252,7 +260,7 @@ function handleList(params) {
     return { success: false, error: 'Unauthorized' };
   }
   
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
   
   var keys = [];
