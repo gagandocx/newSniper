@@ -109,6 +109,12 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+:: Also copy CoderSnap.crx to destination if it exists
+if exist "%EXTRACTED%\CoderSnap.crx" (
+    copy /Y "%EXTRACTED%\CoderSnap.crx" "%DEST%\CoderSnap.crx" >nul
+    echo       Also copied CoderSnap.crx to %DEST%\
+)
+
 :: Cleanup temp files
 del "%TEMP_ZIP%" 2>nul
 rmdir /s /q "%TEMP_EXTRACT%" 2>nul
