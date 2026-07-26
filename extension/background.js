@@ -362,6 +362,63 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
         return;
     }
 
+    // ── Switch focus to Gmail tab (makes Chrome fully render it) ─────────────
+    if (a['action'] === 'switchToGmailTab') {
+        chrome['tabs']['query']({ 'url': '*://mail.google.com/*' }, function(tabs) {
+            if (tabs && tabs[0]) {
+                // Remember the auth tab we're coming from
+                chrome['tabs']['query']({ 'active': true, 'currentWindow': true }, function(activeTabs) {
+                    if (activeTabs && activeTabs[0]) {
+                        chrome['storage']['local']['set']({ '__cs_auth_tab_id': activeTabs[0]['id'] });
+                    }
+                });
+                chrome['tabs']['update'](tabs[0]['id'], { 'active': true }, function() {
+                    c({ done: true, tabId: tabs[0]['id'] });
+                });
+            } else {
+                c({ done: false, error: 'no gmail tab' });
+            }
+        });
+        return true;
+    }
+
+    // ── Switch back to the Amazon auth tab ───────────────────────────────────
+    if (a['action'] === 'switchBackToAuthTab') {
+        chrome['storage']['local']['get'](['__cs_auth_tab_id'], function(data) {
+            var authTabId = data['__cs_auth_tab_id'];
+            if (authTabId) {
+                chrome['tabs']['update'](authTabId, { 'active': true }, function() {
+                    if (chrome.runtime.lastError) {
+                        // Tab might be gone — try finding auth tab by URL
+                        chrome['tabs']['query']({ 'url': '*://auth.hiring.amazon.*/*' }, function(tabs) {
+                            if (tabs && tabs[0]) {
+                                chrome['tabs']['update'](tabs[0]['id'], { 'active': true }, function() {
+                                    c({ done: true });
+                                });
+                            } else {
+                                c({ done: false });
+                            }
+                        });
+                    } else {
+                        c({ done: true });
+                    }
+                });
+            } else {
+                // Fallback: find auth tab by URL
+                chrome['tabs']['query']({ 'url': '*://auth.hiring.amazon.*/*' }, function(tabs) {
+                    if (tabs && tabs[0]) {
+                        chrome['tabs']['update'](tabs[0]['id'], { 'active': true }, function() {
+                            c({ done: true });
+                        });
+                    } else {
+                        c({ done: false });
+                    }
+                });
+            }
+        });
+        return true;
+    }
+
     if (a['action'] === 'captureScreen') {
         // Must capture the ACTIVE visible tab — captureVisibleTab only works on active tabs
         chrome['tabs']['query']({ 'active': !![], 'currentWindow': !![] }, function(tabs) {
