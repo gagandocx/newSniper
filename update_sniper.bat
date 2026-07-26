@@ -67,11 +67,13 @@ echo       Done.
 :: Find the extracted folder name (GitHub adds repo-branch prefix)
 for /d %%D in ("%TEMP_EXTRACT%\*") do set "EXTRACTED=%%D"
 
-:: Check if dist subfolder exists (obfuscated/protected version)
+:: Check if dist subfolder exists (obfuscated/protected version — always preferred)
 if exist "%EXTRACTED%\dist" (
     set "SOURCE=%EXTRACTED%\dist"
+    echo       [Using protected/obfuscated build]
 ) else if exist "%EXTRACTED%\extension" (
     set "SOURCE=%EXTRACTED%\extension"
+    echo       [WARNING: dist/ not found, using source extension/]
 ) else (
     echo [ERROR] Extension folder not found in download.
     pause
