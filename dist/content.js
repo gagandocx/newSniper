@@ -1,8 +1,8 @@
-// CoderSnap v8.7.10.0 — Proprietary. Unauthorized copying prohibited.
-var _0xSTRf140=['add\x45\x76\x65\x6etLis\x74\x65ne\x72','\x44\x4f\x4d\x43o\x6etentL\x6fa\x64\x65d','m\x61n\x61\x67\x65\x6de\x6et','\x67et\x53elf','v\x65\x72\x73io\x6e','g\x65tEl\x65\x6den\x74\x42yI\x64','\x69\x6e\x6e\x65r\x54ex\x74','(\x76e\x72s\x69\x6fn\x2\x30\x76','B\x6flton','Bra\x6d\x70to\x6e','\x42ur\x6ea\x62\x79','\x43\x61mb\x72\x69dg\x65','\x43onco\x72d','\x54o\x72on\x74o','Si\x64n\x65\x79','\x42e\x6c\x67\x72\x61d\x65','\x73\x74\x6fr\x61\x67e','lo\x63\x61l','g\x65\x74','\x73\x65\x6c\x65\x63t\x65\x64\x43i\x74\x79','\x64istan\x63e','\x6ao\x62Type','\x5f_\x61p','\x63i\x74\x79\x54\x61\x67\x73','fet\x63h\x49\x6ete\x72v\x61lV\x61lue','\x66e\x74c\x68\x49\x6e\x74\x65r\x76\x61l\x55\x6e\x69t','\x41ny','\x74\x68\x65n','a\x63\x74i\x76\x61t\x65','c\x68\x65c\x6bed','p\x6fw\x65\x72\x2d\x63a\x72\x64','cl\x61s\x73\x4c\x69st','\x74oggle','ac\x74i\x76\x65','\x65\x72\x72or','\x61c\x74iv\x61\x74e e\x6ce\x6d\x65\x6et\x20no\x74\x20\x66\x6f\x75\x6ed','\x6c\x65ngt\x68','\x73\x65\x74','c\x69t\x79','wo\x72\x6b_\x68ours','\x66\x65t\x63h_\x69\x6et\x65r\x76\x61l\x5fv\x61\x6c\x75e','\x66\x65t\x63h_\x69\x6e\x74\x65\x72v\x61l_u\x6e\x69\x74','v\x61lu\x65','c\x68an\x67e','An\x79 \x43i\x74\x79','som\x65','\x74oL\x6fwe\x72Ca\x73e','a\x6ey \x63it\x79','\x61ny-c\x69\x74y\x2db\x74n','cl\x69ck','\x32\x350\x30\x30','\x64\x69sp\x61\x74c\x68Ev\x65\x6et','i\x6epu\x74','gro\x71_a\x70\x69\x5fkey','tri\x6d','\x67r\x6f\x71\x5f\x73\x61v\x65\x64','\x67\x72\x6f\x71_\x65rr\x6fr','\x73t\x79l\x65','d\x69s\x70\x6ca\x79','\x6e\x6f\x6ee','\x67sk\x5f','f\x6c\x65\x78','tab\x73','\x71u\x65\x72y','sen\x64Messag\x65','\x61\x69s\x5fvi\x73\x61\x5fi\x6e\x66\x6f','\x73ubm\x69t','p\x72\x65v\x65\x6et\x44\x65\x66a\x75lt','\x72\x65\x73e\x74_info','\x73\x65\x74A\x74tr\x69\x62u\x74\x65','di\x73\x61\x62l\x65\x64','cl\x65a\x72','\x72\x75\x6et\x69me','logout','btn\x2dsu\x63\x63e\x73s','Succ\x65\x73\x73','\x72\x65\x6d\x6f\x76eAttr\x69bute','R\x65\x73e\x74','ta\x67\x2d\x69nput-bo\x78','\x63\x72ea\x74\x65\x45le\x6d\x65\x6e\x74','d\x69v','\x61d\x64','\x74a\x67','in\x6eer\x48\x54\x4dL','\x5c\x78\x32\x30\x3csp\x61n\x5c\x78\x32\x30\x63l\x61\x73\x73\x3d\x5c\x7822\x72e\x6dov\x65-t\x61\x67\x5cx\x322>x\x3c\x2f\x73\x70an>','i\x6e\x73er\x74B\x65f\x6f\x72\x65','ci\x74y-i\x6ep\x75t','\x63\x6c\x65\x61r-\x61\x6cl','in\x6ci\x6ee','\x71\x75e\x72y\x53\x65\x6ce\x63tor','.\x72e\x6d\x6fve-t\x61\x67','\x70\x61ren\x74\x45lem\x65n\x74','t\x65\x78\x74Cont\x65\x6et','\x73l\x69\x63\x65','r\x65\x6do\x76e','\x2etag','\x71u\x65r\x79S\x65\x6c\x65ctor\x41l\x6c','for\x45\x61c\x68','pus\x68','fi\x6ct\x65r','\x61ny\x5c\x782\x30c\x69t\x79','u\x6e\x64e\x66ined','A\x6e\x79\\x78\x32\x30\x43i\x74\x79','Any\x20Cit\x79\x20\x2713','ke\x79\x75\x70','\x6bey','\x45nter','onM\x65\x73\x73a\x67\x65','\x61\x64dLis\x74\x65\x6eer','\x61\x63tion','\x70\x6c\x61\x79S\x6fun\x64','Audio\x43\x6fn\x74\x65xt','\x77eb\x6b\x69\x74Aud\x69oC\x6f\x6e\x74\x65\x78t','get\x55\x52L','\x61le\x72\x74\x2ewa\x76','\x61\x72\x72a\x79\x42uffer','\x64\x65c\x6fdeA\x75\x64io\x44a\x74a','\x63reat\x65Buf\x66\x65r\x53ou\x72\x63\x65','b\x75ff\x65\x72','\x63\x6f\x6e\x6e\x65c\x74','dest\x69na\x74\x69\x6f\x6e','\x73ta\x72\x74','ca\x74\x63h','Fail\x65d\x\x320\x74\x6f\x5c\x782\x30pla\x79\\x7820s\x6fund\x5c\x7820via\x2\x30\x57eb\x5cx2\x30\x41\x75dio\x5cx\x32\x30A\x50\x49:','\x70lay','\x41lso\\x782\x30fail\x65\x64\x\x320\x77\x69\x74h\\x7820\x48T\x4dL5\x5cx2\x30Audio\x3a','\x6e\x6f\x74\x69f\x69cat\x69o\x6es','cre\x61te','\x62\x61s\x69\x63','i\x6dage\x73/i\x63on\x3128\x2e\x70n\x67','\x41\x6daz\x6fn\x\x320\x4a\x6f\x62\\x78\x32\x30Al\x65rt!','A\\x78\x32\x30\x6d\x61tch\x69\x6eg\x\x320\x6aob\\x782\x30\x68\x61s\x5cx\x320be\x65\x6e\x5c\x78\x320\x66o\x75\x6e\x64!','A\x6ey\x2\x30C\x69\x74y\\x7820\u\x32\x37\x313','\x75\x70g\x72\x61\x64\x65\x2d\x62t\x6e','g\x75\x69\x64e\x2d\x62\x74n','\x75\x72l','\x69\x6e\x63l\x75\x64\x65s','\x68ir\x69ng\x2e\x61\x6da\x7aon','\x73h\x6f\x77\x47\x75id\x65'];
-document[_0xSTRf140[0]](_0xSTRf140[1], async function () {
-const a = await new Promise(A => chrome[_0xSTRf140[2]][_0xSTRf140[3]](B => A(B[_0xSTRf140[4]])));
-document[_0xSTRf140[5]](_0xSTRf140[4])[_0xSTRf140[6]] = _0xSTRf140[7] + a + ')';
+// CoderSnap v8.7.10.4 — Proprietary. Unauthorized copying prohibited.
+var _0xSTR7b09=['addEventL\x69\x73te\x6eer','\x44O\x4d\x43\x6f\x6et\x65\x6et\x4coad\x65\x64','\x6da\x6e\x61g\x65\x6den\x74','\x67e\x74\x53el\x66','\x76er\x73i\x6f\x6e','\x67\x65\x74\x45\x6c\x65\x6den\x74ByI\x64','\x69\x6e\x6ee\x72T\x65\x78\x74','(versi\x6fn\x20v','\x42\x6fl\x74\x6fn','Br\x61\x6dpt\x6f\x6e','Bu\x72n\x61by','\x43a\x6db\x72idg\x65','C\x6f\x6ec\x6fr\x64','\x54o\x72on\x74o','\x53\x69\x64n\x65y','\x42\x65\x6c\x67\x72ad\x65','\x73t\x6f\x72\x61ge','lo\x63\x61\x6c','\x67et','\x73\x65lec\x74\x65\x64City','\x64is\x74an\x63e','\x6a\x6f\x62\x54y\x70\x65','__\x61\x70','\x63\x69ty\x54a\x67s','\x66etc\x68\x49n\x74e\x72\x76a\x6cV\x61\x6c\x75\x65','f\x65\x74ch\x49\x6etervalU\x6e\x69\x74','A\x6ey','\x74h\x65n','act\x69\x76\x61te','\x63\x68eck\x65d','\x70\x6fw\x65r-\x63ard','\x63l\x61\x73s\x4c\x69\x73t','togg\x6c\x65','\x61\x63ti\x76e','\x65r\x72\x6f\x72','ac\x74\x69vate\x20\x65lem\x65n\x74\x20n\x6f\x74\x20f\x6fun\x64','le\x6e\x67\x74h','\x73et','ci\x74\x79','\x77ork\x5f\x68\x6fu\x72s','\x66\x65tc\x68\x5f\x69n\x74erv\x61\x6c\x5fv\x61\x6c\x75\x65','fet\x63h_i\x6e\x74\x65\x72\x76\x61l\x5f\x75ni\x74','\x76al\x75\x65','\x75\x6ed\x65fi\x6eed','\x63ha\x6eg\x65','An\x79 Ci\x74\x79','\x73om\x65','toLow\x65rC\x61\x73\x65','a\x6ey \x63\x69\x74\x79','\x61\x6ey\x2d\x63\x69\x74\x79\x2d\x62tn','c\x6ci\x63\x6b','\x32500\x30','di\x73\x70a\x74\x63\x68\x45v\x65nt','\x69\x6e\x70u\x74','g\x72\x6f\x71\x5fap\x69\x5fk\x65y','\x74r\x69m','g\x72oq\x5fs\x61\x76\x65\x64','g\x72oq\x5f\x65r\x72o\x72','\x73\x74\x79\x6c\x65','\x64isplay','\x6eon\x65','\x67s\x6b\x5f','flex','t\x61b\x73','\x71u\x65ry','\x73endMes\x73\x61\x67e','\x61i\x73\x5f\x76is\x61\x5f\x69\x6e\x66o','\x73\x75bmi\x74','\x70\x72\x65ven\x74\x44\x65\x66a\x75lt','\x72\x65\x73\x65\x74\x5f\x69n\x66\x6f','\x73\x65tA\x74t\x72i\x62u\x74e','\x64is\x61\x62\x6ced','\x63le\x61r','r\x75ntime','log\x6fut','\x62tn\x2ds\x75\x63c\x65ss','Succ\x65\x73\x73','\x72\x65\x6dove\x41\x74t\x72i\x62\x75te','Res\x65\x74','\x74\x61\x67\x2dinput\x2d\x62ox','c\x72\x65\x61teEl\x65\x6de\x6e\x74','\x64iv','\x61dd','\x74\x61g','i\x6en\x65\x72HTML','\x5cx\x32\x30<s\x70an\x5cx\x320cl\x61\x73s\x3d\x2\x32\x72e\x6dove-ta\x67\x5cx\x322>\x78<\x2f\x73p\x61n>','i\x6e\x73\x65r\x74Be\x66\x6f\x72e','\x63\x69t\x79\x2d\x69np\x75\x74','c\x6c\x65\x61r-\x61\x6cl','i\x6e\x6c\x69n\x65','que\x72\x79S\x65le\x63tor','.\x72emo\x76e\x2d\x74a\x67','\x70\x61r\x65ntE\x6c\x65\x6de\x6e\x74','te\x78t\x43\x6f\x6ete\x6e\x74','sli\x63\x65','re\x6d\x6f\x76\x65','.t\x61\x67','\x71\x75\x65ry\x53\x65\x6ce\x63torAll','\x66\x6fr\x45ach','\x70ush','fil\x74\x65r','any\\x78\x32\x30city','\x41ny\x5cx\x32\x30C\x69ty','An\x79 \x43\x69\x74\x79 \x2713','ke\x79u\x70','k\x65y','\x45n\x74\x65\x72','\x6f\x6eMe\x73s\x61\x67\x65','add\x4ci\x73\x74ener','actio\x6e','pl\x61\x79\x53\x6f\x75\x6ed','A\x75d\x69\x6fCo\x6e\x74ext','we\x62ki\x74\x41\x75d\x69\x6f\x43\x6fn\x74\x65\x78t','\x67\x65tURL','\x61\x6c\x65\x72\x74.wa\x76','array\x42u\x66\x66e\x72','d\x65c\x6fde\x41\x75\x64i\x6fDa\x74\x61','\x63r\x65\x61\x74\x65\x42u\x66ferSo\x75\x72\x63e','\x62\x75f\x66\x65r','c\x6f\x6e\x6e\x65c\x74','de\x73t\x69\x6e\x61\x74\x69\x6fn','\x73\x74a\x72\x74','ca\x74\x63\x68','\x46aile\x64\x5cx\x320t\x6f\\x7820\x70\x6c\x61y\\x7820s\x6fun\x64\x\x32\x30\x76ia\x5c\x78\x320W\x65\x62\x5cx\x32\x30A\x75\x64\x69\x6f\\x78\x32\x30\x41\x50\x49:','\x70\x6ca\x79','Als\x6f\x20f\x61\x69l\x65\x64\\x78\x320wit\x68\x2\x30HTML\x35\x5cx20A\x75\x64\x69\x6f:','\x6eotifica\x74ion\x73','\x63\x72\x65\x61t\x65','\x62a\x73\x69c','\x69\x6da\x67es/i\x63on1\x32\x38.pn\x67','A\x6d\x61\x7aon\\x782\x30Job\x5c\x782\x30\x41\x6c\x65\x72\x74!','\x41\x20m\x61t\x63hing\x5c\x78\x32\x30\x6ao\x62\x5c\x782\x30has\x2\x30b\x65\x65\x6e\x5c\x7820\x66\x6fun\x64\x21','\x41ny\x5c\x782\x30Cit\x79\x5c\x7820\x5c\x75\x32713','\x75\x70g\x72ade-btn','guid\x65\x2dbt\x6e','\x75\x72\x6c','i\x6e\x63\x6c\x75\x64\x65\x73','\x68\x69r\x69n\x67.\x61m\x61\x7aon','sh\x6fw\x47\x75i\x64\x65'];
+document[_0xSTR7b09[0]](_0xSTR7b09[1], async function () {
+const a = await new Promise(A => chrome[_0xSTR7b09[2]][_0xSTR7b09[3]](B => A(B[_0xSTR7b09[4]])));
+document[_0xSTR7b09[5]](_0xSTR7b09[4])[_0xSTR7b09[6]] = _0xSTR7b09[7] + a + ')';
 const b = {
 'Any City': {
 'lat': 43.653524,
@@ -113,253 +113,255 @@ const b = {
 'lng': -111.177155
 }
 }, c = [
-_0xSTRf140[8],
-_0xSTRf140[9],
-_0xSTRf140[10],
-_0xSTRf140[11],
-_0xSTRf140[12],
-_0xSTRf140[13],
-_0xSTRf140[14],
-_0xSTRf140[15]
-], d = await chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]]([
-_0xSTRf140[19],
-_0xSTRf140[20],
-_0xSTRf140[21],
-_0xSTRf140[22],
-_0xSTRf140[23],
-_0xSTRf140[24],
-_0xSTRf140[25]
-]), e = d[_0xSTRf140[19]] || _0xSTRf140[13], f = d[_0xSTRf140[20]] || '50', g = d[_0xSTRf140[21]] || _0xSTRf140[26], h = d[_0xSTRf140[22]] || ![], i = d[_0xSTRf140[23]] || [], j = d[_0xSTRf140[24]] || '2', k = d[_0xSTRf140[25]] || 's';
-await chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]]()[_0xSTRf140[27]](A => {
-const B = document[_0xSTRf140[5]](_0xSTRf140[28]);
+_0xSTR7b09[8],
+_0xSTR7b09[9],
+_0xSTR7b09[10],
+_0xSTR7b09[11],
+_0xSTR7b09[12],
+_0xSTR7b09[13],
+_0xSTR7b09[14],
+_0xSTR7b09[15]
+], d = await chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]]([
+_0xSTR7b09[19],
+_0xSTR7b09[20],
+_0xSTR7b09[21],
+_0xSTR7b09[22],
+_0xSTR7b09[23],
+_0xSTR7b09[24],
+_0xSTR7b09[25]
+]), e = d[_0xSTR7b09[19]] || _0xSTR7b09[13], f = d[_0xSTR7b09[20]] || '50', g = d[_0xSTR7b09[21]] || _0xSTR7b09[26], h = d[_0xSTR7b09[22]] || ![], i = d[_0xSTR7b09[23]] || [], j = d[_0xSTR7b09[24]] || '2', k = d[_0xSTR7b09[25]] || 's';
+await chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]]()[_0xSTR7b09[27]](A => {
+const B = document[_0xSTR7b09[5]](_0xSTR7b09[28]);
 if (B) {
-B[_0xSTRf140[29]] = A[_0xSTRf140[22]];
-const _0 = document[_0xSTRf140[5]](_0xSTRf140[30]);
-if (_0) _0[_0xSTRf140[31]][_0xSTRf140[32]](_0xSTRf140[33], !!A[_0xSTRf140[22]]);
-} else { console[_0xSTRf140[34]](_0xSTRf140[35]); }
+B[_0xSTR7b09[29]] = A[_0xSTR7b09[22]];
+const _0 = document[_0xSTR7b09[5]](_0xSTR7b09[30]);
+if (_0) _0[_0xSTR7b09[31]][_0xSTR7b09[32]](_0xSTR7b09[33], !!A[_0xSTR7b09[22]]);
+} else { console[_0xSTR7b09[34]](_0xSTR7b09[35]); }
 });
-if (i[_0xSTRf140[36]] === 0x0)
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'cityTags': c }, function () {
+if (i[_0xSTR7b09[36]] === 0x0)
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'cityTags': c }, function () {
 });
 else {
 }
-const l = document[_0xSTRf140[5]](_0xSTRf140[38]), m = document[_0xSTRf140[5]](_0xSTRf140[20]), n = document[_0xSTRf140[5]](_0xSTRf140[39]), o = document[_0xSTRf140[5]](_0xSTRf140[28]), p = document[_0xSTRf140[5]](_0xSTRf140[40]), q = document[_0xSTRf140[5]](_0xSTRf140[41]);
+const l = document[_0xSTR7b09[5]](_0xSTR7b09[38]), m = document[_0xSTR7b09[5]](_0xSTR7b09[20]), n = document[_0xSTR7b09[5]](_0xSTR7b09[39]), o = document[_0xSTR7b09[5]](_0xSTR7b09[28]), p = document[_0xSTR7b09[5]](_0xSTR7b09[40]), q = document[_0xSTR7b09[5]](_0xSTR7b09[41]);
 if (l)
-l[_0xSTRf140[42]] = e;
+l[_0xSTR7b09[42]] = e;
 if (m)
-m[_0xSTRf140[42]] = f;
+m[_0xSTR7b09[42]] = f;
 if (n)
-n[_0xSTRf140[42]] = g;
+n[_0xSTR7b09[42]] = g;
 if (o)
-o[_0xSTRf140[29]] = h;
+o[_0xSTR7b09[29]] = h;
 if (p)
-p[_0xSTRf140[42]] = j;
+p[_0xSTR7b09[42]] = j;
 if (q)
-q[_0xSTRf140[42]] = k;
+q[_0xSTR7b09[42]] = k;
+if(typeof undefined!==_0xSTR7b09[43]){void 0;}
 const {
 lat: r,
 lng: s
 } = b[e];
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({
 'lat': r,
 'lng': s
-}), document[_0xSTRf140[5]](_0xSTRf140[38])[_0xSTRf140[0]](_0xSTRf140[43], function () {
-const A = this[_0xSTRf140[42]];
-if (A === _0xSTRf140[44]) {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (tags) {
-const B = tags[_0xSTRf140[23]] || [];
-if (!B[_0xSTRf140[45]](D => D[_0xSTRf140[46]]() === _0xSTRf140[47])) {
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[49]]();
+}), document[_0xSTR7b09[5]](_0xSTR7b09[38])[_0xSTR7b09[0]](_0xSTR7b09[44], function () {
+const A = this[_0xSTR7b09[42]];
+if (A === _0xSTR7b09[45]) {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (tags) {
+const B = tags[_0xSTR7b09[23]] || [];
+if (!B[_0xSTR7b09[46]](D => D[_0xSTR7b09[47]]() === _0xSTR7b09[48])) {
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[50]]();
 }
 });
-const _1 = document[_0xSTRf140[5]](_0xSTRf140[20]);
+const _1 = document[_0xSTR7b09[5]](_0xSTR7b09[20]);
 if (_1) {
-_1[_0xSTRf140[42]] = _0xSTRf140[50];
-_1[_0xSTRf140[51]](new Event(_0xSTRf140[43]));
+_1[_0xSTR7b09[42]] = _0xSTR7b09[51];
+_1[_0xSTR7b09[52]](new Event(_0xSTR7b09[44]));
 }
 }
 const {
 lat: B,
 lng: C
 } = b[A];
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({
+try{if(null===undefined){throw new Error();}}catch(_e){}
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({
 'selectedCity': A,
 'lat': B,
 'lng': C
 });
-}), document[_0xSTRf140[5]](_0xSTRf140[20])[_0xSTRf140[0]](_0xSTRf140[43], function () {
-const A = this[_0xSTRf140[42]];
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'distance': A });
-}), document[_0xSTRf140[5]](_0xSTRf140[39])[_0xSTRf140[0]](_0xSTRf140[43], function () {
-const A = this[_0xSTRf140[42]];
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'jobType': A });
-}), document[_0xSTRf140[5]](_0xSTRf140[40])[_0xSTRf140[0]](_0xSTRf140[43], function () {
-const A = this[_0xSTRf140[42]];
-if (A && parseFloat(A) >= 0.1) chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'fetchIntervalValue': A });
-}), document[_0xSTRf140[5]](_0xSTRf140[40])[_0xSTRf140[0]](_0xSTRf140[52], function () {
-const A = this[_0xSTRf140[42]];
-if (A && parseFloat(A) >= 0.1) chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'fetchIntervalValue': A });
-}), document[_0xSTRf140[5]](_0xSTRf140[41])[_0xSTRf140[0]](_0xSTRf140[43], function () {
-const A = this[_0xSTRf140[42]];
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'fetchIntervalUnit': A });
+try{if(null===undefined){throw new Error();}}catch(_e){}
+}), document[_0xSTR7b09[5]](_0xSTR7b09[20])[_0xSTR7b09[0]](_0xSTR7b09[44], function () {
+const A = this[_0xSTR7b09[42]];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'distance': A });
+}), document[_0xSTR7b09[5]](_0xSTR7b09[39])[_0xSTR7b09[0]](_0xSTR7b09[44], function () {
+const A = this[_0xSTR7b09[42]];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'jobType': A });
+}), document[_0xSTR7b09[5]](_0xSTR7b09[40])[_0xSTR7b09[0]](_0xSTR7b09[44], function () {
+const A = this[_0xSTR7b09[42]];
+if (A && parseFloat(A) >= 0.1) chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'fetchIntervalValue': A });
+}), document[_0xSTR7b09[5]](_0xSTR7b09[40])[_0xSTR7b09[0]](_0xSTR7b09[53], function () {
+const A = this[_0xSTR7b09[42]];
+if (A && parseFloat(A) >= 0.1) chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'fetchIntervalValue': A });
+}), document[_0xSTR7b09[5]](_0xSTR7b09[41])[_0xSTR7b09[0]](_0xSTR7b09[44], function () {
+const A = this[_0xSTR7b09[42]];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'fetchIntervalUnit': A });
 }), (function() {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]]([_0xSTRf140[53]], function (A) {
-const el = document[_0xSTRf140[5]](_0xSTRf140[53]);
-if (el && A[_0xSTRf140[53]]) el[_0xSTRf140[42]] = A[_0xSTRf140[53]];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]]([_0xSTR7b09[54]], function (A) {
+const el = document[_0xSTR7b09[5]](_0xSTR7b09[54]);
+if (el && A[_0xSTR7b09[54]]) el[_0xSTR7b09[42]] = A[_0xSTR7b09[54]];
 });
-const _2 = document[_0xSTRf140[5]](_0xSTRf140[53]);
+const _2 = document[_0xSTR7b09[5]](_0xSTR7b09[54]);
 if (_2) {
-_2[_0xSTRf140[0]](_0xSTRf140[52], function () {
-const _3 = this[_0xSTRf140[42]][_0xSTRf140[54]]();
-const _4 = document[_0xSTRf140[5]](_0xSTRf140[55]);
-const _5   = document[_0xSTRf140[5]](_0xSTRf140[56]);
+_2[_0xSTR7b09[0]](_0xSTR7b09[53], function () {
+const _3 = this[_0xSTR7b09[42]][_0xSTR7b09[55]]();
+const _4 = document[_0xSTR7b09[5]](_0xSTR7b09[56]);
+const _5   = document[_0xSTR7b09[5]](_0xSTR7b09[57]);
 if (!_3) {
-if (_4) _4[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
-if (_5)   _5[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
+if (_4) _4[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
+if (_5)   _5[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
 return;
 }
-const _6 = _3.startsWith(_0xSTRf140[60]) && _3.length >= 30;
+const _6 = _3.startsWith(_0xSTR7b09[61]) && _3.length >= 30;
 if (_6) {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'groq_api_key': _3 });
-if (_4) { _4[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[61]; setTimeout(() => { _4[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59]; }, 2500); }
-if (_5) _5[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'groq_api_key': _3 });
+if (_4) { _4[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[62]; setTimeout(() => { _4[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60]; }, 2500); }
+if (_5) _5[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
 } else {
-if (_4) _4[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
-if (_5) _5[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[61];
+if (_4) _4[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
+if (_5) _5[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[62];
 }
 });
 }
-})(), document[_0xSTRf140[5]](_0xSTRf140[28])[_0xSTRf140[0]](_0xSTRf140[43], async function () {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ '__ap': this[_0xSTRf140[29]] });
-const _0 = document[_0xSTRf140[5]](_0xSTRf140[30]);
-if (_0) _0[_0xSTRf140[31]][_0xSTRf140[32]](_0xSTRf140[33], this[_0xSTRf140[29]]);
-let [A] = await chrome[_0xSTRf140[62]][_0xSTRf140[63]]({ 'active': true, 'lastFocusedWindow': true });
-if (A) chrome[_0xSTRf140[62]][_0xSTRf140[64]](A['id'], { 'action': _0xSTRf140[28], 'status': this[_0xSTRf140[29]] });
-}), document[_0xSTRf140[5]](_0xSTRf140[65])[_0xSTRf140[0]](_0xSTRf140[66], async function (A) {
-A[_0xSTRf140[67]]();
-let B = document[_0xSTRf140[5]](_0xSTRf140[68]);
-B[_0xSTRf140[69]](_0xSTRf140[70], _0xSTRf140[70]), await new Promise(C => setTimeout(C, 0x1f4)), await chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[71]](), await chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({
+})(), document[_0xSTR7b09[5]](_0xSTR7b09[28])[_0xSTR7b09[0]](_0xSTR7b09[44], async function () {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ '__ap': this[_0xSTR7b09[29]] });
+const _0 = document[_0xSTR7b09[5]](_0xSTR7b09[30]);
+if (_0) _0[_0xSTR7b09[31]][_0xSTR7b09[32]](_0xSTR7b09[33], this[_0xSTR7b09[29]]);
+let [A] = await chrome[_0xSTR7b09[63]][_0xSTR7b09[64]]({ 'active': true, 'lastFocusedWindow': true });
+if (A) chrome[_0xSTR7b09[63]][_0xSTR7b09[65]](A['id'], { 'action': _0xSTR7b09[28], 'status': this[_0xSTR7b09[29]] });
+}), document[_0xSTR7b09[5]](_0xSTR7b09[66])[_0xSTR7b09[0]](_0xSTR7b09[67], async function (A) {
+A[_0xSTR7b09[68]]();
+let B = document[_0xSTR7b09[5]](_0xSTR7b09[69]);
+B[_0xSTR7b09[70]](_0xSTR7b09[71], _0xSTR7b09[71]), await new Promise(C => setTimeout(C, 0x1f4)), await chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[72]](), await chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({
 '__ap': !![],
 '__cr': 0x0,
-'selectedCity': _0xSTRf140[13],
+'selectedCity': _0xSTR7b09[13],
 'lat': 43.653524,
 'lng': -79.383907,
 'distance': '50',
-'jobType': _0xSTRf140[26],
+'jobType': _0xSTR7b09[26],
 'fetchIntervalValue': '2',
 'fetchIntervalUnit': 's'
-}), chrome[_0xSTRf140[72]][_0xSTRf140[64]]({ 'action': _0xSTRf140[73] }), B[_0xSTRf140[31]][_0xSTRf140[32]](_0xSTRf140[74]), B[_0xSTRf140[6]] = _0xSTRf140[75], await new Promise(C => setTimeout(C, 0x3e8)), B[_0xSTRf140[31]][_0xSTRf140[32]](_0xSTRf140[74]), B[_0xSTRf140[76]](_0xSTRf140[70]), B[_0xSTRf140[6]] = _0xSTRf140[77];
+}), chrome[_0xSTR7b09[73]][_0xSTR7b09[65]]({ 'action': _0xSTR7b09[74] }), B[_0xSTR7b09[31]][_0xSTR7b09[32]](_0xSTR7b09[75]), B[_0xSTR7b09[6]] = _0xSTR7b09[76], await new Promise(C => setTimeout(C, 0x3e8)), B[_0xSTR7b09[31]][_0xSTR7b09[32]](_0xSTR7b09[75]), B[_0xSTR7b09[77]](_0xSTR7b09[71]), B[_0xSTR7b09[6]] = _0xSTR7b09[78];
 });
 function t(A, B = ![]) {
-const C = document[_0xSTRf140[5]](_0xSTRf140[78]), D = document[_0xSTRf140[79]](_0xSTRf140[80]);
-D[_0xSTRf140[31]][_0xSTRf140[81]](_0xSTRf140[82]), D[_0xSTRf140[83]] = A + _0xSTRf140[84], C[_0xSTRf140[85]](D, document[_0xSTRf140[5]](_0xSTRf140[86])), document[_0xSTRf140[5]](_0xSTRf140[87])[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[88], D[_0xSTRf140[89]](_0xSTRf140[90])[_0xSTRf140[0]](_0xSTRf140[49], function () {
+const C = document[_0xSTR7b09[5]](_0xSTR7b09[79]), D = document[_0xSTR7b09[80]](_0xSTR7b09[81]);
+D[_0xSTR7b09[31]][_0xSTR7b09[82]](_0xSTR7b09[83]), D[_0xSTR7b09[84]] = A + _0xSTR7b09[85], C[_0xSTR7b09[86]](D, document[_0xSTR7b09[5]](_0xSTR7b09[87])), document[_0xSTR7b09[5]](_0xSTR7b09[88])[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[89], D[_0xSTR7b09[90]](_0xSTR7b09[91])[_0xSTR7b09[0]](_0xSTR7b09[50], function () {
 u(this);
+if(false){console.log(Math.random());}
 }), !B && w(A);
 }
 function u(A) {
-const B = A[_0xSTRf140[91]], C = B[_0xSTRf140[92]][_0xSTRf140[54]]()[_0xSTRf140[93]](0x0, -0x1);
-B[_0xSTRf140[94]](), x(C), !document[_0xSTRf140[89]](_0xSTRf140[95]) && (document[_0xSTRf140[5]](_0xSTRf140[87])[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59]);
+const B = A[_0xSTR7b09[92]], C = B[_0xSTR7b09[93]][_0xSTR7b09[55]]()[_0xSTR7b09[94]](0x0, -0x1);
+B[_0xSTR7b09[95]](), x(C), !document[_0xSTR7b09[90]](_0xSTR7b09[96]) && (document[_0xSTR7b09[5]](_0xSTR7b09[88])[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60]);
 }
 function v() {
-const A = document[_0xSTRf140[96]](_0xSTRf140[95]);
-A[_0xSTRf140[97]](B => B[_0xSTRf140[94]]()), y(), document[_0xSTRf140[5]](_0xSTRf140[87])[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
+const A = document[_0xSTR7b09[97]](_0xSTR7b09[96]);
+A[_0xSTR7b09[98]](B => B[_0xSTR7b09[95]]()), y(), document[_0xSTR7b09[5]](_0xSTR7b09[88])[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
 }
 function w(A) {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (B) {
-let C = B[_0xSTRf140[23]] || [];
-C[_0xSTRf140[98]](A), chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'cityTags': C }, function () {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (B) {
+let C = B[_0xSTR7b09[23]] || [];
+C[_0xSTR7b09[99]](A), chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'cityTags': C }, function () {
 });
 });
 }
 function x(A) {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (B) {
-let C = B[_0xSTRf140[23]] || [];
-C = C[_0xSTRf140[99]](D => D[_0xSTRf140[54]]()[_0xSTRf140[46]]() !== A[_0xSTRf140[54]]()[_0xSTRf140[46]]()), chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[37]]({ 'cityTags': C }, function () {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (D) {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (B) {
+let C = B[_0xSTR7b09[23]] || [];
+C = C[_0xSTR7b09[100]](D => D[_0xSTR7b09[55]]()[_0xSTR7b09[47]]() !== A[_0xSTR7b09[55]]()[_0xSTR7b09[47]]()), chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[37]]({ 'cityTags': C }, function () {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (D) {
 });
 });
 });
 }
 function y() {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[94]](_0xSTRf140[23], function () {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[95]](_0xSTR7b09[23], function () {
 });
 }
 function z() {
-const A = document[_0xSTRf140[5]](_0xSTRf140[78]);
-A[_0xSTRf140[96]](_0xSTRf140[95])[_0xSTRf140[97]](B => B[_0xSTRf140[94]]()), chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (B) {
-const C = B[_0xSTRf140[23]] || [];
-C[_0xSTRf140[97]](D => t(D, !![]));
+const A = document[_0xSTR7b09[5]](_0xSTR7b09[79]);
+A[_0xSTR7b09[97]](_0xSTR7b09[96])[_0xSTR7b09[98]](B => B[_0xSTR7b09[95]]()), chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (B) {
+const C = B[_0xSTR7b09[23]] || [];
+C[_0xSTR7b09[98]](D => t(D, !![]));
 });
 }
-document[_0xSTRf140[5]](_0xSTRf140[87])[_0xSTRf140[0]](_0xSTRf140[49], v), document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[0]](_0xSTRf140[49], function () {
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (A) {
-const B = A[_0xSTRf140[23]] || [];
-const C = B[_0xSTRf140[45]](D => D[_0xSTRf140[46]]() === _0xSTRf140[100]);
+document[_0xSTR7b09[5]](_0xSTR7b09[88])[_0xSTR7b09[0]](_0xSTR7b09[50], v), document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[0]](_0xSTR7b09[50], function () {
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (A) {
+const B = A[_0xSTR7b09[23]] || [];
+const C = B[_0xSTR7b09[46]](D => D[_0xSTR7b09[47]]() === _0xSTR7b09[101]);
+if(typeof undefined!==_0xSTR7b09[43]){void 0;}
 if (C) {
 v();
-if(typeof undefined!==_0xSTRf140[101]){void 0;}
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[31]][_0xSTRf140[94]](_0xSTRf140[33]);
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[6]] = _0xSTRf140[44];
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[31]][_0xSTR7b09[95]](_0xSTR7b09[33]);
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[6]] = _0xSTR7b09[45];
 } else {
 v();
-t(_0xSTRf140[102]);
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[31]][_0xSTRf140[81]](_0xSTRf140[33]);
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[6]] = _0xSTRf140[103];
+t(_0xSTR7b09[102]);
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[31]][_0xSTR7b09[82]](_0xSTR7b09[33]);
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[6]] = _0xSTR7b09[103];
 }
 });
-}), document[_0xSTRf140[5]](_0xSTRf140[86])[_0xSTRf140[0]](_0xSTRf140[104], function (A) {
-if (A[_0xSTRf140[105]] === _0xSTRf140[106] && this[_0xSTRf140[42]][_0xSTRf140[54]]() !== '') {
-const B = this[_0xSTRf140[42]][_0xSTRf140[54]]();
-if(false){console.log(Math.random());}
-t(B), this[_0xSTRf140[42]] = '';
+}), document[_0xSTR7b09[5]](_0xSTR7b09[87])[_0xSTR7b09[0]](_0xSTR7b09[104], function (A) {
+if (A[_0xSTR7b09[105]] === _0xSTR7b09[106] && this[_0xSTR7b09[42]][_0xSTR7b09[55]]() !== '') {
+const B = this[_0xSTR7b09[42]][_0xSTR7b09[55]]();
+t(B), this[_0xSTR7b09[42]] = '';
 }
-}), chrome[_0xSTRf140[72]][_0xSTRf140[107]][_0xSTRf140[108]]((A, B, C) => {
-if (A[_0xSTRf140[109]] === _0xSTRf140[110]) {
-const D = new (window[_0xSTRf140[111]] || window[_0xSTRf140[112]])();
-fetch(chrome[_0xSTRf140[72]][_0xSTRf140[113]](_0xSTRf140[114]))[_0xSTRf140[27]](E => E[_0xSTRf140[115]]())[_0xSTRf140[27]](E => D[_0xSTRf140[116]](E))[_0xSTRf140[27]](E => {
-const F = D[_0xSTRf140[117]]();
-F[_0xSTRf140[118]] = E, F[_0xSTRf140[119]](D[_0xSTRf140[120]]), F[_0xSTRf140[121]](0x0), setTimeout(() => {
-const G = D[_0xSTRf140[117]]();
-G[_0xSTRf140[118]] = E, G[_0xSTRf140[119]](D[_0xSTRf140[120]]), G[_0xSTRf140[121]](0x0);
+}), chrome[_0xSTR7b09[73]][_0xSTR7b09[107]][_0xSTR7b09[108]]((A, B, C) => {
+if (A[_0xSTR7b09[109]] === _0xSTR7b09[110]) {
+const D = new (window[_0xSTR7b09[111]] || window[_0xSTR7b09[112]])();
+fetch(chrome[_0xSTR7b09[73]][_0xSTR7b09[113]](_0xSTR7b09[114]))[_0xSTR7b09[27]](E => E[_0xSTR7b09[115]]())[_0xSTR7b09[27]](E => D[_0xSTR7b09[116]](E))[_0xSTR7b09[27]](E => {
+const F = D[_0xSTR7b09[117]]();
+F[_0xSTR7b09[118]] = E, F[_0xSTR7b09[119]](D[_0xSTR7b09[120]]), F[_0xSTR7b09[121]](0x0), setTimeout(() => {
+const G = D[_0xSTR7b09[117]]();
+G[_0xSTR7b09[118]] = E, G[_0xSTR7b09[119]](D[_0xSTR7b09[120]]), G[_0xSTR7b09[121]](0x0);
 }, 0x3e8), setTimeout(() => {
-const G = D[_0xSTRf140[117]]();
-G[_0xSTRf140[118]] = E, G[_0xSTRf140[119]](D[_0xSTRf140[120]]), G[_0xSTRf140[121]](0x0);
+const G = D[_0xSTR7b09[117]]();
+G[_0xSTR7b09[118]] = E, G[_0xSTR7b09[119]](D[_0xSTR7b09[120]]), G[_0xSTR7b09[121]](0x0);
 }, 0x7d0);
-})[_0xSTRf140[122]](E => {
-console[_0xSTRf140[34]](_0xSTRf140[123], E);
-const F = new Audio(chrome[_0xSTRf140[72]][_0xSTRf140[113]](_0xSTRf140[114]));
-F[_0xSTRf140[124]]()[_0xSTRf140[122]](G => console[_0xSTRf140[34]](_0xSTRf140[125], G)), chrome[_0xSTRf140[126]][_0xSTRf140[127]]({
-'type': _0xSTRf140[128],
-'iconUrl': chrome[_0xSTRf140[72]][_0xSTRf140[113]](_0xSTRf140[129]),
-'title': _0xSTRf140[130],
-'message': _0xSTRf140[131],
+})[_0xSTR7b09[122]](E => {
+console[_0xSTR7b09[34]](_0xSTR7b09[123], E);
+const F = new Audio(chrome[_0xSTR7b09[73]][_0xSTR7b09[113]](_0xSTR7b09[114]));
+F[_0xSTR7b09[124]]()[_0xSTR7b09[122]](G => console[_0xSTR7b09[34]](_0xSTR7b09[125], G)), chrome[_0xSTR7b09[126]][_0xSTR7b09[127]]({
+'type': _0xSTR7b09[128],
+'iconUrl': chrome[_0xSTR7b09[73]][_0xSTR7b09[113]](_0xSTR7b09[129]),
+'title': _0xSTR7b09[130],
+'message': _0xSTR7b09[131],
 'priority': 0x2
 });
 });
 }
 }), z();
-chrome[_0xSTRf140[16]][_0xSTRf140[17]][_0xSTRf140[18]](_0xSTRf140[23], function (A) {
-const B = A[_0xSTRf140[23]] || [];
-if (B[_0xSTRf140[45]](C => C[_0xSTRf140[46]]() === _0xSTRf140[100])) {
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[31]][_0xSTRf140[81]](_0xSTRf140[33]);
-document[_0xSTRf140[5]](_0xSTRf140[48])[_0xSTRf140[6]] = _0xSTRf140[132];
+chrome[_0xSTR7b09[16]][_0xSTR7b09[17]][_0xSTR7b09[18]](_0xSTR7b09[23], function (A) {
+const B = A[_0xSTR7b09[23]] || [];
+if (B[_0xSTR7b09[46]](C => C[_0xSTR7b09[47]]() === _0xSTR7b09[101])) {
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[31]][_0xSTR7b09[82]](_0xSTR7b09[33]);
+document[_0xSTR7b09[5]](_0xSTR7b09[49])[_0xSTR7b09[6]] = _0xSTR7b09[132];
 }
 });
 (function() {
-const _7 = document[_0xSTRf140[5]](_0xSTRf140[133]);
-if (_7) _7[_0xSTRf140[57]][_0xSTRf140[58]] = _0xSTRf140[59];
+const _7 = document[_0xSTR7b09[5]](_0xSTR7b09[133]);
+if (_7) _7[_0xSTR7b09[58]][_0xSTR7b09[59]] = _0xSTR7b09[60];
 })();
-const _8 = document[_0xSTRf140[5]](_0xSTRf140[134]);
+const _8 = document[_0xSTR7b09[5]](_0xSTR7b09[134]);
 if (_8) {
-_8[_0xSTRf140[0]](_0xSTRf140[49], function(e) {
-e[_0xSTRf140[67]]();
-chrome[_0xSTRf140[62]][_0xSTRf140[63]]({ 'active': true, 'currentWindow': true }, function(tabs) {
-if (tabs[0] && tabs[0][_0xSTRf140[135]] && tabs[0][_0xSTRf140[135]][_0xSTRf140[136]](_0xSTRf140[137])) {
-chrome[_0xSTRf140[62]][_0xSTRf140[64]](tabs[0]['id'], { 'action': _0xSTRf140[138] });
+_8[_0xSTR7b09[0]](_0xSTR7b09[50], function(e) {
+e[_0xSTR7b09[68]]();
+chrome[_0xSTR7b09[63]][_0xSTR7b09[64]]({ 'active': true, 'currentWindow': true }, function(tabs) {
+if (tabs[0] && tabs[0][_0xSTR7b09[135]] && tabs[0][_0xSTR7b09[135]][_0xSTR7b09[136]](_0xSTR7b09[137])) {
+chrome[_0xSTR7b09[63]][_0xSTR7b09[65]](tabs[0]['id'], { 'action': _0xSTR7b09[138] });
 window.close();
 }
 });
 });
-var _deadb4a2=function(){return void 0;};
 }
 });

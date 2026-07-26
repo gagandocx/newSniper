@@ -158,8 +158,8 @@
             if (badge) {
                 badge.style.display = 'inline-block';
                 badge.innerHTML = '&#8635; Verifying...';
-                badge.style.cssText = 'display:inline-block;background:rgba(99,102,241,0.12);'
-                    + 'color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);font-size:8px;font-weight:600;'
+                badge.style.cssText = 'display:inline-block;background:rgba(59,130,246,0.12);'
+                    + 'color:#93c5fd;border:1px solid rgba(59,130,246,0.25);font-size:8px;font-weight:600;'
                     + 'letter-spacing:1px;padding:2px 8px;border-radius:10px;';
             }
 
@@ -169,9 +169,9 @@
                 // Show LICENSED badge
                 if (badge) {
                     badge.innerHTML = '&#10024; LICENSED';
-                    badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#16f5ff,#a341ff);'
+                    badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#22d3a8,#3b82f6);'
                         + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
-                        + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(22,245,255,0.4);';
+                        + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(34,211,168,0.4);';
                 }
                 // Mark as valid for fetch.js
                 chrome.storage.local.set({ '__cs_license_valid': true });
@@ -245,7 +245,7 @@
                     if (okBadge) okBadge.style.display = 'flex';
                     if (errBadge) errBadge.style.display = 'none';
                     btn.textContent = '✓ Activated!';
-                    btn.style.background = 'linear-gradient(135deg, #4ade80, #22d3ee)';
+                    btn.style.background = 'linear-gradient(135deg, #4ade80, #22d3a8)';
                     
                     setTimeout(function() {
                         gate.style.display = 'none';
@@ -255,9 +255,9 @@
                         if (badge) {
                             badge.style.display = 'inline-block';
                             badge.innerHTML = '&#10024; LICENSED';
-                            badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#16f5ff,#a341ff);'
+                            badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#22d3a8,#3b82f6);'
                                 + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
-                                + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(22,245,255,0.4);';
+                                + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(34,211,168,0.4);';
                         }
                     }, 1200);
                 } else {
