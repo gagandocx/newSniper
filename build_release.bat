@@ -106,8 +106,8 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo       - background.js
-call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false --unicode-escape-sequence true
+echo       - background.js (minified only — contains integrity checker)
+call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array false --control-flow-flattening false --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate background.js
     pause
