@@ -2,9 +2,9 @@
 setlocal enabledelayedexpansion
 
 :: ═══════════════════════════════════════════════════════════════
-:: ShiftSniper Auto-Updater
-:: Downloads the latest unlimited version from GitHub
-:: Destination: F:\Automation\Amazon\newSniper\Unlocked
+:: CoderSnap Auto-Updater
+:: Downloads the latest version from GitHub (unlimited-final branch)
+:: Only copies the extension/ folder — skips build scripts and zips
 :: ═══════════════════════════════════════════════════════════════
 
 set "REPO=gagandocx/newSniper"
@@ -15,7 +15,7 @@ set "TEMP_EXTRACT=%TEMP%\sniper_extract"
 
 echo.
 echo  ========================================
-echo   ShiftSniper Unlimited - Auto Updater
+echo   CoderSnap - Auto Updater
 echo  ========================================
 echo.
 
@@ -29,13 +29,25 @@ if %errorlevel% neq 0 (
 
 :: Download the zip of the branch from GitHub
 echo [1/4] Downloading latest version from GitHub...
-curl -L -o "%TEMP_ZIP%" "https://github.com/%REPO%/archive/refs/heads/%BRANCH%.zip"
+echo       (This may take a moment...)
+curl -L --retry 3 --retry-delay 2 -o "%TEMP_ZIP%" "https://github.com/%REPO%/archive/refs/heads/%BRANCH%.zip"
 if %errorlevel% neq 0 (
     echo [ERROR] Download failed. Check your internet connection.
     pause
     exit /b 1
 )
-echo       Done.
+
+:: Verify download isn't empty
+for %%A in ("%TEMP_ZIP%") do (
+    if %%~zA LSS 1000 (
+        echo [ERROR] Downloaded file is too small — likely a GitHub error.
+        echo         Try again in a minute.
+        del "%TEMP_ZIP%" 2>nul
+        pause
+        exit /b 1
+    )
+)
+echo       Done. (Downloaded successfully)
 
 :: Clean old extraction folder
 echo [2/4] Preparing extraction...
@@ -99,7 +111,7 @@ rmdir /s /q "%TEMP_EXTRACT%" 2>nul
 
 echo.
 echo  ========================================
-echo   SUCCESS! Extension updated to v%VERSION%
+echo   SUCCESS! CoderSnap updated to v%VERSION%
 echo  ========================================
 echo.
 echo  Location: %FINAL_DEST%
@@ -110,6 +122,6 @@ echo    2. Enable Developer Mode (top-right)
 echo    3. Click "Load unpacked"
 echo    4. Select: %FINAL_DEST%
 echo.
-echo  (If already loaded, just click the refresh icon)
+echo  (If already loaded, just click the refresh icon on the extension card)
 echo.
 pause
