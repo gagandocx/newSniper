@@ -63,11 +63,14 @@
             + '&device=' + encodeURIComponent(deviceId);
 
         try {
-            const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+            const resp = await fetch(url, { method: 'GET', redirect: 'follow' });
             if (!resp.ok) return { success: false, error: 'Server error: ' + resp.status };
-            // Google Apps Script redirects — follow manually if needed
-            const data = await resp.json();
-            return data;
+            const text = await resp.text();
+            try {
+                return JSON.parse(text);
+            } catch(e) {
+                return { success: false, error: 'Invalid server response' };
+            }
         } catch (err) {
             return { success: false, error: 'Network error: ' + err.message };
         }
