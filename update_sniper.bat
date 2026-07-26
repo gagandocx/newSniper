@@ -8,7 +8,7 @@ setlocal enabledelayedexpansion
 :: ═══════════════════════════════════════════════════════════════
 
 set "REPO=gagandocx/newSniper"
-set "BRANCH=unlimited-v8.7.8.7"
+set "BRANCH=unlimited-final"
 set "DEST=F:\Automation\Amazon\newSniper\Unlocked"
 set "TEMP_ZIP=%TEMP%\sniper_latest.zip"
 set "TEMP_EXTRACT=%TEMP%\sniper_extract"
