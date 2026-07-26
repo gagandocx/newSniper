@@ -17,7 +17,7 @@
     // ══════════════════════════════════════════════════════════════════
     // ██  PASTE YOUR GOOGLE APPS SCRIPT DEPLOYED URL HERE  ██
     // ══════════════════════════════════════════════════════════════════
-    const LICENSE_SERVER_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+    const LICENSE_SERVER_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
     // ══════════════════════════════════════════════════════════════════
 
     // ── Device fingerprint: unique per Chrome profile ──

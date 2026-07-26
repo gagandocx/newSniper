@@ -92,7 +92,7 @@
       "debugger"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.7.9.0",
+   "version": "8.7.9.1",
    "web_accessible_resources": [
       {
          "matches": [
