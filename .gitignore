@@ -1,5 +1,5 @@
 # Private signing key — NEVER commit this
 codersnap.pem
 
-# Zip artifacts
-*.zip
+# Temp build artifacts
+dist.zip

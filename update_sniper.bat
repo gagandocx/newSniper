@@ -109,14 +109,19 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Also copy CoderSnap.crx to destination if it exists
-if exist "%EXTRACTED%\CoderSnap.crx" (
-    copy /Y "%EXTRACTED%\CoderSnap.crx" "%DEST%\CoderSnap.crx" >nul
-    copy /Y "%EXTRACTED%\CoderSnap.crx" "%FINAL_DEST%\CoderSnap.crx" >nul
-    echo       [CRX] Copied CoderSnap.crx to %DEST%\
-    echo       [CRX] Also in %FINAL_DEST%\CoderSnap.crx
-) else (
-    echo       [NOTE] CoderSnap.crx not found in download
+:: Also copy the distributable zip if it exists
+for %%F in ("%EXTRACTED%\CoderSnap_*.zip") do (
+    if exist "%%F" (
+        copy /Y "%%F" "%DEST%\" >nul
+        copy /Y "%%F" "%FINAL_DEST%\" >nul
+        echo       [ZIP] Copied %%~nxF to %DEST%\
+    )
+)
+if not exist "%DEST%\CoderSnap_*.zip" (
+    :: Create a zip from the dist folder for easy sharing
+    echo       [ZIP] Creating CoderSnap.zip for distribution...
+    powershell -Command "Compress-Archive -Path '%FINAL_DEST%\*' -DestinationPath '%DEST%\CoderSnap.zip' -Force" 2>nul
+    if exist "%DEST%\CoderSnap.zip" echo       [ZIP] Created %DEST%\CoderSnap.zip
 )
 
 :: Cleanup temp files
@@ -130,12 +135,15 @@ echo  ========================================
 echo.
 echo  Location: %FINAL_DEST%
 echo.
-echo  To install/update in Chrome:
+echo  For YOURSELF (development):
 echo    1. Open chrome://extensions
 echo    2. Enable Developer Mode (top-right)
 echo    3. Click "Load unpacked"
 echo    4. Select: %FINAL_DEST%
+echo    (If already loaded, just click the refresh icon)
 echo.
-echo  (If already loaded, just click the refresh icon on the extension card)
+echo  To DISTRIBUTE to users:
+echo    Send them the CoderSnap zip from %DEST%\
+echo    They extract it and load unpacked in Chrome.
 echo.
 pause
