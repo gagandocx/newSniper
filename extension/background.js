@@ -47,87 +47,117 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
     }));
 }), chrome['runtime']['onMessage']['addListener']((a, b, c) => {
     // ── LICENSE SERVER PROXY ─────────────────────────────────────────────────────
-    // Google Apps Script returns 302 → script.googleusercontent.com
-    // Chrome MV3 service worker fetch() sometimes fails to follow this redirect.
-    // Strategy: try redirect:'follow' first, if HTML/opaque, manually follow redirect.
+    // Google Apps Script 302 redirect issue in MV3 service workers:
+    // GAS redirects to script.googleusercontent.com but service worker fetch()
+    // can't follow it (returns HTML login/consent page instead of JSON).
+    // Fix: Try multiple approaches including constructing the userContent URL directly.
     // MUST be in the SAME listener as other handlers to avoid channel conflicts.
     if (a['action'] === 'licenseRequest') {
         (async function() {
             var url = a['url'];
             console.log('[bg] License request URL:', url);
 
+            // Helper: check if text looks like valid JSON
+            function isJSON(t) {
+                var trimmed = (t || '').trim();
+                return trimmed.startsWith('{') || trimmed.startsWith('[');
+            }
+
+            // Helper: try to parse JSON from response text
+            function tryParse(t) {
+                try { return JSON.parse(t); } catch(e) { return null; }
+            }
+
             try {
-                // ── Attempt 1: Normal fetch with redirect:follow ──
-                var resp = await fetch(url, {
+                // ── Attempt 1: Direct fetch (works if Chrome follows redirect) ──
+                console.log('[bg] Attempt 1: direct fetch with redirect:follow...');
+                var resp1 = await fetch(url, {
                     method: 'GET',
-                    redirect: 'follow',
-                    headers: { 'Accept': 'application/json' }
+                    redirect: 'follow'
                 });
+                var text1 = await resp1.text();
+                console.log('[bg] Attempt 1: status=' + resp1.status + ' url=' + resp1.url);
+                console.log('[bg] Attempt 1 body:', text1.substring(0, 200));
 
-                var text = await resp.text();
-                console.log('[bg] License response (attempt 1, status ' + resp.status + '):', text.substring(0, 300));
-
-                // Check if we got valid JSON
-                if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
-                    try {
-                        c(JSON.parse(text));
-                        return;
-                    } catch(e) { /* fall through to attempt 2 */ }
+                if (isJSON(text1)) {
+                    var parsed = tryParse(text1);
+                    if (parsed) { c(parsed); return; }
                 }
 
-                // If we got HTML or non-JSON, the redirect wasn't followed properly
-                console.log('[bg] Attempt 1 returned non-JSON, trying manual redirect...');
-
-                // ── Attempt 2: Manual redirect handling ──
-                var resp2 = await fetch(url, {
-                    method: 'GET',
-                    redirect: 'manual'
-                });
-
-                console.log('[bg] Manual redirect response: status=' + resp2.status + ' type=' + resp2.type);
-
-                // For 302/301/307/308 redirects, get the Location header
-                var redirectUrl = null;
-                if (resp2.status >= 300 && resp2.status < 400) {
-                    redirectUrl = resp2.headers.get('Location');
-                    console.log('[bg] Got redirect Location header:', redirectUrl);
-                } else if (resp2.type === 'opaqueredirect') {
-                    redirectUrl = resp2.url || null;
-                    console.log('[bg] Opaque redirect, resp2.url:', redirectUrl);
-                }
-
-                if (redirectUrl) {
-                    console.log('[bg] Following redirect to:', redirectUrl);
-                    var resp3 = await fetch(redirectUrl, {
-                        method: 'GET',
-                        redirect: 'follow',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    var text3 = await resp3.text();
-                    console.log('[bg] Final response (status ' + resp3.status + '):', text3.substring(0, 300));
-
-                    if (text3.trim().startsWith('{') || text3.trim().startsWith('[')) {
-                        c(JSON.parse(text3));
-                        return;
+                // ── Attempt 2: If we got redirected somewhere, try fetching that final URL again ──
+                // resp1.url contains the actual URL after redirects were followed
+                if (resp1.url && resp1.url !== url && resp1.url.includes('googleusercontent.com')) {
+                    console.log('[bg] Attempt 2: re-fetching final URL:', resp1.url);
+                    var resp2 = await fetch(resp1.url, { method: 'GET', redirect: 'follow' });
+                    var text2 = await resp2.text();
+                    console.log('[bg] Attempt 2: status=' + resp2.status + ' body:', text2.substring(0, 200));
+                    if (isJSON(text2)) {
+                        var parsed2 = tryParse(text2);
+                        if (parsed2) { c(parsed2); return; }
                     }
                 }
 
-                // ── Attempt 3: Fetch with no Accept header ──
-                console.log('[bg] Attempt 3: fetch with no special headers...');
-                var resp4 = await fetch(url, { method: 'GET', redirect: 'follow' });
-                var text4 = await resp4.text();
-                console.log('[bg] Attempt 3 response (status ' + resp4.status + '):', text4.substring(0, 300));
-
-                if (text4.trim().startsWith('{') || text4.trim().startsWith('[')) {
-                    c(JSON.parse(text4));
-                    return;
+                // ── Attempt 3: Construct the googleusercontent.com URL directly ──
+                // Google Apps Script pattern:
+                // Input:  https://script.google.com/macros/s/{DEPLOYMENT_ID}/exec?params
+                // Output: https://script.googleusercontent.com/macros/echo?user_content_key=...
+                // 
+                // Alternative known pattern - just change the domain:
+                // https://script.googleusercontent.com/macros/s/{DEPLOYMENT_ID}/exec?params
+                var userContentUrl = url.replace(
+                    'script.google.com',
+                    'script.googleusercontent.com'
+                );
+                console.log('[bg] Attempt 3: trying googleusercontent.com URL:', userContentUrl);
+                var resp3 = await fetch(userContentUrl, { method: 'GET', redirect: 'follow' });
+                var text3 = await resp3.text();
+                console.log('[bg] Attempt 3: status=' + resp3.status + ' body:', text3.substring(0, 200));
+                if (isJSON(text3)) {
+                    var parsed3 = tryParse(text3);
+                    if (parsed3) { c(parsed3); return; }
                 }
 
-                // All attempts failed
-                if (text4.includes('<!DOCTYPE') || text4.includes('<html')) {
-                    c({ success: false, error: 'Google returned HTML — ensure Apps Script is deployed as "Anyone" with no auth' });
+                // ── Attempt 4: Use XMLHttpRequest (synchronous-style in async wrapper) ──
+                // Some report XHR follows redirects differently than fetch in SW
+                console.log('[bg] Attempt 4: XMLHttpRequest fallback...');
+                var xhrResult = await new Promise(function(resolve) {
+                    try {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', url, true);
+                        xhr.setRequestHeader('Accept', 'application/json');
+                        xhr.onload = function() {
+                            console.log('[bg] XHR status:', xhr.status, 'response:', (xhr.responseText || '').substring(0, 200));
+                            resolve(xhr.responseText || '');
+                        };
+                        xhr.onerror = function() {
+                            console.log('[bg] XHR error');
+                            resolve('');
+                        };
+                        xhr.ontimeout = function() {
+                            console.log('[bg] XHR timeout');
+                            resolve('');
+                        };
+                        xhr.timeout = 15000;
+                        xhr.send();
+                    } catch(e) {
+                        console.log('[bg] XHR exception:', e.message);
+                        resolve('');
+                    }
+                });
+                if (isJSON(xhrResult)) {
+                    var parsed4 = tryParse(xhrResult);
+                    if (parsed4) { c(parsed4); return; }
+                }
+
+                // ── All attempts failed ──
+                var lastBody = text1 || text3 || xhrResult || '';
+                if (lastBody.includes('<!DOCTYPE') || lastBody.includes('<html')) {
+                    // Extract useful info from HTML if possible
+                    var titleMatch = lastBody.match(/<title>([^<]*)<\/title>/i);
+                    var pageTitle = titleMatch ? titleMatch[1] : 'unknown page';
+                    c({ success: false, error: 'Got HTML page ("' + pageTitle + '") instead of JSON. The Apps Script redirect is not being followed. Check deployment settings.' });
                 } else {
-                    c({ success: false, error: 'Non-JSON response: ' + (text4 || text || '').substring(0, 100) });
+                    c({ success: false, error: 'Non-JSON response: ' + lastBody.substring(0, 120) });
                 }
             } catch(err) {
                 console.error('[bg] License fetch error:', err);
