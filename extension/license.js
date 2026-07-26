@@ -1,23 +1,46 @@
 /**
- * license.js — CoderSnap License Key + Email Binding
+ * license.js — CoderSnap Online License Verification
  * 
- * How it works:
- * - User enters a license key + their Amazon email
- * - Key is validated algorithmically (CS prefix + checksum)
- * - Key gets permanently bound to that email address
- * - If the extension detects a DIFFERENT email being used, it blocks scanning
- * - One key = one Amazon account forever
+ * Flow:
+ * 1. User enters license key + Amazon email in popup
+ * 2. Extension calls Google Apps Script API to ACTIVATE (binds key + email + device)
+ * 3. On every popup open, extension calls API to VERIFY (checks key/email/device match)
+ * 4. If verification fails → extension is locked
+ * 5. One key = one email = one device = forever
+ * 
+ * YOU MUST SET THE LICENSE_SERVER_URL below after deploying the Google Apps Script.
  */
 
 (function() {
     'use strict';
 
-    // ── Normalize key format ──
-    function normalizeKey(key) {
-        return key.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    // ══════════════════════════════════════════════════════════════════
+    // ██  PASTE YOUR GOOGLE APPS SCRIPT DEPLOYED URL HERE  ██
+    // ══════════════════════════════════════════════════════════════════
+    const LICENSE_SERVER_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+    // ══════════════════════════════════════════════════════════════════
+
+    // ── Device fingerprint: unique per Chrome profile ──
+    function getDeviceId() {
+        // Combine extension ID + screen + hardware for uniqueness
+        var parts = [
+            chrome.runtime.id || 'x',
+            screen.width + 'x' + screen.height,
+            screen.colorDepth || 0,
+            navigator.hardwareConcurrency || 0,
+            navigator.language || 'en'
+        ];
+        // Simple hash
+        var str = parts.join('|');
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash = hash & hash; // Convert to 32bit int
+        }
+        return 'D' + Math.abs(hash).toString(36).toUpperCase();
     }
 
-    // ── Format key with dashes ──
+    // ── Format key with dashes as user types ──
     function formatKey(raw) {
         const clean = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
         const parts = [];
@@ -27,65 +50,77 @@
         return parts.join('-');
     }
 
-    // ── Validate a license key algorithmically ──
-    function validateKeySync(key) {
-        const normalized = normalizeKey(key);
-        if (normalized.length !== 20) return false;
-        if (!normalized.startsWith('CS')) return false;
+    // ── Call the license server ──
+    async function callServer(action, key, email) {
+        const deviceId = getDeviceId();
+        const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const cleanEmail = email.toLowerCase().trim();
         
-        const payload = normalized.substring(0, 18);
-        const checksum = normalized.substring(18, 20);
-        
-        let sum = 0;
-        for (let i = 0; i < payload.length; i++) {
-            sum = (sum + payload.charCodeAt(i) * (i + 1)) & 0xFFFF;
+        const url = LICENSE_SERVER_URL
+            + '?action=' + encodeURIComponent(action)
+            + '&key=' + encodeURIComponent(cleanKey)
+            + '&email=' + encodeURIComponent(cleanEmail)
+            + '&device=' + encodeURIComponent(deviceId);
+
+        try {
+            const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+            if (!resp.ok) return { success: false, error: 'Server error: ' + resp.status };
+            // Google Apps Script redirects — follow manually if needed
+            const data = await resp.json();
+            return data;
+        } catch (err) {
+            return { success: false, error: 'Network error: ' + err.message };
         }
-        const expected = ((sum % 676) + 10).toString(36).toUpperCase().padStart(2, '0');
-        
-        return checksum === expected;
     }
 
-    // ── Check if license is already activated (with email) ──
-    async function getLicenseData() {
+    // ── Check stored license against server ──
+    async function verifyStoredLicense() {
         return new Promise(function(resolve) {
-            chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_date'], function(data) {
-                resolve(data);
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email'], async function(data) {
+                if (!data['__cs_license_key'] || !data['__cs_license_email']) {
+                    resolve({ valid: false, error: 'No license stored' });
+                    return;
+                }
+                
+                const result = await callServer('verify', data['__cs_license_key'], data['__cs_license_email']);
+                
+                if (result.success && result.valid) {
+                    resolve({ valid: true });
+                } else {
+                    resolve({ valid: false, error: result.error || 'Verification failed' });
+                }
             });
         });
     }
 
-    // ── Check if license is active and bound to an email ──
-    async function isLicenseActive() {
-        const data = await getLicenseData();
-        if (!data['__cs_license_key'] || !data['__cs_license_email']) {
-            return false;
-        }
-        // Re-validate the key
-        return validateKeySync(data['__cs_license_key']);
-    }
-
-    // ── Get the licensed email ──
-    async function getLicensedEmail() {
-        const data = await getLicenseData();
-        return data['__cs_license_email'] || null;
-    }
-
-    // ── Activate license with email binding ──
+    // ── Activate a new license ──
     async function activateLicense(key, email) {
-        if (!validateKeySync(key)) return { success: false, error: 'Invalid license key' };
-        if (!email || !email.includes('@')) return { success: false, error: 'Enter a valid email' };
-
-        const normalized = normalizeKey(key);
-        const normalizedEmail = email.trim().toLowerCase();
-
-        await new Promise(function(resolve) {
-            chrome.storage.local.set({
-                '__cs_license_key': normalized,
-                '__cs_license_email': normalizedEmail,
-                '__cs_license_date': new Date().toISOString()
-            }, resolve);
-        });
-        return { success: true };
+        const result = await callServer('activate', key, email);
+        
+        if (result.success) {
+            // Store locally
+            const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const cleanEmail = email.toLowerCase().trim();
+            
+            await new Promise(function(resolve) {
+                chrome.storage.local.set({
+                    '__cs_license_key': cleanKey,
+                    '__cs_license_email': cleanEmail,
+                    '__cs_license_device': getDeviceId(),
+                    '__cs_license_date': new Date().toISOString(),
+                    '__cs_license_valid': true
+                }, resolve);
+            });
+            
+            // Also set the Amazon email for the extension
+            await new Promise(function(resolve) {
+                chrome.storage.local.set({ '__un': cleanEmail }, resolve);
+            });
+            
+            return { success: true };
+        } else {
+            return { success: false, error: result.error || 'Activation failed' };
+        }
     }
 
     // ── UI Logic: Show gate or main app ──
@@ -95,88 +130,146 @@
         
         if (!gate || !app) return;
 
-        const active = await isLicenseActive();
-        
-        if (active) {
+        // Check if we have a stored license
+        const stored = await new Promise(function(resolve) {
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email'], resolve);
+        });
+
+        if (stored['__cs_license_key'] && stored['__cs_license_email']) {
+            // Has stored license — verify online
             gate.style.display = 'none';
             app.style.display = 'block';
+
+            // Show a brief "verifying..." state
+            const badge = document.getElementById('access-badge');
+            if (badge) {
+                badge.style.display = 'inline-block';
+                badge.innerHTML = '&#8635; Verifying...';
+                badge.style.cssText = 'display:inline-block;background:rgba(99,102,241,0.12);'
+                    + 'color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);font-size:8px;font-weight:600;'
+                    + 'letter-spacing:1px;padding:2px 8px;border-radius:10px;';
+            }
+
+            const verification = await verifyStoredLicense();
+            
+            if (verification.valid) {
+                // Show LICENSED badge
+                if (badge) {
+                    badge.innerHTML = '&#10024; LICENSED';
+                    badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#16f5ff,#a341ff);'
+                        + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
+                        + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(22,245,255,0.4);';
+                }
+                // Mark as valid for fetch.js
+                chrome.storage.local.set({ '__cs_license_valid': true });
+            } else {
+                // License invalid — show error and lock
+                if (badge) {
+                    badge.innerHTML = '&#128274; ' + (verification.error || 'INVALID');
+                    badge.style.cssText = 'display:inline-block;background:rgba(239,68,68,0.15);'
+                        + 'color:#f87171;border:1px solid rgba(239,68,68,0.35);font-size:8px;font-weight:800;'
+                        + 'letter-spacing:1px;padding:2px 8px;border-radius:10px;';
+                }
+                // Mark as invalid — fetch.js will not scan
+                chrome.storage.local.set({ '__cs_license_valid': false });
+                
+                // If it's a device/email mismatch, clear stored data and show gate
+                if (verification.error && (verification.error.includes('mismatch') || verification.error.includes('revoked'))) {
+                    chrome.storage.local.remove(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_valid']);
+                    gate.style.display = 'block';
+                    app.style.display = 'none';
+                }
+            }
         } else {
+            // No license — show activation gate
             gate.style.display = 'block';
             app.style.display = 'none';
-            
-            // Auto-format key input as user types
-            const keyInput = document.getElementById('license-key-input');
-            if (keyInput) {
-                keyInput.addEventListener('input', function() {
-                    const raw = this.value.replace(/[^A-Za-z0-9]/g, '');
-                    this.value = formatKey(raw);
-                });
-            }
+        }
+        
+        // ── Gate UI event handlers ──
+        setupGateUI(gate, app);
+    }
 
-            // Activate button
-            const btn = document.getElementById('activate-license-btn');
-            if (btn) {
-                btn.addEventListener('click', async function() {
-                    const keyEl = document.getElementById('license-key-input');
-                    const emailEl = document.getElementById('license-email-input');
-                    const okBadge = document.getElementById('license_ok');
-                    const errBadge = document.getElementById('license_err');
-                    
-                    const key = (keyEl ? keyEl.value.trim() : '');
-                    const email = (emailEl ? emailEl.value.trim() : '');
-
-                    if (!key) {
-                        showError(errBadge, okBadge, 'Enter your license key');
-                        return;
-                    }
-                    if (!email || !email.includes('@')) {
-                        showError(errBadge, okBadge, 'Enter your Amazon email');
-                        return;
-                    }
-
-                    btn.textContent = 'Validating...';
-                    btn.disabled = true;
-
-                    const result = await activateLicense(key, email);
-                    
-                    if (result.success) {
-                        if (okBadge) okBadge.style.display = 'flex';
-                        if (errBadge) errBadge.style.display = 'none';
-                        btn.textContent = '✓ Activated!';
-                        btn.style.background = 'linear-gradient(135deg, #4ade80, #22d3ee)';
-                        
-                        // Also store the email as the Amazon account email
-                        chrome.storage.local.set({ '__un': email.trim().toLowerCase() });
-
-                        setTimeout(function() {
-                            gate.style.display = 'none';
-                            app.style.display = 'block';
-                        }, 1000);
-                    } else {
-                        showError(errBadge, okBadge, result.error || 'Invalid License Key');
-                        btn.textContent = 'Activate License';
-                        btn.disabled = false;
-                        
-                        // Shake animation
-                        if (keyEl) {
-                            keyEl.style.animation = 'none';
-                            keyEl.offsetHeight;
-                            keyEl.style.animation = 'shake 0.4s ease';
-                        }
-                    }
-                });
-            }
-
-            // Allow Enter key to submit
-            const inputs = document.querySelectorAll('#license-key-input, #license-email-input');
-            inputs.forEach(function(el) {
-                el.addEventListener('keyup', function(e) {
-                    if (e.key === 'Enter') {
-                        document.getElementById('activate-license-btn').click();
-                    }
-                });
+    function setupGateUI(gate, app) {
+        // Auto-format key input
+        const keyInput = document.getElementById('license-key-input');
+        if (keyInput) {
+            keyInput.addEventListener('input', function() {
+                const raw = this.value.replace(/[^A-Za-z0-9]/g, '');
+                this.value = formatKey(raw);
             });
         }
+
+        // Activate button
+        const btn = document.getElementById('activate-license-btn');
+        if (btn) {
+            btn.addEventListener('click', async function() {
+                const keyEl = document.getElementById('license-key-input');
+                const emailEl = document.getElementById('license-email-input');
+                const okBadge = document.getElementById('license_ok');
+                const errBadge = document.getElementById('license_err');
+                
+                const key = (keyEl ? keyEl.value.trim() : '');
+                const email = (emailEl ? emailEl.value.trim() : '');
+
+                if (!key || key.replace(/-/g, '').length < 5) {
+                    showError(errBadge, okBadge, 'Enter your license key');
+                    return;
+                }
+                if (!email || !email.includes('@')) {
+                    showError(errBadge, okBadge, 'Enter your Amazon email');
+                    return;
+                }
+
+                btn.textContent = 'Verifying online...';
+                btn.disabled = true;
+                if (errBadge) errBadge.style.display = 'none';
+
+                const result = await activateLicense(key, email);
+                
+                if (result.success) {
+                    if (okBadge) okBadge.style.display = 'flex';
+                    if (errBadge) errBadge.style.display = 'none';
+                    btn.textContent = '✓ Activated!';
+                    btn.style.background = 'linear-gradient(135deg, #4ade80, #22d3ee)';
+                    
+                    setTimeout(function() {
+                        gate.style.display = 'none';
+                        app.style.display = 'block';
+                        // Show licensed badge
+                        const badge = document.getElementById('access-badge');
+                        if (badge) {
+                            badge.style.display = 'inline-block';
+                            badge.innerHTML = '&#10024; LICENSED';
+                            badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#16f5ff,#a341ff);'
+                                + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
+                                + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(22,245,255,0.4);';
+                        }
+                    }, 1200);
+                } else {
+                    showError(errBadge, okBadge, result.error || 'Activation failed');
+                    btn.textContent = 'Activate License';
+                    btn.disabled = false;
+                    
+                    // Shake
+                    if (keyEl) {
+                        keyEl.style.animation = 'none';
+                        keyEl.offsetHeight;
+                        keyEl.style.animation = 'shake 0.4s ease';
+                    }
+                }
+            });
+        }
+
+        // Enter key to submit
+        const inputs = document.querySelectorAll('#license-key-input, #license-email-input');
+        inputs.forEach(function(el) {
+            el.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('activate-license-btn').click();
+                }
+            });
+        });
     }
 
     function showError(errBadge, okBadge, msg) {

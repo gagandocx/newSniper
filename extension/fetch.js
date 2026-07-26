@@ -1,26 +1,22 @@
 (async function (a) {
-    // ── LICENSE + EMAIL CHECK — Block scanning if no valid license or wrong email ──
+    // ── ONLINE LICENSE CHECK — Extension won't work without verified license ──
     var _csLicenseOk = false;
     var _csLicensedEmail = null;
-    async function _checkLicense() {
+
+    async function _checkLicenseOnline() {
         return new Promise(function(resolve) {
-            chrome.storage.local.get(['__cs_license_key', '__cs_license_email'], function(data) {
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_valid', '__cs_license_device'], function(data) {
                 if (!data['__cs_license_key'] || !data['__cs_license_email']) {
                     resolve(false); return;
                 }
-                // Validate key algorithmically
-                var key = data['__cs_license_key'];
-                if (key.length !== 20 || !key.startsWith('CS')) { resolve(false); return; }
-                var payload = key.substring(0, 18);
-                var checksum = key.substring(18, 20);
-                var sum = 0;
-                for (var i = 0; i < payload.length; i++) {
-                    sum = (sum + payload.charCodeAt(i) * (i + 1)) & 0xFFFF;
+                // Use the cached validity from last popup verification
+                // The popup (license.js) does the online check and stores __cs_license_valid
+                if (data['__cs_license_valid'] === true) {
+                    _csLicensedEmail = data['__cs_license_email'].toLowerCase().trim();
+                    resolve(true);
+                } else {
+                    resolve(false);
                 }
-                var expected = ((sum % 676) + 10).toString(36).toUpperCase().padStart(2, '0');
-                if (checksum !== expected) { resolve(false); return; }
-                _csLicensedEmail = data['__cs_license_email'].toLowerCase().trim();
-                resolve(true);
             });
         });
     }
@@ -52,10 +48,10 @@
         }, 10000);
     }
 
-    _csLicenseOk = await _checkLicense();
+    _csLicenseOk = await _checkLicenseOnline();
     if (!_csLicenseOk) {
-        console.log('[CoderSnap] No valid license — scanning disabled');
-        return;
+        console.log('[CoderSnap] No valid license — scanning disabled. Activate in the popup.');
+        return; // Exit entire content script
     }
     _enforceEmailBinding();
     // ─────────────────────────────────────────────────────────────────────────

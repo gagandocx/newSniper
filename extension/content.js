@@ -344,16 +344,7 @@ document['addEventListener']('DOMContentLoaded', async function () {
         }
     });
 
-    // ── Access badge — UNLIMITED: always show PREMIUM ──
-    (function() {
-        const badge = document['getElementById']('access-badge');
-        if (!badge) return;
-        badge['style']['display'] = 'inline-block';
-        badge['innerHTML'] = '&#10024; UNLIMITED';
-        badge['style']['cssText'] = 'display:inline-block;background:linear-gradient(135deg,#16f5ff,#a341ff);'
-            + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
-            + 'border-radius:10px;text-transform:uppercase;box-shadow:0 0 8px rgba(22,245,255,0.4);';
-    })();
+    // ── Access badge — handled by license.js online verification ──
     // ─────────────────────────────────────────────────────────────
 
 
