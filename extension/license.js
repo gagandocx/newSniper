@@ -62,19 +62,26 @@
             + '&email=' + encodeURIComponent(cleanEmail)
             + '&device=' + encodeURIComponent(deviceId);
 
+        console.log('[license] callServer:', action, '→', url.substring(0, 80) + '...');
+
         try {
             // Route through background.js service worker (no CORS/redirect issues)
-            const result = await new Promise(function(resolve) {
+            const result = await new Promise(function(resolve, reject) {
+                console.log('[license] Sending message to background...');
                 chrome.runtime.sendMessage({ action: 'licenseRequest', url: url }, function(response) {
+                    console.log('[license] Got response from background:', JSON.stringify(response));
                     if (chrome.runtime.lastError) {
+                        console.error('[license] runtime.lastError:', chrome.runtime.lastError.message);
                         resolve({ success: false, error: chrome.runtime.lastError.message });
                     } else {
                         resolve(response || { success: false, error: 'No response from background' });
                     }
                 });
             });
+            console.log('[license] callServer result:', JSON.stringify(result));
             return result;
         } catch (err) {
+            console.error('[license] callServer exception:', err);
             return { success: false, error: err.message || 'Network error' };
         }
     }
@@ -210,6 +217,7 @@
         const btn = document.getElementById('activate-license-btn');
         if (btn) {
             btn.addEventListener('click', async function() {
+                console.log('[license] Activate button clicked!');
                 const keyEl = document.getElementById('license-key-input');
                 const emailEl = document.getElementById('license-email-input');
                 const okBadge = document.getElementById('license_ok');
