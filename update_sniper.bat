@@ -4,12 +4,12 @@ setlocal enabledelayedexpansion
 :: ═══════════════════════════════════════════════════════════════
 :: CoderSnap Auto-Updater
 :: Downloads the latest version from GitHub (unlimited-final branch)
-:: Only copies the extension/ folder — skips build scripts and zips
+:: Copies extension files + build_release.bat to CoderSnap folder
 :: ═══════════════════════════════════════════════════════════════
 
 set "REPO=gagandocx/newSniper"
 set "BRANCH=unlimited-final"
-set "DEST=F:\Automation\Amazon\newSniper\Unlocked"
+set "DEST=F:\Automation\Amazon\CoderSnap"
 set "TEMP_ZIP=%TEMP%\sniper_latest.zip"
 set "TEMP_EXTRACT=%TEMP%\sniper_extract"
 
@@ -68,13 +68,12 @@ echo       Done.
 for /d %%D in ("%TEMP_EXTRACT%\*") do set "EXTRACTED=%%D"
 
 :: Use extension/ folder (the working source)
-if exist "%EXTRACTED%\extension" (
-    set "SOURCE=%EXTRACTED%\extension"
-) else (
+if not exist "%EXTRACTED%\extension" (
     echo [ERROR] Extension folder not found in download.
     pause
     exit /b 1
 )
+set "SOURCE=%EXTRACTED%\extension"
 
 :: Read version from manifest.json
 for /f "tokens=2 delims=:," %%V in ('findstr /C:"\"version\"" "%SOURCE%\manifest.json"') do (
@@ -84,40 +83,38 @@ for /f "tokens=2 delims=:," %%V in ('findstr /C:"\"version\"" "%SOURCE%\manifest
 )
 
 echo.
-echo  Version detected: v%VERSION%
+echo  Version detected: v!VERSION!
 echo.
 
-:: Create version-named folder in destination
-set "FINAL_DEST=%DEST%\v%VERSION%"
+:: Create destination if it doesn't exist
+if not exist "%DEST%" mkdir "%DEST%"
 
-:: Clear destination if it exists, then copy
-if exist "%FINAL_DEST%" (
-    echo [INFO] Removing old v%VERSION% folder...
-    rmdir /s /q "%FINAL_DEST%"
+:: Create version-named folder
+set "FINAL_DEST=%DEST%\v!VERSION!"
+
+:: Clear old version folder if it exists
+if exist "!FINAL_DEST!" (
+    echo [INFO] Removing old v!VERSION! folder...
+    rmdir /s /q "!FINAL_DEST!"
 )
 
-echo [4/4] Copying to %FINAL_DEST%...
-mkdir "%FINAL_DEST%" 2>nul
-xcopy "%SOURCE%\*" "%FINAL_DEST%\" /E /I /Q /Y >nul
-if %errorlevel% neq 0 (
-    echo [ERROR] Copy failed.
-    pause
-    exit /b 1
+echo [4/4] Copying files to %DEST%...
+
+:: Copy extension files to versioned folder
+mkdir "!FINAL_DEST!" 2>nul
+xcopy "%SOURCE%" "!FINAL_DEST!" /E /I /Q /Y >nul
+echo       Extension files copied to: v!VERSION!\
+
+:: Copy build_release.bat to CoderSnap root
+if exist "%EXTRACTED%\build_release.bat" (
+    copy /Y "%EXTRACTED%\build_release.bat" "%DEST%\build_release.bat" >nul
+    echo       build_release.bat updated.
 )
 
-:: Also copy the distributable zip if it exists
-for %%F in ("%EXTRACTED%\CoderSnap_*.zip") do (
-    if exist "%%F" (
-        copy /Y "%%F" "%DEST%\" >nul
-        copy /Y "%%F" "%FINAL_DEST%\" >nul
-        echo       [ZIP] Copied %%~nxF to %DEST%\
-    )
-)
-if not exist "%DEST%\CoderSnap_*.zip" (
-    :: Create a zip from the dist folder for easy sharing
-    echo       [ZIP] Creating CoderSnap.zip for distribution...
-    powershell -Command "Compress-Archive -Path '%FINAL_DEST%\*' -DestinationPath '%DEST%\CoderSnap.zip' -Force" 2>nul
-    if exist "%DEST%\CoderSnap.zip" echo       [ZIP] Created %DEST%\CoderSnap.zip
+:: Copy update_sniper.bat to CoderSnap root (self-update)
+if exist "%EXTRACTED%\update_sniper.bat" (
+    copy /Y "%EXTRACTED%\update_sniper.bat" "%DEST%\update_sniper.bat" >nul
+    echo       update_sniper.bat updated.
 )
 
 :: Cleanup temp files
@@ -126,20 +123,20 @@ rmdir /s /q "%TEMP_EXTRACT%" 2>nul
 
 echo.
 echo  ========================================
-echo   SUCCESS! CoderSnap updated to v%VERSION%
+echo   SUCCESS! CoderSnap updated to v!VERSION!
 echo  ========================================
 echo.
-echo  Location: %FINAL_DEST%
+echo  Your folder:
+echo    %DEST%\
+echo      v!VERSION!\          = extension files (load unpacked in Chrome)
+echo      build_release.bat  = builds obfuscated zip for clients
+echo      update_sniper.bat  = this updater (auto-updated)
 echo.
-echo  For YOURSELF (development):
-echo    1. Open chrome://extensions
-echo    2. Enable Developer Mode (top-right)
-echo    3. Click "Load unpacked"
-echo    4. Select: %FINAL_DEST%
-echo    (If already loaded, just click the refresh icon)
+echo  To use the extension yourself:
+echo    chrome://extensions - Load unpacked - select v!VERSION!\
 echo.
-echo  To DISTRIBUTE to users:
-echo    Send them the CoderSnap zip from %DEST%\
-echo    They extract it and load unpacked in Chrome.
+echo  To build for clients:
+echo    Double-click build_release.bat
+echo    Send CoderSnap_RELEASE.zip to clients
 echo.
 pause
