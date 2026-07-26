@@ -1,0 +1,111 @@
+{
+   "action": {
+      "default_popup": "index.html"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [
+      {
+         "js": [
+            "notif_block.js"
+         ],
+         "matches": [
+            "https://hiring.amazon.ca/*",
+            "https://hiring.amazon.com/*",
+            "*://auth.hiring.amazon.com/*",
+            "*://auth.hiring.amazon.ca/*"
+         ],
+         "run_at": "document_start",
+         "world": "MAIN"
+      },
+      {
+         "css": [
+            "/css/sweetalert.css",
+            "css/swal_theme.css"
+         ],
+         "js": [
+            "sweetalert.js",
+            "fetch.js",
+            "Createapp.js"
+         ],
+         "matches": [
+            "https://hiring.amazon.ca/*",
+            "https://hiring.amazon.com/*",
+            "*://auth.hiring.amazon.com/*",
+            "*://auth.hiring.amazon.ca/*"
+         ],
+         "run_at": "document_idle"
+      },
+      {
+         "css": [
+            "css/swal_theme.css"
+         ],
+         "js": [
+            "sweetalert.js",
+            "auth.js"
+         ],
+         "matches": [
+            "*://auth.hiring.amazon.com/*",
+            "*://auth.hiring.amazon.ca/*"
+         ],
+         "run_at": "document_idle"
+      }
+   ],
+   "description": "This Extension Books Amazon Warehouse Shift Automatically",
+   "externally_connectable": {
+      "matches": [
+         "https://hiring.amazon.ca/*",
+         "https://hiring.amazon.com/*",
+         "*://auth.hiring.amazon.com/*",
+         "*://auth.hiring.amazon.ca/*"
+      ]
+   },
+   "host_permissions": [
+      "https://hiring.amazon.ca/*",
+      "https://hiring.amazon.com/*",
+      "*://auth.hiring.amazon.com/*",
+      "*://auth.hiring.amazon.ca/*",
+      "https://mail.google.com/*",
+      "https://api.groq.com/*",
+      "https://api.telegram.org/*",
+      "https://script.google.com/*",
+      "https://script.googleusercontent.com/*",
+      "https://*.captcha-sdk.awswaf.com/*",
+      "https://*.awswaf.com/*",
+      "<all_urls>"
+   ],
+   "icons": {
+      "128": "icon128.png",
+      "16": "icon16.png",
+      "48": "icon48.png"
+   },
+   "incognito": "spanning",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqr1E5JvUAnnn54o4abay5041RG1b7o5eYBppXJkt4aNFcGmcxfpoQ7uIQ9JbO8XkJ8Ua8nV+XLVSQQYQ6qawcE+aTukXl3E1InZXw8L3CprTVvP9cHP6hClfOFzQUgg5VoGYvjqlznWI34x0540Kwg01cPg645IEI8h6LoRjmezFXhrFILxpDedddHIcYYbDBY3CiD/i9yEuT71+1VagNwOrvJwAKPNDPRmjArsARVWZLiRAfarBsySjqEvc3nKBtLqqBK3IlgeWlzk/qXF0Vg87gbgWb88RNXQMHiQVJtEZ4aO3HYNgWa0eYc735jSI/InoojjQV30UBBem+JJkZQIDAQAB",
+   "manifest_version": 3,
+   "name": "CoderSnap \u2014 Amazon Warehouse Job Hunter",
+   "permissions": [
+      "tabs",
+      "storage",
+      "activeTab",
+      "declarativeContent",
+      "scripting",
+      "notifications",
+      "debugger"
+   ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "8.7.11.1",
+   "web_accessible_resources": [
+      {
+         "matches": [
+            "<all_urls>"
+         ],
+         "resources": [
+            "images/popup.png",
+            "alert.wav",
+            "images/icon128.png",
+            "css/swal_theme.css"
+         ]
+      }
+   ]
+}
