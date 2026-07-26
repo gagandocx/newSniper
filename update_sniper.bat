@@ -112,7 +112,11 @@ if %errorlevel% neq 0 (
 :: Also copy CoderSnap.crx to destination if it exists
 if exist "%EXTRACTED%\CoderSnap.crx" (
     copy /Y "%EXTRACTED%\CoderSnap.crx" "%DEST%\CoderSnap.crx" >nul
-    echo       Also copied CoderSnap.crx to %DEST%\
+    copy /Y "%EXTRACTED%\CoderSnap.crx" "%FINAL_DEST%\CoderSnap.crx" >nul
+    echo       [CRX] Copied CoderSnap.crx to %DEST%\
+    echo       [CRX] Also in %FINAL_DEST%\CoderSnap.crx
+) else (
+    echo       [NOTE] CoderSnap.crx not found in download
 )
 
 :: Cleanup temp files
