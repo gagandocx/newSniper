@@ -355,17 +355,76 @@ document['addEventListener']('DOMContentLoaded', async function () {
     })();
     // ─────────────────────────────────────────────────────────────
 
-    // ── Guide Button ─────────────────────────────────────────────
+    // ── Guide Button — shows guide directly in popup ─────────────
     const _guideBtn = document['getElementById']('guide-btn');
     if (_guideBtn) {
         _guideBtn['addEventListener']('click', function(e) {
             e['preventDefault']();
-            // Send message to Amazon page content script to show guide there
-            chrome['tabs']['query']({ 'active': true, 'currentWindow': true }, function(tabs) {
-                if (tabs[0] && tabs[0]['url'] && tabs[0]['url']['includes']('hiring.amazon')) {
-                    chrome['tabs']['sendMessage'](tabs[0]['id'], { 'action': 'showGuide' });
-                    window.close();
-                }
+            if (typeof Swal === 'undefined') return;
+            Swal['fire']({
+                'title': '',
+                'html': '<div style="font-family:Inter,sans-serif;">' +
+  '<div style="background:linear-gradient(135deg,rgba(34,211,168,0.12),rgba(59,130,246,0.12));border-radius:14px;padding:16px 18px;margin-bottom:14px;border:1px solid rgba(34,211,168,0.2);text-align:center;">' +
+    '<div style="font-size:26px;margin-bottom:4px;">🎯</div>' +
+    '<div style="font-size:18px;font-weight:800;color:#e2e8f0;">How to Get Shifts Fast</div>' +
+    '<div style="font-size:12px;color:rgba(199,210,254,0.55);margin-top:3px;">CoderSnap Setup Guide</div>' +
+  '</div>' +
+  '<div style="background:rgba(34,211,168,0.05);border-left:3px solid #22d3a8;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:10px;text-align:left;">' +
+    '<div style="font-weight:800;color:#22d3a8;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;">🌍 REGION — Search Center</div>' +
+    '<div style="font-size:12.5px;color:rgba(199,210,254,0.85);line-height:1.65;">Pick the <b style="color:#e2e8f0;">city closest to where you want to work</b>. Amazon searches jobs near its GPS coordinates.</div>' +
+    '<div style="margin-top:7px;background:rgba(0,0,0,0.3);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:11px;color:rgba(199,210,254,0.6);">REGION: Toronto ▼ &nbsp;|&nbsp; RADIUS: 150km ▼ &nbsp;|&nbsp; Any ▼</div>' +
+  '</div>' +
+  '<div style="background:rgba(59,130,246,0.05);border-left:3px solid #3b82f6;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:10px;text-align:left;">' +
+    '<div style="font-weight:800;color:#93c5fd;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;">🏙️ TARGET CITIES — Result Filter</div>' +
+    '<div style="font-size:12.5px;color:rgba(199,210,254,0.85);line-height:1.65;">Filters which jobs get applied to. <b style="color:#4ade80;">Any City ✓</b> = apply to everything in the radius.</div>' +
+    '<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;">' +
+      '<span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);padding:3px 9px;border-radius:20px;font-size:11px;color:#93c5fd;">Bolton ×</span>' +
+      '<span style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);padding:3px 9px;border-radius:20px;font-size:11px;color:#93c5fd;">Whitby ×</span>' +
+      '<span style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);padding:3px 9px;border-radius:20px;font-size:11px;color:#4ade80;">Any City ✓</span>' +
+    '</div>' +
+  '</div>' +
+  '<div style="background:rgba(34,197,94,0.05);border-left:3px solid #22c55e;border-radius:0 10px 10px 0;padding:11px 14px;margin-bottom:10px;text-align:left;">' +
+    '<div style="font-weight:800;color:#4ade80;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;">⚙️ HOW IT WORKS</div>' +
+    '<div style="font-size:12px;color:rgba(199,210,254,0.7);line-height:2;background:rgba(0,0,0,0.25);border-radius:8px;padding:9px 12px;">' +
+      '<span style="color:#22d3a8;font-weight:700;">REGION</span> Toronto + <span style="color:#3b82f6;font-weight:700;">RADIUS</span> 50km + <span style="color:#4ade80;font-weight:700;">CITIES</span> Any<br>' +
+      '↓ Amazon returns jobs within 50km of Toronto<br>' +
+      '↓ Extension applies to <b style="color:#4ade80;">ALL jobs found ✓</b>' +
+    '</div>' +
+  '</div>' +
+  '<div style="background:linear-gradient(135deg,rgba(251,146,60,0.08),rgba(251,146,60,0.03));border:1px solid rgba(251,146,60,0.25);border-radius:10px;padding:12px 14px;text-align:left;">' +
+    '<div style="font-weight:800;color:#fb923c;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px;">⚡ BEST SETTINGS FOR FASTEST RESULTS</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">' +
+      '<div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:7px 10px;">' +
+        '<div style="color:rgba(199,210,254,0.4);font-size:10px;margin-bottom:2px;">REGION</div>' +
+        '<div style="font-weight:700;color:#e2e8f0;font-size:12.5px;">Nearest city</div>' +
+      '</div>' +
+      '<div style="background:rgba(0,0,0,0.25);border-radius:8px;padding:7px 10px;">' +
+        '<div style="color:rgba(199,210,254,0.4);font-size:10px;margin-bottom:2px;">RADIUS</div>' +
+        '<div style="font-weight:700;color:#e2e8f0;font-size:12.5px;">50–150 km</div>' +
+      '</div>' +
+      '<div style="background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);border-radius:8px;padding:7px 10px;">' +
+        '<div style="color:rgba(199,210,254,0.4);font-size:10px;margin-bottom:2px;">TARGET CITIES</div>' +
+        '<div style="font-weight:700;color:#4ade80;font-size:12.5px;">Any City ✓</div>' +
+      '</div>' +
+      '<div style="background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.3);border-radius:8px;padding:7px 10px;">' +
+        '<div style="color:rgba(199,210,254,0.4);font-size:10px;margin-bottom:2px;">SCAN INTERVAL</div>' +
+        '<div style="font-weight:700;color:#fb923c;font-size:12.5px;">2 seconds ⚡</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="background:rgba(0,0,0,0.2);border-radius:7px;padding:8px 11px;font-size:11.5px;color:rgba(199,210,254,0.6);">' +
+      '⚡ <b style="color:#fb923c;">2 sec interval</b> = 30 checks/min = fastest possible detection.' +
+    '</div>' +
+  '</div>' +
+'</div>',
+                'showConfirmButton': true,
+                'confirmButtonText': '✕  Close Guide',
+                'showCancelButton': false,
+                'allowEscapeKey': true,
+                'allowOutsideClick': true,
+                'width': 'min(360px, 94vw)',
+                'background': '#1a2332',
+                'color': '#e2e8f0',
+                'customClass': { 'htmlContainer': 'ss-guide-body' }
             });
         });
     }
