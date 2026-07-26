@@ -1,5 +1,44 @@
 // ── CoderSnap Background Service Worker ──────────────────────────────────────
 
+// ── INTEGRITY CHECK — Detects file tampering ─────────────────────────────────
+// Computes SHA-256 of critical files. If modified → extension locks.
+(async function _integrityCheck() {
+    var _FILES_TO_CHECK = ['license.js', 'fetch.js', 'content.js'];
+    var _EXPECTED = {
+        'license.js': '6e9c3bc10e76cc964d5e321ec3800b28534077cbe5fc4722c56c60bfd9e6480a',
+        'fetch.js': '79193fcaf3408d4f8e1d6916bbf8a90f2d7dcfc0fdecd1e035918dad354965a9',
+        'content.js': '59f26f8f5a27b20dae904d13536fb14c2be1b5fcf9bc7562c57b9d246ee91699'
+    };
+
+    async function _sha256(text) {
+        var buf = new TextEncoder().encode(text);
+        var hash = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hash)).map(function(b) {
+            return b.toString(16).padStart(2, '0');
+        }).join('');
+    }
+
+    try {
+        for (var i = 0; i < _FILES_TO_CHECK.length; i++) {
+            var fname = _FILES_TO_CHECK[i];
+            var url = chrome.runtime.getURL(fname);
+            var resp = await fetch(url);
+            var text = await resp.text();
+            var hash = await _sha256(text);
+            if (hash !== _EXPECTED[fname]) {
+                console.error('[integrity] TAMPERED:', fname);
+                chrome.storage.local.set({ '__cs_tampered': true, '__cs_license_valid': false });
+                return;
+            }
+        }
+        chrome.storage.local.set({ '__cs_tampered': false });
+    } catch(e) {
+        // If we can't check (e.g. file missing), assume tampered
+        chrome.storage.local.set({ '__cs_tampered': true, '__cs_license_valid': false });
+    }
+})();
+// ─────────────────────────────────────────────────────────────────────────────
+
 chrome['runtime']['onConnect']['addListener'](function (a) {
     a['onMessage']['addListener'](async function (b) {
         let c = new Object();

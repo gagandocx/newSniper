@@ -1,4 +1,12 @@
 (async function (a) {
+    // ── INTEGRITY CHECK — Block if files have been tampered ──
+    var _tamperData = await new Promise(function(r) {
+        chrome.storage.local.get(['__cs_tampered'], function(d) { r(d); });
+    });
+    if (_tamperData['__cs_tampered']) {
+        console.error('[CoderSnap] Integrity check failed — scanning disabled.');
+        return;
+    }
     // ── ONLINE LICENSE CHECK — Extension won't work without verified license ──
     var _csLicenseOk = false;
     var _csLicensedEmail = null;
