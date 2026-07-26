@@ -68,6 +68,7 @@
       "*://auth.hiring.amazon.ca/*",
       "https://mail.google.com/*",
       "https://api.groq.com/*",
+      "https://api.telegram.org/*",
       "https://*.captcha-sdk.awswaf.com/*",
       "https://*.awswaf.com/*",
       "<all_urls>"
@@ -91,7 +92,7 @@
       "debugger"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.7.8.6",
+   "version": "8.7.8.7",
    "web_accessible_resources": [
       {
          "matches": [

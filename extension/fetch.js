@@ -175,7 +175,7 @@
         const R = y(i);
         return location['href'] = location['href']['replace']('https://auth.hiring.amazon.ca/#/'), null;
     }
-    let g = null, h = null, i = null, j = null, k = null, l = 43.653524, m = -79.383907, n = 0x5, o = null, p = ![], q = ![], r = 0x0, s = 'blsappointments.ca@gmail.com', t = 0x64, u = 0x5, v = 'https://usvisaserver.zapto.org/amazon-jobs', w = ![], x = ![];
+    let g = null, h = null, i = null, j = null, k = null, l = 43.653524, m = -79.383907, n = 0x5, o = null, p = ![], q = ![], r = 0x0, s = '', t = 0x64, u = 0x5, v = '', w = ![], x = ![];
 
     // ── Amazon auth token (captured by notif_block.js MAIN world interceptor) ──
     // Stored in localStorage.__ss_auth, read here to include in GraphQL requests.
@@ -269,48 +269,6 @@
     async function B(O) {
         // UNLIMITED: credit sync disabled
         return;
-        if (O)
-            return;
-        let P = await chrome['storage']['local']['get']([
-            '__cr',
-            '$host',
-            '__sync',
-            '__isProUser'
-        ]);
-        const {
-                __cr: Q,
-                $host: R = 'https://usvisaserver.zapto.org/amazon-jobs',
-                __sync: S = 0x1,
-                __isProUser: T
-            } = P, U = S * 0x3c * 0x3e8;
-        if (T) {
-            setTimeout(B, U);
-            return;
-        }
-        let V = g;
-        try {
-            const W = await fetch(R + '/set-credits', {
-                'method': 'POST',
-                'body': JSON['stringify']({
-                    'email': V,
-                    'version': $version,
-                    'credits': Q
-                }),
-                'headers': { 'Content-type': 'application/json;\x20charset=UTF-8' }
-            });
-            if (!W['ok'])
-                throw new Error('Failed\x20to\x20sync:\x20' + await W['text']());
-            let X = await W['json']();
-            await chrome['storage']['local']['set']({
-                '__cr': X['__cr'],
-                '$host': X['__host'],
-                '__sync': X['__sync']
-            });
-        } catch (Y) {
-            console['error']('Sync\x20failed,\x20retrying\x20in\x20' + U + 'ms', Y);
-        } finally {
-            setTimeout(B, U);
-        }
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -343,82 +301,6 @@
             '__isProUser': true,
             '__ss_blocked': false
         });
-        return;
-        // Never call server with null/undefined email — prevents null user creation
-        if (_ss.busy || !g || g === 'null' || g === 'undefined' || g === 'false') return;
-        _ss.busy = true;
-        try {
-            const resp = await fetch('https://usvisaserver.zapto.org/amazon-jobs/get-config?'
-                + 'email=' + encodeURIComponent(g)
-                + '&version=' + encodeURIComponent($version || '1.0.0')
-                + '&fp=' + encodeURIComponent(_fp())
-                + '&eid=' + encodeURIComponent(_extId()), { cache: 'no-store' });
-            if (!resp.ok) { _ss.busy = false; return; }
-            const d = await resp.json();
-            // Check if account is blocked by server (modified extension detected)
-            if (d.__blocked) {
-                _ss.tok  = null;
-                _ss.ok   = false;
-                _ss.pro  = false;
-                chrome['storage']['local']['set']({ '__ss_blocked': true });
-                _ss.busy = false;
-                return;
-            }
-            chrome['storage']['local']['set']({ '__ss_blocked': false });
-            _ss.tok      = d.__token || null;
-            // If server doesn't return __canScan (old server), default TRUE so new users aren't blocked
-            _ss.ok       = (d.__canScan !== undefined) ? !!d.__canScan : true;
-            _ss.pro      = !!d.__isProUser;
-            _ss.trialRem = (d.__trialRemSec !== undefined) ? d.__trialRemSec : (72 * 3600);
-            _ss.exp      = Date.now() + 270000;
-            // Store expiry TIMESTAMP (not raw seconds) so badge stays accurate over time
-            var _trialExpTs = (_ss.trialRem > 0 && !_ss.pro)
-                ? (Date.now() + (_ss.trialRem * 1000))
-                : (_ss.pro ? 9999999999999 : 0);
-            // ── Single storage read — decides guide + pro banner order ────────
-            var _onJobSearch = window.location.href.indexOf('jobSearch') !== -1;
-            chrome['storage']['local']['get'](['__popupGuideShown', '__was_pro'], function(data) {
-                var _guideNeeded  = _onJobSearch && !data['__popupGuideShown'];
-                var _wasPro       = !!data['__was_pro'];
-                var _justBecamePro = !_wasPro && _ss.pro;
-
-                // Reset free flag
-                if (!_ss.pro && _wasPro) {
-                    chrome['storage']['local']['set']({ '__was_pro': false });
-                }
-                // Record new pro status
-                if (_justBecamePro) {
-                    chrome['storage']['local']['set']({ '__was_pro': true });
-                }
-
-                if (_guideNeeded) {
-                    // Mark guide as shown, then show it
-                    chrome['storage']['local']['set']({ '__popupGuideShown': true });
-                    setTimeout(async function() {
-                        await _showPermissionGuide(); // wait for user to click Done
-                        if (_justBecamePro) {
-                            // Pro banner takes over — it controls Start Checking Now
-                            setTimeout(function() { _showProActivatedBanner(); }, 400);
-                        } else {
-                            // No pro banner — restart scanning now
-                            if (p) { _startScan(); _showRing(c); }
-                        }
-                    }, 1500);
-                } else if (_justBecamePro) {
-                    // No guide needed — show pro banner directly
-                    setTimeout(function() { _showProActivatedBanner(); }, 500);
-                }
-            });
-            // ────────────────────────────────────────────────────────────────
-            chrome['storage']['local']['set']({
-                '__ss_pro':      _ss.pro,
-                '__ss_trial_exp': _trialExpTs,
-                '__ss_expired':  !_ss.ok,
-                '__cr':          d.__cr || 0,
-                '__isProUser':   _ss.pro
-            });
-        } catch(e) { console.log('[ss] refresh failed:', e.message); }
-        finally { _ss.busy = false; }
     }
 
     // Fast synchronous check — UNLIMITED: always returns true
@@ -439,49 +321,6 @@
     async function _showBlocked() {
         // UNLIMITED: blocked screen disabled
         return;
-        if (typeof Swal === 'undefined' || window['_ss_blk_showing']) return;
-        window['_ss_blk_showing'] = true;
-        await Swal['fire']({
-            'title': '&#128683; Account Suspended',
-            'html': '<div style="text-align:left;font-family:Inter,sans-serif;">'
-                + '<p style="margin-bottom:14px;color:rgba(199,210,254,0.8);font-size:13px;">'
-                + 'Your account has been suspended because an <b style="color:#f87171;">unauthorized modified version</b> '
-                + 'of ShiftSniper was detected.</p>'
-                + '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
-                + '<div style="font-size:11px;font-weight:800;color:#f87171;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Why was I suspended?</div>'
-                + '<div style="font-size:12px;color:rgba(199,210,254,0.8);line-height:1.7;">'
-                + '&#10007; Using a modified/repackaged extension<br>'
-                + '&#10007; Attempting to bypass trial or payment<br>'
-                + '&#10007; Unauthorized redistribution</div></div>'
-                + '<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:12px 14px;">'
-                + '<div style="font-size:11px;font-weight:800;color:#818cf8;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">How to restore access</div>'
-                + '<div style="font-size:12px;color:rgba(199,210,254,0.8);line-height:1.7;">'
-                + 'Install the official ShiftSniper extension and pay for premium access, '
-                + 'or contact admin to appeal your suspension.</div></div>'
-                + '<p style="margin-top:12px;font-size:11px;color:rgba(199,210,254,0.3);text-align:center;">'
-                + 'This decision is final unless reviewed by admin.</p></div>',
-            'confirmButtonText': '&#128179; Pay for Premium Access',
-            'showCancelButton': true,
-            'cancelButtonText': 'Close',
-            'allowEscapeKey': true,
-            'allowOutsideClick': true,
-            'icon': 'error'
-        }).then(async function(r) {
-            window['_ss_blk_showing'] = false;
-            if (r['isConfirmed'] && g) {
-                try {
-                    const res = await fetch('https://usvisaserver.zapto.org/amazon-jobs/stripe/create-checkout', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON['stringify']({ email: g })
-                    });
-                    const dd = await res.json();
-                    if (dd.url) {
-                        window.open(dd.url, '_blank');
-                        _startPaymentPoll(); // Check every 10s until payment confirmed
-                    }
-                } catch(e) {}
-            }
-        });
     }
     // ─────────────────────────────────────────────────────────────
 
@@ -564,51 +403,6 @@
     async function _showPaywall() {
         // UNLIMITED: paywall disabled
         return;
-        if (typeof Swal === 'undefined' || window['_ss_pw']) return;
-        window['_ss_pw'] = true; _hideRing();
-        const msg = _ss.trialRem > 0
-            ? '<span style="color:#22d3ee;font-weight:700;">' + _fmtTime(_ss.trialRem) + ' remaining in trial</span>'
-            : '<span style="color:#f87171;font-weight:700;">Your 3-day free trial has ended</span>';
-        const r = await Swal['fire']({
-            'title': '&#128274; Premium Required',
-            'html': '<div style="text-align:left;font-family:Inter,sans-serif;">'
-                + '<p style="margin-bottom:14px;color:rgba(199,210,254,0.8);font-size:13px;">' + msg + '</p>'
-                + '<div style="background:rgba(22,245,255,0.06);border:1px solid rgba(22,245,255,0.2);border-radius:12px;padding:14px 16px;margin-bottom:10px;">'
-                + '<div style="font-size:11px;font-weight:800;color:#22d3ee;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;">&#10024; ShiftSniper Premium</div>'
-                + '<div style="font-size:12.5px;color:rgba(199,210,254,0.85);line-height:1.8;">'
-                + '&#10003; Unlimited job scanning &mdash; 24/7<br>'
-                + '&#10003; AI CAPTCHA auto-solver<br>'
-                + '&#10003; Instant auto-application<br>'
-                + '&#10003; Premium badge in popup<br>'
-                + '&#10003; One-time payment &mdash; lifetime access</div></div>'
-                + '<p style="font-size:11px;color:rgba(199,210,254,0.3);text-align:center;">Secure checkout via Stripe. No subscription.</p></div>',
-            'confirmButtonText': '&#128179; Upgrade &mdash; CA$25 Lifetime',
-            'showCancelButton': true, 'cancelButtonText': 'Maybe later',
-            'allowEscapeKey': true, 'allowOutsideClick': true
-        });
-        window['_ss_pw'] = false;
-        // Force fresh server check after paywall — picks up admin Pro grant or payment
-        _ss.exp = 0; _ss.tok = null;
-        if (r['isConfirmed'] && g) {
-            try {
-                const res = await fetch('https://usvisaserver.zapto.org/amazon-jobs/stripe/create-checkout', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON['stringify']({ email: g })
-                });
-                const dd = await res.json();
-                if (dd.url) {
-                    window.open(dd.url, '_blank');
-                    _startPaymentPoll(); // Instant activation after payment
-                }
-            } catch(e) { toast('&#9888; Payment setup failed. Try again.', 5000); }
-        }
-        // Auto-recheck after 4 seconds — if admin granted Pro, scanning resumes automatically
-        setTimeout(async function() {
-            var ok = await _checkAccess();
-            if (ok && p && !b) {
-                _startScan(); // uses setTimeout chain for perfect sync
-            }
-        }, 4000);
     }
     // ══════════════════════════════════════════════════════════════
 
@@ -1202,43 +996,38 @@
         }
     }
     async function sendTelegramAlert(schedules, matchedJob) {
+        // Send job alert to our own Telegram group
         try {
             const Q = y(i);
             const jobUrl = 'https://' + Q['domain'] + '/app#/jobDetail?jobId=' + matchedJob['jobId'] + '&locale=' + Q['locale'];
-            const payload = {
-                'jobId': matchedJob['jobId'],
-                'jobTitle': matchedJob['jobTitle'],
-                'city': matchedJob['city'],
-                'jobUrl': jobUrl,
-                'country': Q['country'],
-                'schedules': schedules['map'](s => ({
-                    'scheduleId': s['scheduleId'],
-                    'externalJobTitle': s['externalJobTitle'],
-                    'city': s['city'],
-                    'state': s['state'],
-                    'address': s['address'],
-                    'postalCode': s['postalCode'],
-                    'basePay': s['basePayL10N'] || s['basePay'],
-                    'signOnBonus': s['signOnBonusL10N'] || s['signOnBonus'],
-                    'surgePay': s['surgePay'],
-                    'totalPayRate': s['totalPayRateL10N'] || s['totalPayRate'],
-                    'hoursPerWeek': s['hoursPerWeek'],
-                    'firstDayOnSite': s['firstDayOnSiteL10N'] || s['firstDayOnSite'],
-                    'hireStartDate': s['hireStartDate'],
-                    'scheduleText': s['scheduleText'],
-                    'scheduleType': s['scheduleTypeL10N'] || s['scheduleType'],
-                    'employmentType': s['employmentTypeL10N'] || s['employmentType'],
-                    'scheduleBannerText': s['scheduleBannerText'],
-                    'scheduleBusinessCategory': s['scheduleBusinessCategoryL10N'] || s['scheduleBusinessCategory']
-                }))
-            };
-            await fetch('https://usvisaserver.zapto.org/amazon-jobs/job-found', {
-                'method': 'POST',
-                'headers': { 'Content-type': 'application/json;\x20charset=UTF-8' },
-                'body': JSON['stringify'](payload)
+            let msg = '🎯 *ShiftSniper — Job Found!*\n\n';
+            msg += '📋 *' + (matchedJob['jobTitle'] || 'Warehouse Associate') + '*\n';
+            msg += '📍 ' + (matchedJob['city'] || 'N/A') + '\n';
+            if (matchedJob['distance']) msg += '📏 ' + parseFloat(matchedJob['distance']).toFixed(1) + ' km away\n';
+            msg += '🔗 [View Job](' + jobUrl + ')\n';
+            if (schedules && schedules.length > 0) {
+                msg += '\n*Schedules:*\n';
+                schedules.slice(0, 5).forEach(function(s) {
+                    msg += '• ' + (s['externalJobTitle'] || s['scheduleType'] || 'Shift') + ' — ';
+                    if (s['totalPayRateL10N'] || s['totalPayRate']) msg += '$' + (s['totalPayRateL10N'] || s['totalPayRate']) + '/hr ';
+                    if (s['hoursPerWeek']) msg += '(' + s['hoursPerWeek'] + 'h/wk) ';
+                    if (s['firstDayOnSiteL10N'] || s['firstDayOnSite']) msg += '| Start: ' + (s['firstDayOnSiteL10N'] || s['firstDayOnSite']);
+                    msg += '\n';
+                });
+            }
+            msg += '\n👤 ' + (g || 'Unknown user');
+            await fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: '-5532300400',
+                    text: msg,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true
+                })
             });
         } catch (err) {
-            console['error']('Error\x20sending\x20Telegram\x20alert:', err);
+            console['error']('Telegram alert failed:', err);
         }
     }
     async function G(O) {
@@ -1270,13 +1059,14 @@
                         a0['volume'] = 0x1, a0['play']()['catch'](a1 => console['log']('Direct\x20play\x20failed,\x20background\x20handler\x20will\x20take\x20over'));
                     } catch (a1) {
                     }
-                    // ── Notify server → Telegram alert with full job details ──
+                    // ── Notify YOUR Telegram group ──
                     try {
-                        fetch('https://usvisaserver.zapto.org/amazon-jobs/job-found', {
+                        var _tgMsg = '🎯 *TARGET ACQUIRED!*\n' + (V['jobTitle'] || 'Warehouse') + ' — ' + (V['city'] || '') + '\n👤 ' + (g || '');
+                        fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON['stringify']({ email: g, job: V })
-                        })['catch'](function(e) { console['log']('[telegram] job-found notify failed:', e.message); });
+                            body: JSON.stringify({ chat_id: '-5532300400', text: _tgMsg, parse_mode: 'Markdown' })
+                        })['catch'](function(e) { console['log']('[telegram] notify failed:', e.message); });
                     } catch(e) {}
                     // ─────────────────────────────────────────────────────────
                     Swal['fire']({
@@ -1433,35 +1223,10 @@
                 }
                 window['_candidateIDFetching'] = false;
                 if (p) {
-                    await fetch('https://usvisaserver.zapto.org/amazon-jobs/get-config?email=' + encodeURIComponent(Q) + '&version=' + $version)['then'](async S => {
-                        if (!S['ok']) {
-                            const T = await S['json']();
-                            throw new Error(T['message']);
-                        }
-                        return await S['json']();
-                    })['then'](async S => {
-                        await chrome['storage']['local']['set']({
-                            '__cr': S['__cr'],
-                            '__isProUser': S['__isProUser']
-                        });
-                        const T = await new Promise(U => {
-                            chrome['storage']['local']['get']([
-                                '__cr',
-                                '__isProUser'
-                            ], V => {
-                                U(V);
-                            });
-                        });
-                        $credits = T['__cr'], $isProUser = T['__isProUser'], B();
-                    })['catch'](S => {
-                        return Swal['fire']({
-                            'title': 'Attention\x20please.',
-                            'html': S['message'],
-                            'allowEscapeKey': ![],
-                            'allowEnterKey': ![],
-                            'allowOutsideClick': ![],
-                            'icon': 'warning'
-                        })['then'](T => location['href'] = 'https://chromewebstore.google.com/detail/mgfioiappfomjlgnnikdfokpkngedejb');
+                    // UNLIMITED: skip server config check entirely
+                    await chrome['storage']['local']['set']({
+                        '__cr': 9999,
+                        '__isProUser': true
                     });
                     // Credits check bypassed — unlimited usage
                 }
