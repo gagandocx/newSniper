@@ -1699,7 +1699,7 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
         if (url.includes('/login') && url.includes('redirectUrl=')) {
             if (!window['_ssRedirectTimerSet']) {
                 window['_ssRedirectTimerSet'] = true;
-                console.log('[fetch.js] Post-OTP redirect page — waiting 5s for Amazon natural redirect');
+                console.log('[fetch.js] Post-login redirect page — going to jobSearch in 3s');
                 setTimeout(function() {
                     var cur = window.location.href;
                     if (cur.includes('redirectUrl=')) {
@@ -1707,13 +1707,10 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
                             console.log('[fetch.js] redirectUrl handler deferred — popup open');
                             return;
                         }
-                        console.log('[fetch.js] Still on redirect page after 5s — going to hiring root');
-                        chrome.storage.local.set({ _pendingJobRedirect: true });
-                        window.location.replace('https://hiring.amazon.ca/');
-                    } else {
-                        console.log('[fetch.js] Amazon redirected naturally — not intervening');
+                        console.log('[fetch.js] Still on redirect page — going directly to jobSearch');
+                        window.location.replace('https://hiring.amazon.ca/app#/jobSearch');
                     }
-                }, 5000);
+                }, 3000);
             }
             return;
         }
