@@ -385,7 +385,7 @@ button, input, select { font: inherit; }
 /* ── Action buttons ── */
 .actions {
   position: relative; z-index: 2;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(2, 1fr);
   gap: 9px; margin-top: 16px;
 }
 .action-btn {
