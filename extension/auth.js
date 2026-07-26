@@ -642,7 +642,8 @@
         // Step 8: Check for invalid code error → Resend with current OTP as stale
         await sleep(2000);
         const errorMsg = document.body.innerText || '';
-        if (/not valid|invalid|expired|try resending/i.test(errorMsg)) {
+        // Only check for specific OTP rejection messages — NOT general words like "expired"
+        if (/not valid|incorrect code|code is invalid|try resending/i.test(errorMsg) && !/session/i.test(errorMsg)) {
             console.log('[auth.js] OTP', otp, 'rejected — clicking Resend, will skip this code next time');
             toast('⚠️ <b style="color:#ffcc00;">Code rejected — requesting fresh code...</b>', 5000);
             const resendBtn = document.querySelector('[data-test-id*="resend"], button[class*="resend"]')
@@ -657,7 +658,17 @@
                 return;
             }
         }
-        console.log('[auth.js] OTP flow complete — fetch.js will handle redirect');
+
+        // Step 9: Login successful — go directly to jobSearch
+        // Don't wait for fetch.js to handle it — auth.js runs on auth.hiring.amazon domain
+        // where fetch.js redirect logic doesn't apply
+        console.log('[auth.js] OTP flow complete — navigating to jobSearch');
+        await sleep(1000);
+        // Check if page already navigated away from auth
+        if (window.location.href.includes('auth.hiring')) {
+            // Still on auth page — force navigate to jobSearch
+            window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
+        }
     }
 
 
