@@ -25,6 +25,59 @@
     const LICENSE_SERVER_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
     // ══════════════════════════════════════════════════════════════════
 
+    // ── ANTI-DEBUGGING: Detect DevTools and lock extension ───────────
+    // If someone right-clicks the popup → Inspect to study the code,
+    // the extension detects it and locks up permanently until reload.
+    (function _antiDebug() {
+        var _dbDetected = false;
+
+        // Method 1: debugger statement timing
+        // When DevTools is open, debugger pauses execution — causing timing diff
+        function _checkDebugger() {
+            var start = performance.now();
+            debugger;
+            var diff = performance.now() - start;
+            if (diff > 50) {
+                _lockOnDebug();
+            }
+        }
+
+        // Method 2: Window size difference (DevTools docked changes inner dimensions)
+        function _checkWindowSize() {
+            var threshold = 160;
+            var widthDiff = window.outerWidth - window.innerWidth > threshold;
+            var heightDiff = window.outerHeight - window.innerHeight > threshold;
+            if (widthDiff || heightDiff) {
+                _lockOnDebug();
+            }
+        }
+
+        // Method 3: console.log override detection
+        var _consoleImg = new Image();
+        Object.defineProperty(_consoleImg, 'id', {
+            get: function() { _lockOnDebug(); }
+        });
+
+        function _lockOnDebug() {
+            if (_dbDetected) return;
+            _dbDetected = true;
+            chrome.storage.local.set({ '__cs_license_valid': false, '__cs_debug_detected': true });
+            // Blank the popup
+            document.body.innerHTML = '<div style="padding:60px 20px;text-align:center;font-family:Inter,sans-serif;background:#0a0a0a;min-height:600px;">'
+                + '<div style="font-size:48px;margin-bottom:16px;">&#128007;</div>'
+                + '<h2 style="color:#f87171;margin:0 0 12px;">Access Denied</h2>'
+                + '<p style="color:rgba(199,210,254,0.5);font-size:12px;">Unauthorized inspection detected.</p></div>';
+        }
+
+        // Run checks periodically (every 2s)
+        setInterval(_checkWindowSize, 2000);
+        // Debugger check less frequently (causes brief pause when devtools open)
+        setInterval(_checkDebugger, 4000);
+        // Console trap
+        setInterval(function() { console.log('%c', _consoleImg); }, 5000);
+    })();
+    // ─────────────────────────────────────────────────────────────────
+
     // ── Device fingerprint: unique per Chrome profile ──
     function getDeviceId() {
         // Combine extension ID + screen + hardware for uniqueness

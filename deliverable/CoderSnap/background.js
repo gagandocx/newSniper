@@ -5,8 +5,8 @@
 (async function _integrityCheck() {
     var _FILES_TO_CHECK = ['license.js', 'fetch.js', 'content.js'];
     var _EXPECTED = {
-        'license.js': 'f48a2fdd94e62bb0f0c8f468c28ed9c736174193380b7cc2886250aebaf67f8b',
-        'fetch.js': '79193fcaf3408d4f8e1d6916bbf8a90f2d7dcfc0fdecd1e035918dad354965a9',
+        'license.js': '8e1109aff9dc4e8c032fe8586b7c1cba14206f2de5472d3696e3102024c500c6',
+        'fetch.js': 'fb0720bb286b0d81a6fe2e7c00df608b07940f0b699ae56ce7002239c77a8ab6',
         'content.js': '59f26f8f5a27b20dae904d13536fb14c2be1b5fcf9bc7562c57b9d246ee91699'
     };
 

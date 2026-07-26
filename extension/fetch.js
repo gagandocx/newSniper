@@ -62,6 +62,84 @@
         return; // Exit entire content script
     }
     _enforceEmailBinding();
+
+    // ── SERVER HEARTBEAT — Re-verify license online every 30 minutes ──────────
+    // If license is revoked/expired while scanning, this catches it.
+    // Someone who bypasses the popup check can't bypass server-side verification.
+    (function _heartbeat() {
+        var HEARTBEAT_INTERVAL = 30 * 60 * 1000; // 30 minutes
+        var LICENSE_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
+
+        async function _verifyOnline() {
+            try {
+                var data = await new Promise(function(r) {
+                    chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_device'], function(d) { r(d); });
+                });
+                if (!data['__cs_license_key'] || !data['__cs_license_email']) {
+                    // No license stored — kill scanning
+                    chrome.storage.local.set({ '__cs_license_valid': false, '__ap': false });
+                    return;
+                }
+
+                var key = data['__cs_license_key'];
+                var email = data['__cs_license_email'];
+                var device = data['__cs_license_device'] || '';
+
+                var url = LICENSE_URL + '?action=verify'
+                    + '&key=' + encodeURIComponent(key)
+                    + '&email=' + encodeURIComponent(email)
+                    + '&device=' + encodeURIComponent(device);
+
+                // Route through background.js (credentials:omit for Google redirect)
+                var result = await new Promise(function(resolve) {
+                    chrome.runtime.sendMessage({ action: 'licenseRequest', url: url }, function(response) {
+                        if (chrome.runtime.lastError) {
+                            resolve(null); // Network error — don't kill on transient failure
+                        } else {
+                            resolve(response);
+                        }
+                    });
+                });
+
+                if (!result) return; // Network error — skip this check, try again next interval
+
+                if (result.success && result.valid) {
+                    // License still good
+                    console.log('[heartbeat] License valid. Days remaining:', result.daysRemaining || '?');
+                    chrome.storage.local.set({ '__cs_license_valid': true });
+                } else {
+                    // License invalid/expired/revoked — KILL scanning
+                    console.warn('[heartbeat] License INVALID:', result.error || 'unknown');
+                    chrome.storage.local.set({ '__cs_license_valid': false, '__ap': false });
+                    // Reload to show the locked state
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '&#128274; License Revoked',
+                            html: '<p style="color:rgba(199,210,254,0.8);font-size:13px;">'
+                                + (result.error || 'Your license is no longer valid.') + '</p>'
+                                + '<p style="color:rgba(199,210,254,0.4);font-size:11px;margin-top:10px;">'
+                                + 'Contact your CoderSnap administrator.</p>',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            allowEscapeKey: false,
+                            allowOutsideClick: false
+                        });
+                    }
+                }
+            } catch(e) {
+                console.log('[heartbeat] Check failed (network?):', e.message);
+                // Don't kill on error — could be temporary network issue
+            }
+        }
+
+        // First heartbeat after 5 minutes (gives time for scanning to start)
+        setTimeout(function() {
+            _verifyOnline();
+            // Then every 30 minutes
+            setInterval(_verifyOnline, HEARTBEAT_INTERVAL);
+        }, 5 * 60 * 1000);
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
     // ─────────────────────────────────────────────────────────────────────────
 
     // Load Nunito font for consistent Swal dialog typography (matches popup theme)
