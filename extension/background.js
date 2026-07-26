@@ -1,19 +1,29 @@
 // ── License server proxy (background has no CORS/redirect restrictions) ──────
 chrome['runtime']['onMessage']['addListener'](function(a, b, c) {
     if (a['action'] === 'licenseRequest') {
-        (async function() {
+        fetch(a['url'], {
+            method: 'GET',
+            redirect: 'follow',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function(resp) { return resp.text(); })
+        .then(function(text) {
+            console.log('[bg] License response:', text.substring(0, 200));
             try {
-                var resp = await fetch(a['url'], { method: 'GET', redirect: 'follow' });
-                var text = await resp.text();
-                try {
-                    c(JSON.parse(text));
-                } catch(e) {
-                    c({ success: false, error: 'Invalid response from server' });
+                c(JSON.parse(text));
+            } catch(e) {
+                // Google might return HTML login page — extract error
+                if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+                    c({ success: false, error: 'Google auth redirect — deploy as "Anyone"' });
+                } else {
+                    c({ success: false, error: 'Parse error: ' + text.substring(0, 100) });
                 }
-            } catch(err) {
-                c({ success: false, error: err.message || 'Network error' });
             }
-        })();
+        })
+        .catch(function(err) {
+            console.error('[bg] License fetch error:', err);
+            c({ success: false, error: err.message || 'Network error' });
+        });
         return true; // keep message channel open for async response
     }
 });
