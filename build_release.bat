@@ -37,12 +37,32 @@ set "SRC=%~dp0extension"
 set "OUT=%~dp0release\CoderSnap"
 set "ZIP=%~dp0CoderSnap_RELEASE.zip"
 
+:: Verify extension folder exists
+if not exist "%SRC%" (
+    echo [ERROR] Cannot find extension\ folder!
+    echo         Looking in: %~dp0
+    echo.
+    echo         Make sure build_release.bat is in the SAME folder as extension\
+    echo         Example:
+    echo           F:\Automation\Amazon\newSniper\build_release.bat
+    echo           F:\Automation\Amazon\newSniper\extension\
+    echo.
+    pause
+    exit /b 1
+)
+if not exist "%SRC%\manifest.json" (
+    echo [ERROR] extension\ folder found but manifest.json is missing!
+    echo         Path: %SRC%
+    pause
+    exit /b 1
+)
+
 :: Step 1: Clean and copy
 echo.
 echo [1/5] Copying extension to release folder...
 if exist "%~dp0release" rmdir /s /q "%~dp0release"
 mkdir "%OUT%"
-xcopy "%SRC%\*" "%OUT%\" /E /I /Q /Y >nul
+xcopy "%SRC%" "%OUT%" /E /I /Q /Y >nul
 :: Remove _metadata (Chrome regenerates it)
 if exist "%OUT%\_metadata" rmdir /s /q "%OUT%\_metadata"
 echo       Done.
@@ -55,7 +75,7 @@ echo.
 
 :: Obfuscate license.js
 echo       - license.js
-javascript-obfuscator "%OUT%\license.js" --output "%OUT%\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "%OUT%\license.js" --output "%OUT%\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate license.js
     pause
@@ -64,7 +84,7 @@ if %errorlevel% neq 0 (
 
 :: Obfuscate fetch.js
 echo       - fetch.js
-javascript-obfuscator "%OUT%\fetch.js" --output "%OUT%\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "%OUT%\fetch.js" --output "%OUT%\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate fetch.js
     pause
@@ -73,7 +93,7 @@ if %errorlevel% neq 0 (
 
 :: Obfuscate content.js
 echo       - content.js
-javascript-obfuscator "%OUT%\content.js" --output "%OUT%\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "%OUT%\content.js" --output "%OUT%\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate content.js
     pause
@@ -82,7 +102,7 @@ if %errorlevel% neq 0 (
 
 :: Obfuscate background.js (lighter settings — has integrity checker)
 echo       - background.js
-javascript-obfuscator "%OUT%\background.js" --output "%OUT%\background.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false --unicode-escape-sequence true
+call javascript-obfuscator "%OUT%\background.js" --output "%OUT%\background.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false --unicode-escape-sequence true
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to obfuscate background.js
     pause
@@ -91,11 +111,11 @@ if %errorlevel% neq 0 (
 
 :: Obfuscate other JS files (lighter — less critical)
 echo       - auth.js
-javascript-obfuscator "%OUT%\auth.js" --output "%OUT%\auth.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "%OUT%\auth.js" --output "%OUT%\auth.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
 echo       - notif_block.js
-javascript-obfuscator "%OUT%\notif_block.js" --output "%OUT%\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "%OUT%\notif_block.js" --output "%OUT%\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
 echo       - Createapp.js
-javascript-obfuscator "%OUT%\Createapp.js" --output "%OUT%\Createapp.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "%OUT%\Createapp.js" --output "%OUT%\Createapp.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
 
 echo.
 echo       All files obfuscated.
