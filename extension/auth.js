@@ -68,7 +68,12 @@
         // Skip if Swal popup is open
         if (document.querySelector('.swal2-container.swal2-shown')) return null;
 
-        // ── CAPTCHA: detect by visible square image grid (works even in shadow DOM / widgets)
+        // ── CAPTCHA Begin page: "Let's confirm you are human" + Begin button (no grid yet)
+        const beginBtn = [...document.querySelectorAll('button, input[type="submit"], a')]
+            .find(b => /^begin/i.test((b.textContent || b.value || '').trim()));
+        if (beginBtn && (text.includes('confirm you are human') || text.includes('security check'))) return 'captcha-begin';
+
+        // ── CAPTCHA Grid: visible square image grid (grid is already showing)
         const captchaImgs = [...document.querySelectorAll('img')].filter(img => {
             const r = img.getBoundingClientRect();
             return r.width >= 70 && r.width <= 330 &&
@@ -76,7 +81,7 @@
                    r.top > 30 && img.naturalWidth > 0 && img.src.startsWith('http');
         });
         if (captchaImgs.length >= 6) return 'captcha';
-        if (text.includes("confirm you are human")) return 'captcha';
+        if (text.includes('Choose all')) return 'captcha';
 
         // ── OTP entry page
         if (text.includes('verification code has been sent') || title.includes('Verify code')) return 'otp';
@@ -96,6 +101,23 @@
         if (pinInput && !pinInput.value) return 'login-pin';
 
         return null;
+    }
+
+    // ── CAPTCHA Begin: click "Begin" button → grid loads → captchaWatcher solves it
+    async function handleCaptchaBegin() {
+        console.log('[auth.js] "Let\'s confirm you are human" page — clicking Begin');
+        await sleep(500);
+        const beginBtn = [...document.querySelectorAll('button, input[type="submit"], a')]
+            .find(b => /^begin/i.test((b.textContent || b.value || '').trim()));
+        if (beginBtn) {
+            simulateClick(beginBtn);
+            toast('🤖 <b style="color:#00d4ff;">Starting human verification...</b>', 3000);
+            console.log('[auth.js] Begin clicked — waiting for CAPTCHA grid to appear');
+            await sleep(3000);
+            // captchaWatcher will pick up the grid once it appears
+        } else {
+            console.warn('[auth.js] Begin button not found');
+        }
     }
 
     // ── Verification type: select Email → Send ────────────────────────────────
@@ -840,6 +862,7 @@ FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
             await sleep(400);
             if      (step === 'verify-type') await handleVerifyType();
             else if (step === 'verify-rate-limited') await handleVerifyRateLimited();
+            else if (step === 'captcha-begin') await handleCaptchaBegin();
             else if (step === 'otp')         await handleOTP();
             else if (step === 'login-email') await handleLoginEmail();
             else if (step === 'login-pin')   await handleLoginPin();
@@ -853,14 +876,30 @@ FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
         if (_captchaHandling) return;
 
         var isAuthPage = window.location.href.includes('auth.hiring.amazon');
+        var bodyText = document.body.innerText || '';
 
-        // Detect by AWS WAF custom element OR "confirm you are human" text
+        // Detect "Begin" button page (pre-CAPTCHA) — on any Amazon page
+        var beginBtn = [...document.querySelectorAll('button, input[type="submit"], a')]
+            .find(function(b) { return /^begin/i.test((b.textContent || b.value || '').trim()); });
+        if (beginBtn && (bodyText.includes('confirm you are human') || bodyText.includes('security check'))) {
+            console.log('[auth.js] captchaWatcher: Begin page detected — clicking Begin');
+            _captchaHandling = true;
+            try {
+                await handleCaptchaBegin();
+            } finally {
+                await sleep(3000);
+                _captchaHandling = false;
+            }
+            return;
+        }
+
+        // Detect CAPTCHA grid — WAF widget or "Choose all" text on any page
         const hasWidget = !!document.querySelector('awswaf-captcha, [id*="awswaf"], [class*="awswaf"]');
-        const bodyHas   = document.body.innerText.includes('confirm you are human');
+        const hasChooseAll = bodyText.includes('Choose all');
 
-        // Image grid detection — ONLY on auth pages (jobSearch has warehouse photos that false-trigger)
+        // Image grid detection — ONLY on auth pages (jobSearch has warehouse photos)
         var hasCaptchaImgs = false;
-        if (isAuthPage) {
+        if (isAuthPage || hasChooseAll) {
             const imgs = [...document.querySelectorAll('img')].filter(img => {
                 const r = img.getBoundingClientRect();
                 return r.width  >= 60 && r.width  <= 350 &&
@@ -871,13 +910,12 @@ FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
             hasCaptchaImgs = imgs.length >= 6;
         }
 
-        if (hasWidget || bodyHas || hasCaptchaImgs) {
-            console.log('[auth.js] CAPTCHA detected! widget:', hasWidget, 'text:', bodyHas, 'imgs:', hasCaptchaImgs);
+        if (hasWidget || hasChooseAll || hasCaptchaImgs) {
+            console.log('[auth.js] CAPTCHA detected! widget:', hasWidget, 'chooseAll:', hasChooseAll, 'imgs:', hasCaptchaImgs);
             _captchaHandling = true;
             try {
                 await handleCaptcha();
             } finally {
-                // Wait before allowing retry — longer if Groq was rate limited
                 var _retryCooldown = _groqRateLimited ? 15000 : 4000;
                 await sleep(_retryCooldown);
                 _captchaHandling = false;
