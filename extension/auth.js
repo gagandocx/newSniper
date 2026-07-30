@@ -84,6 +84,9 @@
         // ── Verification type — only fire ONCE per session
         if (!_verifyTypeDone && text.includes('Where should we send your verification code')) return 'verify-type';
 
+        // ── Rate limited: "Please wait 60 seconds before trying again"
+        if (text.includes('Please wait') && text.includes('seconds before trying again')) return 'verify-rate-limited';
+
         // ── Login page: email input visible
         const emailInput = document.querySelector('input[data-test-id="input-test-id-login"]');
         if (emailInput && !emailInput.value) return 'login-email';
@@ -113,6 +116,29 @@
             toast('📧 <b style="color:#00d4ff;">Sending verification code to your email...</b>');
             simulateClick(sendBtn);
         }
+    }
+
+    // ── Rate limited: wait 65s then click Send verification code again ────────
+    var _rateLimitHandling = false;
+    async function handleVerifyRateLimited() {
+        if (_rateLimitHandling) return; // prevent multiple timers
+        _rateLimitHandling = true;
+        console.log('[auth.js] Rate limited — waiting 65s before retrying...');
+        toast('⏳ <b style="color:#f59e0b;">Rate limited — auto-retrying in 65 seconds...</b>', 66000);
+        await sleep(65000);
+
+        // Click Send verification code
+        const sendBtn = [...document.querySelectorAll('button')]
+            .find(b => b.textContent.includes('Send verification code'));
+        if (sendBtn) {
+            console.log('[auth.js] 65s elapsed — clicking Send verification code');
+            toast('📧 <b style="color:#00d4ff;">Retrying — sending verification code...</b>');
+            simulateClick(sendBtn);
+        } else {
+            console.log('[auth.js] Send button not found after 65s wait');
+        }
+        _rateLimitHandling = false;
+        _verifyTypeDone = false; // allow re-detection if needed
     }
 
     // ── Login Email: fill stored email → click Continue ─────────────────────
@@ -813,6 +839,7 @@ FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
             console.log('[auth.js] step:', step);
             await sleep(400);
             if      (step === 'verify-type') await handleVerifyType();
+            else if (step === 'verify-rate-limited') await handleVerifyRateLimited();
             else if (step === 'otp')         await handleOTP();
             else if (step === 'login-email') await handleLoginEmail();
             else if (step === 'login-pin')   await handleLoginPin();
