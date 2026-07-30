@@ -777,32 +777,31 @@
     async function captchaWatcher() {
         if (_captchaHandling) return;
 
-        // ONLY detect CAPTCHAs on auth pages — jobSearch has warehouse images that false-trigger
-        if (!window.location.href.includes('auth.hiring.amazon')) return;
+        var isAuthPage = window.location.href.includes('auth.hiring.amazon');
 
-        // Detect by AWS WAF custom element OR grid images
+        // Detect by AWS WAF custom element OR "confirm you are human" text
         const hasWidget = !!document.querySelector('awswaf-captcha, [id*="awswaf"], [class*="awswaf"]');
         const bodyHas   = document.body.innerText.includes('confirm you are human');
 
-        // Image detection: use r.bottom > 50 instead of r.top > 0
-        // (modal may be scrolled so row-1 images have negative r.top)
-        const imgs = [...document.querySelectorAll('img')].filter(img => {
-            const r = img.getBoundingClientRect();
-            return r.width  >= 60 && r.width  <= 350 &&
-                   r.height >= 60 && r.height <= 350 &&
-                   r.bottom > 50 &&  // at least partially visible
-                   img.src && img.src.startsWith('http');
-        });
-        const hasCaptchaImgs = imgs.length >= 6;
+        // Image grid detection — ONLY on auth pages (jobSearch has warehouse photos that false-trigger)
+        var hasCaptchaImgs = false;
+        if (isAuthPage) {
+            const imgs = [...document.querySelectorAll('img')].filter(img => {
+                const r = img.getBoundingClientRect();
+                return r.width  >= 60 && r.width  <= 350 &&
+                       r.height >= 60 && r.height <= 350 &&
+                       r.bottom > 50 &&
+                       img.src && img.src.startsWith('http');
+            });
+            hasCaptchaImgs = imgs.length >= 6;
+        }
 
         if (hasWidget || bodyHas || hasCaptchaImgs) {
-            console.log('[auth.js] CAPTCHA detected! widget:', hasWidget, 'text:', bodyHas, 'imgs:', imgs.length);
+            console.log('[auth.js] CAPTCHA detected! widget:', hasWidget, 'text:', bodyHas, 'imgs:', hasCaptchaImgs);
             _captchaHandling = true;
             try {
                 await handleCaptcha();
             } finally {
-                // Wait 4s after solve attempt before allowing retry
-                // This prevents watcher from re-triggering during cell clicks / Confirm
                 await sleep(4000);
                 _captchaHandling = false;
                 console.log('[auth.js] captchaWatcher ready for retry');
