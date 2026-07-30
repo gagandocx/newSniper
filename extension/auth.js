@@ -146,8 +146,8 @@
         if (_rateLimitHandling) return; // prevent multiple timers
         _rateLimitHandling = true;
         console.log('[auth.js] Rate limited — waiting 65s before retrying...');
-        toast('⏳ <b style="color:#f59e0b;">Rate limited — auto-retrying in 65 seconds...</b>', 66000);
-        await sleep(65000);
+        toast('⏳ <b style="color:#f59e0b;">Rate limited — auto-retrying in 30 seconds...</b>', 31000);
+        await sleep(30000);
 
         // Click Send verification code
         const sendBtn = [...document.querySelectorAll('button')]
