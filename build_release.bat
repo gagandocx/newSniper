@@ -122,8 +122,8 @@ if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 echo       - notif_block.js
 call javascript-obfuscator "!OUT!\notif_block.js" --output "!OUT!\notif_block.js" --compact true --string-array true --identifier-names-generator hexadecimal --rename-globals false --self-defending false
 
-echo       - Createapp.js
-call javascript-obfuscator "!OUT!\Createapp.js" --output "!OUT!\Createapp.js" --compact true --string-array false --control-flow-flattening false --identifier-names-generator hexadecimal --rename-globals false --self-defending false
+echo       - Createapp.js (not obfuscated — small file, async recursion breaks with any transform)
+copy /Y "!SRC!\Createapp.js" "!OUT!\Createapp.js" >nul
 
 echo.
 echo       All files obfuscated.
