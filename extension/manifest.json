@@ -8,7 +8,8 @@
    "content_scripts": [
       {
          "js": [
-            "notif_block.js"
+            "notif_block.js",
+            "tokenCapture.js"
          ],
          "matches": [
             "https://hiring.amazon.ca/*",
@@ -27,6 +28,7 @@
          "js": [
             "sweetalert.js",
             "fetch.js",
+            "brain.js",
             "Createapp.js"
          ],
          "matches": [
@@ -73,6 +75,7 @@
       "https://script.googleusercontent.com/*",
       "https://*.captcha-sdk.awswaf.com/*",
       "https://*.awswaf.com/*",
+      "https://*.appsync-api.us-east-1.amazonaws.com/*",
       "<all_urls>"
    ],
    "icons": {
@@ -94,7 +97,7 @@
       "debugger"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.7.12.3",
+   "version": "8.7.12.4",
    "web_accessible_resources": [
       {
          "matches": [
