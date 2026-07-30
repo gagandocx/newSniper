@@ -40,7 +40,7 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
         }
     });
 }), chrome['tabs']['onUpdated']['addListener']((a, b, c) => {
-    b['status'] === 'complete' && ((c['url']['includes']('hiring.amazon.ca/application/us/') || c['url']['includes']('hiring.amazon.com/application/us/')) && c['url']['includes']('jobId=') && chrome['scripting']['executeScript']({
+    b['status'] === 'complete' && ((c['url']['includes']('hiring.amazon.ca/application/') || c['url']['includes']('hiring.amazon.com/application/')) && c['url']['includes']('jobId=') && chrome['scripting']['executeScript']({
         'target': { 'tabId': a },
         'files': ['Createapp.js']
     }, () => {
