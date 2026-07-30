@@ -194,92 +194,12 @@
     // FEATURE 5: SMARTER AI ANALYSIS
     // ═══════════════════════════════════════════════════════════════════════════
     async function _askAI(stuckState) {
-        logAction('ai', 'Escalating to AI for state: ' + stuckState);
-
-        var groqKey = '';
-        try {
-            var data = await new Promise(function(res) {
-                chrome.storage.local.get(['groq_api_key'], res);
-            });
-            groqKey = data.groq_api_key || '';
-        } catch(e) {}
-
-        if (!groqKey) {
-            logAction('ai', 'No Groq key — falling back to reload', false);
-            window.location.reload();
-            return;
-        }
-
-        var ssRes = await new Promise(function(resolve) {
-            chrome.runtime.sendMessage({ action: 'takeScreenshot' }, function(r) {
-                if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
-                else resolve(r || { error: 'no response' });
-            });
-        });
-
-        if (ssRes.error || !ssRes.dataUrl) {
-            logAction('ai', 'Screenshot failed', false);
-            window.location.reload();
-            return;
-        }
-
-        var pageContext = {
-            url: window.location.href,
-            title: document.title,
-            stuckState: stuckState,
-            stuckFor: Math.round(stateAge() / 1000) + 's',
-            healthScore: _health.score,
-            actionsAttempted: _actionCount,
-            recentLog: _activityLog.slice(-5).map(function(e) { return e.type + ':' + e.detail; }),
-            visibleButtons: [],
-            visibleInputs: [],
-            bodySnippet: (document.body.innerText || '').slice(0, 600)
-        };
-
-        var btns = document.querySelectorAll('button, [role="button"], a[href]');
-        for (var i = 0; i < Math.min(btns.length, 15); i++) {
-            var txt = (btns[i].textContent || '').trim().slice(0, 50);
-            if (txt) pageContext.visibleButtons.push(txt);
-        }
-        var inputs = document.querySelectorAll('input, textarea, select');
-        for (var j = 0; j < Math.min(inputs.length, 10); j++) {
-            pageContext.visibleInputs.push({
-                type: inputs[j].type || 'text',
-                id: inputs[j].id || inputs[j].getAttribute('data-test-id') || '',
-                hasValue: !!inputs[j].value
-            });
-        }
-
-        try {
-            var ctl = new AbortController();
-            var tmout = setTimeout(function() { ctl.abort(); }, 20000);
-            var gResp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                signal: ctl.signal, method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
-                body: JSON.stringify({
-                    model: 'qwen/qwen3.6-27b', max_tokens: 500, temperature: 0.1,
-                    messages: [{
-                        role: 'system',
-                        content: 'You are ShiftSniper Brain AI. The Amazon job-hunting extension is STUCK. Analyze the screenshot and context. Your goal: get to https://hiring.amazon.ca/app#/jobSearch.\n\nIf you see a CAPTCHA grid ("Choose all the..."): the correct answer is ALWAYS exactly 5 images. Use ACTION: CLICK_BUTTON | Confirm after selecting.\n\nProvide:\n1. DIAGNOSIS: one line describing what you see\n2. ACTION: exactly one of:\n   CLICK_BUTTON | button text\n   CLICK_LINK | link text\n   FILL_INPUT | css-selector | value\n   NAVIGATE | url\n   RELOAD | reason\n   WAIT | seconds\n   RELOGIN | session expired\n\nRecent brain log: ' + pageContext.recentLog.join('; ') + '\nHealth score: ' + pageContext.healthScore + '/100'
-                    }, {
-                        role: 'user',
-                        content: [
-                            { type: 'image_url', image_url: { url: ssRes.dataUrl } },
-                            { type: 'text', text: 'STUCK: ' + stuckState + ' for ' + pageContext.stuckFor + '\nURL: ' + pageContext.url + '\nButtons: ' + pageContext.visibleButtons.join(', ') + '\nInputs: ' + JSON.stringify(pageContext.visibleInputs) + '\nPage: ' + pageContext.bodySnippet }
-                        ]
-                    }]
-                })
-            });
-            clearTimeout(tmout);
-            var gData = await gResp.json();
-            var aiText = (gData.choices && gData.choices[0] && gData.choices[0].message && gData.choices[0].message.content || '').trim();
-            logAction('ai', 'AI response: ' + aiText.slice(0, 150));
-            _executeAIAction(aiText);
-        } catch(e) {
-            logAction('ai', 'AI call failed: ' + e.message, false);
-            window.location.reload();
-        }
+        // DISABLED: brain.js AI calls eat Groq rate limit that auth.js needs for CAPTCHA
+        // auth.js handles CAPTCHAs directly. brain.js uses simpler fix logic instead.
+        logAction('ai', 'AI escalation skipped (rate limit protection) — using fallback fix');
+        return;
     }
+
 
 
     function _executeAIAction(response) {
