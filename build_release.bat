@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 :: ═══════════════════════════════════════════════════════════════
 :: CoderSnap — Release Builder
-:: Obfuscates code + recalculates integrity hashes + zips for distribution
+:: Obfuscates code + zips for distribution
 ::
 :: PREREQUISITES:
 ::   npm install -g javascript-obfuscator
@@ -33,7 +33,6 @@ if %errorlevel% neq 0 (
 echo [OK] javascript-obfuscator found.
 
 :: ── Find the source folder ──────────────────────────────────────
-:: Priority: extension\ folder first, then latest v* folder
 set "SRC="
 
 if exist "%~dp0extension\manifest.json" (
@@ -55,8 +54,6 @@ if "!SRC!"=="" (
     echo           extension\     folder, OR
     echo           v8.7.x.x\     folder
     echo.
-    echo         with manifest.json inside it.
-    echo.
     pause
     exit /b 1
 )
@@ -69,7 +66,7 @@ set "ZIP=%~dp0CoderSnap_RELEASE.zip"
 
 :: ── Step 1: Clean and copy ──────────────────────────────────────
 echo.
-echo [1/5] Copying extension to release folder...
+echo [1/3] Copying extension to release folder...
 if exist "%~dp0release" rmdir /s /q "%~dp0release"
 mkdir "!OUT!"
 xcopy "!SRC!" "!OUT!" /E /I /Q /Y >nul
@@ -78,44 +75,52 @@ echo       Done.
 
 :: ── Step 2: Obfuscate JS files ──────────────────────────────────
 echo.
-echo [2/5] Obfuscating JavaScript files...
+echo [2/3] Obfuscating JavaScript files...
 echo       (This takes 30-60 seconds)
 echo.
 
+:: ── HEAVY obfuscation: license.js, fetch.js, content.js ─────────
+:: These don't make direct API calls — safe to use RC4 string encoding
+
 echo       - license.js
 call javascript-obfuscator "!OUT!\license.js" --output "!OUT!\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to obfuscate license.js
-    pause
-    exit /b 1
-)
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - fetch.js
 call javascript-obfuscator "!OUT!\fetch.js" --output "!OUT!\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to obfuscate fetch.js
-    pause
-    exit /b 1
-)
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - content.js
 call javascript-obfuscator "!OUT!\content.js" --output "!OUT!\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to obfuscate content.js
-    pause
-    exit /b 1
-)
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
-echo       - background.js (minified only — contains integrity checker)
-call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array false --control-flow-flattening false --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to obfuscate background.js
-    pause
-    exit /b 1
-)
+:: ── MEDIUM obfuscation: auth.js, brain.js, tokenCapture.js ──────
+:: These interact with chrome.runtime.sendMessage and specific string
+:: patterns (action names, model IDs). Use string-array WITHOUT rc4
+:: encoding to keep runtime strings working correctly.
 
 echo       - auth.js
-call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --self-defending false --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
+
+echo       - brain.js
+call javascript-obfuscator "!OUT!\brain.js" --output "!OUT!\brain.js" --compact true --self-defending false --string-array true --string-array-threshold 0.5 --control-flow-flattening true --control-flow-flattening-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
+
+echo       - tokenCapture.js
+call javascript-obfuscator "!OUT!\tokenCapture.js" --output "!OUT!\tokenCapture.js" --compact true --self-defending false --string-array true --string-array-threshold 0.5 --identifier-names-generator hexadecimal --rename-globals false
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
+
+:: ── LIGHT obfuscation: background.js ────────────────────────────
+:: Service worker makes direct API calls (Groq, Telegram, Google).
+:: String encoding BREAKS 'Bearer ', 'Authorization', API URLs.
+:: Only rename variables — keep all strings intact.
+
+echo       - background.js (light — keeps API strings intact)
+call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array false --control-flow-flattening false --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
+
+:: ── LIGHT obfuscation: other files ──────────────────────────────
 
 echo       - notif_block.js
 call javascript-obfuscator "!OUT!\notif_block.js" --output "!OUT!\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
