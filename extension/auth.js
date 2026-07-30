@@ -495,9 +495,9 @@
         }
         // ─────────────────────────────────────────────────────────────────────────
 
-        // Step 1: Wait 6s for email to arrive, then switch to Gmail tab + refresh
-        toast('📬 <b style="color:#00d4ff;">Waiting for verification email...</b>', 8000);
-        await sleep(6000);
+        // Step 1: Wait 4s for email to arrive, then switch to Gmail tab + refresh
+        toast('📬 <b style="color:#00d4ff;">Waiting for verification email...</b>', 6000);
+        await sleep(4000);
         console.log('[auth.js] Switching to Gmail tab + refreshing...');
 
         // Tell background to refresh Gmail tab — this reloads it and waits for load
@@ -505,9 +505,9 @@
             chrome.runtime.sendMessage({ action: 'refreshGmailTab' }, r => resolve(r || {}));
         });
         if (_rfResult && _rfResult.opened) {
-            console.log('[auth.js] Gmail tab auto-opened — waiting 8s for full load');
-            toast('📬 <b style="color:#ffcc00;">Gmail opened — waiting for inbox to load...</b>', 9000);
-            await sleep(8000);
+            console.log('[auth.js] Gmail tab auto-opened — waiting 7s for full load');
+            toast('📬 <b style="color:#ffcc00;">Gmail opened — waiting for inbox to load...</b>', 8000);
+            await sleep(7000);
         } else {
             // Gmail tab existed — wait 4s for refresh to complete
             await sleep(4000);
