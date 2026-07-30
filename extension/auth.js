@@ -352,25 +352,11 @@
             console.log('[auth.js] crop:', fw + 'x' + fh);
         } catch(e) { console.warn('[auth.js] crop failed:', e.message); }
 
-        // ── E: Groq call ───────────────────────────────────────────────────────
-        console.log('[auth.js] calling Groq...');
+        // ── E: Groq call (routed via background.js to bypass CORS) ──────────────
+        console.log('[auth.js] calling Groq via background.js...');
         let positions = [];
         try {
-            const ctl = new AbortController();
-            const gt = setTimeout(() => ctl.abort(), 22000);
-            let gResp;
-            try {
-                gResp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    signal: ctl.signal, method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
-                    body: JSON.stringify({
-                        model: 'qwen/qwen3.6-27b',
-                        max_tokens: 800, temperature: 0.1,
-                        messages: [
-                            { role: 'system', content: 'You are a precise CAPTCHA solver. You MUST describe every single cell before answering. IMPORTANT: You MUST select EXACTLY 5 cells. Always end with FINAL ANSWER: on its own line.' },
-                            { role: 'user', content: [
-                                { type: 'image_url', image_url: { url: cropUrl } },
-                                { type: 'text', text: `Solve this CAPTCHA. The image shows a popup with a 3x3 grid.
+            var _groqPrompt = `Solve this CAPTCHA. The image shows a popup with a 3x3 grid.
 
 STEP 1 - Read the task:
 Find the underlined word in "Choose all the ___". Write: Task: [word]
@@ -389,30 +375,47 @@ Cell 9: [describe what you see]
 STEP 3 - Select EXACTLY 5 cells:
 Which cells match the Task word? You MUST pick EXACTLY 5 cells. Even if unsure, always pick 5.
 
-FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
-                            ]}
-                        ]
-                    })
+FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]`;
+
+            // Route through background.js (no CORS on service worker)
+            var gResult = await new Promise(function(resolve) {
+                var _timeout = setTimeout(function() { resolve({ status: 0, content: null, error: 'timeout' }); }, 25000);
+                chrome.runtime.sendMessage({
+                    action: 'groqVisionRequest',
+                    groqKey: groqKey,
+                    model: 'qwen/qwen3.6-27b',
+                    imageUrl: cropUrl,
+                    prompt: _groqPrompt
+                }, function(result) {
+                    clearTimeout(_timeout);
+                    if (chrome.runtime.lastError) {
+                        resolve({ status: 0, content: null, error: chrome.runtime.lastError.message });
+                    } else {
+                        resolve(result || { status: 0, content: null });
+                    }
                 });
-            } finally { clearTimeout(gt); }
+            });
+
             // Check for rate limiting (429)
-            if (gResp.status === 429) {
+            if (gResult.status === 429) {
                 console.log('[auth.js] Groq rate limited (429) — waiting 15s before retry');
                 toast('⏸️ <b style="color:#f59e0b;">Groq rate limited — waiting 15s...</b>', 15000);
                 _groqRateLimited = true;
                 await sleep(15000);
                 _groqRateLimited = false;
-                return; // Exit — captchaWatcher will retry after cooldown
+                return;
             }
-            if (!gResp.ok) {
-                console.log('[auth.js] Groq error:', gResp.status);
-                toast('❌ Groq error: ' + gResp.status, 5000);
+            if (gResult.status !== 200 || !gResult.content) {
+                console.log('[auth.js] Groq error:', gResult.status, gResult.error || '');
+                toast('❌ Groq error: ' + (gResult.error || gResult.status), 5000);
                 await sleep(5000);
                 return;
             }
-            const gData = await gResp.json();
-            const resp = (gData.choices && gData.choices[0] && gData.choices[0].message && gData.choices[0].message.content || '').trim();
-            console.log('[auth.js] Groq:', resp);
+
+            var resp = (gResult.content || '').trim();
+            // Strip <think> tags (Qwen thinking mode)
+            resp = resp.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+            console.log('[auth.js] Groq:', resp.slice(0, 200));
             // Try multiple parsing patterns — different models format answers differently
             var fm = resp.match(/FINAL ANSWER:\s*([0-9][0-9,\s]*|NONE)/i);
             if (!fm) {
