@@ -1459,7 +1459,7 @@
         if (O['action'] == 'activate') {
             p = O['status'];
             if (p)
-                C();
+                L();
         }
         Q(!![]);
     });
@@ -1468,7 +1468,7 @@
         if (O['action'] == 'fetch_info') {
             g = O['data']['$username'], h = O['data']['$password'], j = O['data']['$candidateID'], k = O['data']['$selectedCity'], l = O['data']['$lat'], m = O['data']['$lng'], n = O['data']['$distance'], o = O['data']['$jobType'], p = O['data']['$active'], $version = O['data']['$version'];
             if (p) {
-                C();
+                L();
                 return;
             }
         }
