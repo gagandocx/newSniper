@@ -84,6 +84,14 @@
         // ── Verification type — only fire ONCE per session
         if (!_verifyTypeDone && text.includes('Where should we send your verification code')) return 'verify-type';
 
+        // ── Login page: email input visible
+        const emailInput = document.querySelector('input[data-test-id="input-test-id-login"]');
+        if (emailInput && !emailInput.value) return 'login-email';
+
+        // ── PIN page: pin input visible
+        const pinInput = document.querySelector('input[data-test-id="input-test-id-pin"]');
+        if (pinInput && !pinInput.value) return 'login-pin';
+
         return null;
     }
 
@@ -104,6 +112,65 @@
         if (sendBtn) {
             toast('📧 <b style="color:#00d4ff;">Sending verification code to your email...</b>');
             simulateClick(sendBtn);
+        }
+    }
+
+    // ── Login Email: fill stored email → click Continue ─────────────────────
+    async function handleLoginEmail() {
+        console.log('[auth.js] handleLoginEmail — filling email from storage');
+        var data = await new Promise(function(r) {
+            chrome.storage.local.get(['__un'], function(d) { r(d); });
+        });
+        var email = data['__un'] || '';
+        if (!email) {
+            console.log('[auth.js] No stored email — cannot auto-fill');
+            return;
+        }
+
+        var emailInput = document.querySelector('input[data-test-id="input-test-id-login"]');
+        if (!emailInput) return;
+
+        simulateInput(emailInput, email);
+        await sleep(500);
+        toast('📧 <b style="color:#00d4ff;">Filling login: ' + email + '</b>', 3000);
+
+        // Click Continue
+        await sleep(800);
+        var continueBtn = [...document.querySelectorAll('button')]
+            .find(function(b) { return /continue/i.test(b.textContent.trim()); });
+        if (continueBtn) {
+            simulateClick(continueBtn);
+            console.log('[auth.js] Continue clicked after email fill');
+        }
+    }
+
+    // ── Login PIN: fill stored PIN → click Continue ──────────────────────────
+    async function handleLoginPin() {
+        console.log('[auth.js] handleLoginPin — filling PIN from storage');
+        var data = await new Promise(function(r) {
+            chrome.storage.local.get(['__pw'], function(d) { r(d); });
+        });
+        var pin = data['__pw'] || '';
+        if (!pin) {
+            console.log('[auth.js] No stored PIN — cannot auto-fill');
+            return;
+        }
+
+        var pinInput = document.querySelector('input[data-test-id="input-test-id-pin"]');
+        if (!pinInput) return;
+
+        simulateInput(pinInput, pin);
+        await sleep(500);
+        toast('🔑 <b style="color:#00d4ff;">Filling PIN...</b>', 2000);
+
+        // Click Continue
+        await sleep(800);
+        var continueBtn = document.querySelector('button[data-test-id="button-continue"]')
+                       || [...document.querySelectorAll('button')]
+                          .find(function(b) { return /continue/i.test(b.textContent.trim()); });
+        if (continueBtn) {
+            simulateClick(continueBtn);
+            console.log('[auth.js] Continue clicked after PIN fill');
         }
     }
 
@@ -699,8 +766,10 @@
             await sleep(400);
             if      (step === 'verify-type') await handleVerifyType();
             else if (step === 'otp')         await handleOTP();
+            else if (step === 'login-email') await handleLoginEmail();
+            else if (step === 'login-pin')   await handleLoginPin();
         } finally {
-            _handling = false; // reset immediately — no extra wait
+            _handling = false;
         }
     }
 
