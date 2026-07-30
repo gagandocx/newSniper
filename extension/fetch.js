@@ -1837,32 +1837,12 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
 
     // 2. Bug 1 fix: Stuck on homepage without login → redirect to auth login
     function checkLoginRequired() {
-        var url = window.location.href;
-        // On homepage or non-app page
-        // Only match actual homepage — NOT login page or app pages
-        var isHomepage = (url === 'https://hiring.amazon.ca/' || url === 'https://hiring.amazon.ca' ||
-                          /hiring\.amazon\.ca\/?$/.test(url));
-        if (!isHomepage) return;
-
-        // Check if logged in — look for My Account nav or welcome text
-        var loggedIn = document.querySelector('[aria-label*="My Account"], [data-test-id*="account"], .hvh-header__account-name');
-        var welcomeText = document.body.innerText || '';
-        var hasWelcome = /welcome back/i.test(welcomeText);
-
-        if (!loggedIn && !hasWelcome) {
-            console.log('[health] Homepage without login — clicking Sign In button');
-            // Use Sign In button on the page (correct auth flow with tokens)
-            var signInBtn = document.querySelector('[data-test-id="topPanelSigninLink"]')
-                         || document.querySelector('[aria-label="Sign In"]')
-                         || [...document.querySelectorAll('a, button')]
-                            .find(function(el) { return /^sign.?in$/i.test((el.textContent || '').trim()); });
-            if (signInBtn) {
-                console.log('[health] Clicking Sign In button');
-                signInBtn.click();
-            } else {
-                window.location.href = 'https://hiring.amazon.ca/app#/login';
-            }
-        }
+        // DISABLED: This was causing login loops.
+        // After successful login, the page briefly shows the homepage without "My Account"
+        // element loaded yet — this function detected it as "not logged in" and redirected
+        // back to the login page, creating an infinite loop.
+        // The login flow is fully handled by auth.js now.
+        return;
     }
 
     // 3. Bug 4 fix handled above (10s reload after jobSearch load)
@@ -1883,16 +1863,8 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
                       (url.includes('/login') && url.includes('redirectUrl=')) ||
                       (url.includes('hiring.amazon.ca') && !url.includes('app#'));
         if (url === _lastUrl && isStuck) {
-            _stuckCount++;
-            console.log('[health] Stuck on', url.split('/').pop() || 'homepage', '— count:', _stuckCount);
-            if (_stuckCount >= 3) { // 90s stuck
+            if (_stuckCount >= 3) {
                 _stuckCount = 0;
-                console.log('[health] Force redirect to login via Sign In click');
-                var signInBtn = document.querySelector('[data-test-id="topPanelSigninLink"]')
-                             || document.querySelector('[aria-label="Sign In"]')
-                             || [...document.querySelectorAll('a')].find(function(el){ return /^sign.?in$/i.test((el.textContent||'').trim()); });
-                if (signInBtn) { signInBtn.click(); }
-                else { window.location.href = 'https://hiring.amazon.ca/app#/login'; }
             }
         } else {
             _stuckCount = 0;
