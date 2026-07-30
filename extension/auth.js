@@ -225,24 +225,45 @@
         await sleep(200);
         console.log('[auth.js] handleCaptcha start', new Date().toLocaleTimeString());
 
-        // ── A: Find modal ──────────────────────────────────────────────────────
+        // ── A: Find CAPTCHA area ───────────────────────────────────────────────
+        // Two modes: 1) Modal (login flow), 2) Full-page (human verification)
         const tryList = ['#captchaModal','.captcha-modal','[data-test-id="captchaModal"]',
                          '#captchaModalOverlay > *:first-child','.captcha-overlay > *:first-child'];
         let modal = null;
+        let isFullPage = false; // true = standalone "Let's confirm you are human" page
         for (const s of tryList) { const el = document.querySelector(s); if (el) { modal = el; break; } }
-        if (!modal) { console.warn('[auth.js] modal not found'); return; }
-        try { modal.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch(_) {}
-        await sleep(300);
-        const _mr0 = modal.getBoundingClientRect();
-        if (_mr0.top < 60) { window.scrollBy(0, _mr0.top - 60); await sleep(200); }
-        const mr = modal.getBoundingClientRect();
+
+        if (!modal) {
+            // Check if this is the full-page CAPTCHA ("Choose all the hats")
+            const bodyText = document.body.innerText || '';
+            if (bodyText.includes('Choose all') || bodyText.includes('confirm you are human')) {
+                // Use the entire visible page as the "modal"
+                modal = document.body;
+                isFullPage = true;
+                console.log('[auth.js] Full-page CAPTCHA detected');
+            } else {
+                console.warn('[auth.js] No CAPTCHA modal or page found');
+                return;
+            }
+        }
+
+        if (!isFullPage) {
+            try { modal.scrollIntoView({ block: 'start', behavior: 'instant' }); } catch(_) {}
+            await sleep(300);
+            const _mr0 = modal.getBoundingClientRect();
+            if (_mr0.top < 60) { window.scrollBy(0, _mr0.top - 60); await sleep(200); }
+        }
+
+        const mr = isFullPage
+            ? { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
+            : modal.getBoundingClientRect();
         const modalRect = {
             top:    Math.max(0, Math.round(mr.top)),
             left:   Math.round(mr.left),
-            width:  mr.width > 700 ? Math.round(window.innerWidth * 0.24) : Math.round(mr.width),
-            height: mr.width > 700 ? Math.round(window.innerHeight * 0.82) : Math.round(mr.height)
+            width:  isFullPage ? Math.round(window.innerWidth) : (mr.width > 700 ? Math.round(window.innerWidth * 0.24) : Math.round(mr.width)),
+            height: isFullPage ? Math.round(window.innerHeight) : (mr.width > 700 ? Math.round(window.innerHeight * 0.82) : Math.round(mr.height))
         };
-        console.log('[auth.js] modal rect:', JSON.stringify(modalRect));
+        console.log('[auth.js] CAPTCHA rect:', JSON.stringify(modalRect), 'fullPage:', isFullPage);
 
         // ── B: Groq key ────────────────────────────────────────────────────────
         let groqKey = '';
@@ -250,7 +271,7 @@
         // No fallback key — user must enter their own key in the popup
         if (!groqKey) {
             // Guide is shown after PIN entry (in fetch.js) — just remind here
-            toast('&#9888; <b style="color:#f59e0b;">No Groq API key!</b> Open the CoderSnap popup &rarr; AI Captcha Solver &rarr; paste your <span style="color:#22d3ee;font-family:monospace;">gsk_</span> key. Solving manually for now.', 8000);
+            toast('&#9888; <b style="color:#f59e0b;">No Groq API key!</b> Open the ShiftSniper popup &rarr; AI Captcha Solver &rarr; paste your <span style="color:#22d3ee;font-family:monospace;">gsk_</span> key. Solving manually for now.', 8000);
             return;
         }
 
@@ -283,200 +304,216 @@
             console.log('[auth.js] crop:', fw + 'x' + fh);
         } catch(e) { console.warn('[auth.js] crop failed:', e.message); }
 
-        // ── E: Groq call ── FIX: multi-model fallback (404 on deprecated model) ──
+        // ── E: Groq call ───────────────────────────────────────────────────────
         console.log('[auth.js] calling Groq...');
         let positions = [];
-        // ── FIX: compress image + expanded model list + 400 retry with tiny image ──
-        // Step 1: Compress crop to max 280x280 at 35% quality (many models reject large images)
-        let compCropUrl = cropUrl;
         try {
-            const _cimg = new Image();
-            await new Promise(function(res, rej) { _cimg.onload = res; _cimg.onerror = rej; _cimg.src = cropUrl; });
-            const _maxD = 280;
-            const _csc  = Math.min(_maxD / _cimg.naturalWidth, _maxD / _cimg.naturalHeight, 1);
-            const _ccv  = document.createElement('canvas');
-            _ccv.width  = Math.round(_cimg.naturalWidth  * _csc);
-            _ccv.height = Math.round(_cimg.naturalHeight * _csc);
-            _ccv.getContext('2d').drawImage(_cimg, 0, 0, _ccv.width, _ccv.height);
-            compCropUrl = _ccv.toDataURL('image/jpeg', 0.35);
-            console.log('[auth.js] Compressed:', _ccv.width+'x'+_ccv.height,
-                        Math.round(cropUrl.length/1024)+'KB →', Math.round(compCropUrl.length/1024)+'KB');
-        } catch(_ce) { console.warn('[auth.js] Compress failed:', _ce.message); }
+            const ctl = new AbortController();
+            const gt = setTimeout(() => ctl.abort(), 22000);
+            let gResp;
+            try {
+                gResp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    signal: ctl.signal, method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
+                    body: JSON.stringify({
+                        model: 'qwen/qwen3.6-27b',
+                        max_tokens: 800, temperature: 0.1,
+                        messages: [
+                            { role: 'system', content: 'You are a precise CAPTCHA solver. You MUST describe every single cell before answering. IMPORTANT: You MUST select EXACTLY 5 cells. Always end with FINAL ANSWER: on its own line.' },
+                            { role: 'user', content: [
+                                { type: 'image_url', image_url: { url: cropUrl } },
+                                { type: 'text', text: `Solve this CAPTCHA. The image shows a popup with a 3x3 grid.
 
-        // Step 2: Model list — prioritise models visible in user's Groq account (Image 3):
-        // openai/gpt-oss-120b, openai/gpt-oss-20b, qwen/qwen3.6-27b are confirmed in account.
-        // Llama 4 and Llama 3.2 vision models also tried as fallback.
-        // qwen/qwen3.6-27b is Groq's OFFICIAL replacement for Llama 4 Scout (deprecated Jun 2026)
-        // It's already in the user's free Groq account and supports image input (vision).
-        // Source: console.groq.com/docs/deprecations + console.groq.com/docs/vision
-        const _groqModels = [
-            'qwen/qwen3.6-27b',                                 // ← PRIMARY: Groq's official replacement for Llama 4 Scout, vision capable, FREE
-            'openai/gpt-oss-120b',                              // Groq's replacement for Llama 4 Maverick
-            'openai/gpt-oss-20b',                               // Smaller OSS variant
-            'llama-4-scout',                                    // Try short ID just in case
-            'meta-llama/llama-4-scout-17b-16e-instruct',       // Original full ID
-            'llama-3.2-90b-vision-preview',                     // Legacy fallback
-            'llama-3.2-11b-vision-preview'
-        ];
-        const _groqPrompt = 'Solve this CAPTCHA. The image shows a popup with a 3x3 grid.\n\nSTEP 1 - Read the task:\nFind the underlined word in \"Choose all the ___\". Write: Task: [word]\n\nSTEP 2 - Describe EVERY cell (you must fill in all 9):\nCell 1: [describe what you see]\nCell 2: [describe what you see]\nCell 3: [describe what you see]\nCell 4: [describe what you see]\nCell 5: [describe what you see]\nCell 6: [describe what you see]\nCell 7: [describe what you see]\nCell 8: [describe what you see]\nCell 9: [describe what you see]\n\nSTEP 3 - Select:\nWhich cells match the Task word? Only pick cells where that object is clearly the main subject.\n\nFINAL ANSWER: [e.g. 1,3,7] or NONE';
+STEP 1 - Read the task:
+Find the underlined word in "Choose all the ___". Write: Task: [word]
 
-        // ── FIX: Route Groq calls via background.js to bypass CORS ──────────────
-        // auth.js runs on auth.hiring.amazon.com — direct fetch() to api.groq.com
-        // is blocked by CORS policy. Background service worker has no such restriction.
-        async function _tryGroqModel(modelId, imgUrl, key) {
-            return new Promise(function(resolve) {
-                var _timer = setTimeout(function() {
-                    resolve({ ok: false, status: 0, _timeout: true });
-                }, 25000);
-                chrome.runtime.sendMessage({
-                    action: 'groqVisionRequest',
-                    groqKey: key,
-                    model: modelId,
-                    imageUrl: imgUrl,
-                    prompt: _groqPrompt
-                }, function(result) {
-                    clearTimeout(_timer);
-                    if (chrome.runtime.lastError || !result) {
-                        resolve({ ok: false, status: 0 });
-                        return;
-                    }
-                    var _content = result.content || '';
-                    // Return a fake Response-like object so existing code works unchanged
-                    resolve({
-                        ok:     result.status === 200,
-                        status: result.status || 0,
-                        json:   async function() {
-                            return { choices: [{ message: { content: _content } }] };
-                        }
-                    });
+STEP 2 - Describe EVERY cell (you must fill in all 9):
+Cell 1: [describe what you see]
+Cell 2: [describe what you see]
+Cell 3: [describe what you see]
+Cell 4: [describe what you see]
+Cell 5: [describe what you see]
+Cell 6: [describe what you see]
+Cell 7: [describe what you see]
+Cell 8: [describe what you see]
+Cell 9: [describe what you see]
+
+STEP 3 - Select EXACTLY 5 cells:
+Which cells match the Task word? You MUST pick EXACTLY 5 cells. Even if unsure, always pick 5.
+
+FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
+                            ]}
+                        ]
+                    })
                 });
-            });
-        }
-        // ─────────────────────────────────────────────────────────────────────────
-
-        try {
-            let gResp = null, usedModel = '';
-            for (const _model of _groqModels) {
-                try {
-                    let _r = await _tryGroqModel(_model, compCropUrl, groqKey);
-                    if (_r && _r.ok) { gResp = _r; usedModel = _model; break; }
-
-                    // 429 Rate Limited — stop trying all models immediately (all will be limited)
-                    // Wait 25s before allowing the captchaWatcher to retry.
-                    if (_r && _r.status === 429) {
-                        console.warn('[auth.js] 429 rate limit — waiting 25s before retry');
-                        toast('\u23F3 <b style="color:#f59e0b;">Groq rate limited — auto-retrying in 25s...</b>', 26000);
-                        await sleep(25000);
-                        return; // exit handleCaptcha — watcher will retry after its cooldown
-                    }
-
-                    if (_r && _r.status === 404) {
-                        console.warn('[auth.js] Model', _model, '\u2192 404, trying next');
-                        continue;
-                    }
-                    if (_r && _r.status === 400) {
-                        // 400: try with even tinier image (strict size limit)
-                        console.warn('[auth.js] Model', _model, '\u2192 400, retrying at 160px');
-                        try {
-                            const _ti = new Image();
-                            await new Promise(function(res, rej) { _ti.onload = res; _ti.onerror = rej; _ti.src = compCropUrl; });
-                            const _tc = document.createElement('canvas');
-                            _tc.width = Math.min(_ti.naturalWidth, 160);
-                            _tc.height = Math.round(_ti.naturalHeight * (_tc.width / _ti.naturalWidth));
-                            _tc.getContext('2d').drawImage(_ti, 0, 0, _tc.width, _tc.height);
-                            _r = await _tryGroqModel(_model, _tc.toDataURL('image/jpeg', 0.3), groqKey);
-                            if (_r && _r.ok) { gResp = _r; usedModel = _model+'(tiny)'; break; }
-                            // 400 tiny also rate limited
-                            if (_r && _r.status === 429) {
-                                toast('\u23F3 <b style="color:#f59e0b;">Groq rate limited — auto-retrying in 25s...</b>', 26000);
-                                await sleep(25000);
-                                return;
-                            }
-                        } catch(_te) {}
-                        continue;
-                    }
-                    gResp = _r; usedModel = _model; break;
-                } catch(_me) { console.warn('[auth.js] Model', _model, 'threw:', _me.message); }
+            } finally { clearTimeout(gt); }
+            // Check for rate limiting (429)
+            if (gResp.status === 429) {
+                console.log('[auth.js] Groq rate limited (429) — waiting 15s before retry');
+                toast('⏸️ <b style="color:#f59e0b;">Groq rate limited — waiting 15s...</b>', 15000);
+                _groqRateLimited = true;
+                await sleep(15000);
+                _groqRateLimited = false;
+                return; // Exit — captchaWatcher will retry after cooldown
             }
-            if (!gResp) { toast('\u274C Groq: no working model — solve CAPTCHA manually', 8000); return; }
-            // Wrong key (401), server error (500), etc — show correct message
             if (!gResp.ok) {
-                var _errMsg = gResp.status === 401
-                    ? '\u274C Groq: Invalid API key — check your Groq key in the popup'
-                    : '\u274C Groq error ' + gResp.status + ' — try again later';
-                toast(_errMsg, 6000);
+                console.log('[auth.js] Groq error:', gResp.status);
+                toast('❌ Groq error: ' + gResp.status, 5000);
+                await sleep(5000);
                 return;
             }
-            console.log('[auth.js] Groq model used:', usedModel);
             const gData = await gResp.json();
-            let resp = (gData.choices && gData.choices[0] && gData.choices[0].message && gData.choices[0].message.content || '').trim();
-
-            // ── FIX: Qwen 3.6 thinking mode wraps reasoning in <think>...</think> ──
-            // max_tokens=500 was too small — thinking block consumed all tokens before
-            // FINAL ANSWER could be output. Now using 2000 tokens + stripping think tags.
-            resp = resp.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-
-            console.log('[auth.js] Groq (stripped):', resp.slice(0, 300));
-
-            // Primary parser: look for FINAL ANSWER: X,Y,Z
-            const fm = resp.match(/FINAL ANSWER:\s*([0-9][0-9,\s]*|NONE)/i);
-            if (fm && fm[1].toUpperCase() !== 'NONE') {
+            const resp = (gData.choices && gData.choices[0] && gData.choices[0].message && gData.choices[0].message.content || '').trim();
+            console.log('[auth.js] Groq:', resp);
+            // Try multiple parsing patterns — different models format answers differently
+            var fm = resp.match(/FINAL ANSWER:\s*([0-9][0-9,\s]*|NONE)/i);
+            if (!fm) {
+                // Fallback: look for "matching cells are X, Y, Z" pattern
+                fm = resp.match(/matching cells?\s*(?:are|:)\s*([0-9][0-9,\s]*)/i);
+            }
+            if (!fm) {
+                // Fallback: look for any line that's just numbers at the end
+                fm = resp.match(/(?:^|\n)\s*([0-9](?:[,\s]+[0-9])*)\s*\.?\s*$/m);
+            }
+            if (!fm) {
+                // Fallback: find all single digits mentioned after "select" or "answer" or "match"
+                var answerSection = resp.slice(resp.toLowerCase().lastIndexOf('select'));
+                if (answerSection.length < 5) answerSection = resp.slice(-200);
+                var digits = answerSection.match(/\b([1-9])\b/g);
+                if (digits && digits.length >= 1 && digits.length <= 6) {
+                    fm = [null, digits.join(',')];
+                }
+            }
+            if (fm && fm[1] && fm[1].toUpperCase() !== 'NONE') {
                 positions = fm[1].split(/[,\s]+/).map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 1 && n <= 9);
             }
-            // Fallback parser: look for "matching cells are X, Y, Z" or "cells are X, Y"
-            // (catches responses where FINAL ANSWER format isn't used)
-            if (!positions.length) {
-                var fallbackMatch = resp.match(/(?:matching cells?|selected cells?|cells? are)[\s:]*([1-9][\s,1-9]*)/i);
-                if (fallbackMatch) {
-                    positions = fallbackMatch[1].split(/[,\s]+/).map(function(n) { return parseInt(n); }).filter(function(n) { return !isNaN(n) && n >= 1 && n <= 9; });
-                    if (positions.length) console.log('[auth.js] Used fallback parser, positions:', positions);
+
+            // Enforce exactly 5 selections — pad or trim as needed
+            if (positions.length > 0 && positions.length !== 5) {
+                console.log('[auth.js] AI gave', positions.length, 'positions — adjusting to 5');
+                if (positions.length > 5) {
+                    // Too many — keep first 5
+                    positions = positions.slice(0, 5);
+                } else {
+                    // Too few — add random cells that aren't already selected
+                    var available = [1,2,3,4,5,6,7,8,9].filter(n => positions.indexOf(n) === -1);
+                    while (positions.length < 5 && available.length > 0) {
+                        var randIdx = Math.floor(Math.random() * available.length);
+                        positions.push(available[randIdx]);
+                        available.splice(randIdx, 1);
+                    }
                 }
+                console.log('[auth.js] Adjusted to 5 positions:', positions);
             }
-            // Last resort: look for any standalone numbers 1-9 near "yes" or "curtain/bag/clock" etc
-            if (!positions.length) {
-                var yesMatches = [...resp.matchAll(/Cell\s*(\d):\s*Yes/gi)];
-                if (yesMatches.length > 0) {
-                    positions = yesMatches.map(function(m) { return parseInt(m[1]); }).filter(function(n) { return n >= 1 && n <= 9; });
-                    if (positions.length) console.log('[auth.js] Used Cell:Yes parser, positions:', positions);
-                }
-            }
-        } catch(e) { toast('\u274C Groq error: ' + e.message, 5000); return; }
+        } catch(e) { toast('❌ Groq error: ' + e.message, 5000); return; }
+
         if (!positions.length) { console.warn('[auth.js] no positions'); return; }
         console.log('[auth.js] positions:', positions);
         toast('🤖 <b style="color:#4CAF50;">Clicking: ' + positions.join(',') + '</b>', 5000);
 
         // ── F: Build cell click coordinates ───────────────────────────────────
-        const gT = modalRect.top  + modalRect.height * 0.17;
-        const gL = modalRect.left + modalRect.width  * 0.03;
-        const cW = (modalRect.width  * 0.94) / 3;
-        const cH = (modalRect.height * 0.62) / 3;
-        const cellClicks = positions.map(pos => {
-            const row = Math.floor((pos-1)/3), col = (pos-1)%3;
-            return { x: gL + col*cW + cW/2, y: gT + row*cH + cH/2 };
-        });
-
-        // ── G: ONE debugger session — click cells then Confirm via shadow DOM ──
-        console.log('[auth.js] sending clickCellsAndConfirm...');
-        const result = await new Promise(resolve => {
-            chrome.runtime.sendMessage({ action: 'clickCellsAndConfirm', cellClicks }, r => {
-                if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
-                else resolve(r || { error: 'no response' });
+        let cellClicks;
+        if (isFullPage) {
+            // Full-page CAPTCHA: find the actual image grid position
+            const gridImgs = [...document.querySelectorAll('img')].filter(img => {
+                const r = img.getBoundingClientRect();
+                return r.width >= 70 && r.width <= 250 && r.height >= 70 && r.height <= 250 && r.top > 30;
             });
-        });
-        console.log('[auth.js] clickCellsAndConfirm result:', JSON.stringify(result));
+            if (gridImgs.length >= 6) {
+                // Calculate grid bounds from actual images
+                let minX = 9999, minY = 9999, maxX = 0, maxY = 0;
+                gridImgs.forEach(img => {
+                    const r = img.getBoundingClientRect();
+                    minX = Math.min(minX, r.left);
+                    minY = Math.min(minY, r.top);
+                    maxX = Math.max(maxX, r.right);
+                    maxY = Math.max(maxY, r.bottom);
+                });
+                const gridW = maxX - minX, gridH = maxY - minY;
+                const cW = gridW / 3, cH = gridH / 3;
+                cellClicks = positions.map(pos => {
+                    const row = Math.floor((pos-1)/3), col = (pos-1)%3;
+                    return { x: minX + col*cW + cW/2, y: minY + row*cH + cH/2 };
+                });
+            } else {
+                // Fallback: estimate from page center
+                const gT = modalRect.height * 0.15;
+                const gL = modalRect.width * 0.35;
+                const cW = (modalRect.width * 0.30) / 3;
+                const cH = (modalRect.height * 0.55) / 3;
+                cellClicks = positions.map(pos => {
+                    const row = Math.floor((pos-1)/3), col = (pos-1)%3;
+                    return { x: gL + col*cW + cW/2, y: gT + row*cH + cH/2 };
+                });
+            }
+        } else {
+            // Modal CAPTCHA: original calculation
+            const gT = modalRect.top  + modalRect.height * 0.17;
+            const gL = modalRect.left + modalRect.width  * 0.03;
+            const cW = (modalRect.width  * 0.94) / 3;
+            const cH = (modalRect.height * 0.62) / 3;
+            cellClicks = positions.map(pos => {
+                const row = Math.floor((pos-1)/3), col = (pos-1)%3;
+                return { x: gL + col*cW + cW/2, y: gT + row*cH + cH/2 };
+            });
+        }
 
-        if (result.error) { toast('❌ ' + result.error, 5000); return; }
-        toast('✅ <b style="color:#4CAF50;">Submitted: ' + positions.join(',') + ' | ' + (result.confirmStatus || '?') + '</b>', 5000);
+        // ── G: Click cells then Confirm ────────────────────────────────────────
+        if (isFullPage) {
+            // Full-page mode: use debugger for cells, then click Confirm button directly
+            console.log('[auth.js] Full-page CAPTCHA — clicking cells via debugger...');
+            const clickResult = await new Promise(resolve => {
+                chrome.runtime.sendMessage({ action: 'debuggerClick', clicks: cellClicks }, r => {
+                    if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
+                    else resolve(r || { error: 'no response' });
+                });
+            });
+            console.log('[auth.js] Cell clicks result:', JSON.stringify(clickResult));
+            if (clickResult.error) { toast('❌ ' + clickResult.error, 5000); return; }
 
-        // ── H: Wait for CAPTCHA outcome (up to 6s) ────────────────────────────
-        // Only retry after "Incorrect" is confirmed AND new images are loaded
+            // Wait for selections to register, then click Confirm
+            await sleep(800);
+            const confirmBtn = [...document.querySelectorAll('button, input[type="submit"]')]
+                .find(b => /confirm/i.test(b.textContent || b.value || ''));
+            if (confirmBtn) {
+                simulateClick(confirmBtn);
+                console.log('[auth.js] Confirm button clicked (full-page)');
+                toast('✅ <b style="color:#4CAF50;">Submitted: ' + positions.join(',') + '</b>', 5000);
+            } else {
+                // Fallback: try debugger click at Confirm button location
+                console.warn('[auth.js] Confirm button not found — trying debugger click');
+                const confirmClicks = [{ x: Math.round(window.innerWidth * 0.7), y: Math.round(window.innerHeight * 0.85) }];
+                chrome.runtime.sendMessage({ action: 'debuggerClick', clicks: confirmClicks });
+            }
+        } else {
+            // Modal mode: original approach (shadow DOM pierce)
+            console.log('[auth.js] sending clickCellsAndConfirm...');
+            const result = await new Promise(resolve => {
+                chrome.runtime.sendMessage({ action: 'clickCellsAndConfirm', cellClicks }, r => {
+                    if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
+                    else resolve(r || { error: 'no response' });
+                });
+            });
+            console.log('[auth.js] clickCellsAndConfirm result:', JSON.stringify(result));
+            if (result.error) { toast('❌ ' + result.error, 5000); return; }
+            toast('✅ <b style="color:#4CAF50;">Submitted: ' + positions.join(',') + ' | ' + (result.confirmStatus || '?') + '</b>', 5000);
+        }
+
+        // ── H: Wait for CAPTCHA outcome (up to 3s) ────────────────────────────
         console.log('[auth.js] waiting for outcome...');
         let outcome = 'pending';
-        for (let w = 0; w < 12; w++) {
-            await sleep(500);
+        for (let w = 0; w < 8; w++) {
+            await sleep(400);
             const txt = document.body.innerText;
-            if (!document.querySelector('#captchaModal, .captcha-modal, awswaf-captcha')) {
-                outcome = 'success'; break;
+            // Full-page: success = page navigates away (no more "Choose all" text)
+            if (isFullPage) {
+                if (!txt.includes('Choose all') && !txt.includes('confirm you are human')) {
+                    outcome = 'success'; break;
+                }
+            } else {
+                if (!document.querySelector('#captchaModal, .captcha-modal, awswaf-captcha')) {
+                    outcome = 'success'; break;
+                }
             }
             if (txt.includes('Incorrect') || txt.includes('incorrect') || txt.includes('try again')) {
                 outcome = 'incorrect'; break;
@@ -491,6 +528,16 @@
         // If 'incorrect' or 'pending', captchaWatcher will retry after cooldown
         // with the fresh/new CAPTCHA images
     }
+    async function clickConfirm() {
+        await sleep(400);
+        const btn = [...document.querySelectorAll('button')].find(b => /confirm/i.test(b.textContent));
+        if (btn) simulateClick(btn);
+    }
+
+    // ── OTP: read from Gmail tab → fill → click Continue ────────────────────────
+    var _otpRequestedAt = 0; // Timestamp when OTP was requested — only accept newer emails
+    var _lastUsedOtp = null; // Last OTP code we tried — skip if same code appears again
+
     async function clickConfirm() {
         await sleep(400);
         const btn = [...document.querySelectorAll('button')].find(b => /confirm/i.test(b.textContent));
@@ -755,6 +802,7 @@
     // ── Main loop ─────────────────────────────────────────────────────────────
     let _handling = false;
     let _captchaHandling = false; // separate lock just for CAPTCHA
+    var _groqRateLimited = false; // Flag: Groq returned 429, need to wait longer
 
     async function runStep() {
         if (_handling) return;
@@ -802,7 +850,9 @@
             try {
                 await handleCaptcha();
             } finally {
-                await sleep(4000);
+                // Wait before allowing retry — longer if Groq was rate limited
+                var _retryCooldown = _groqRateLimited ? 15000 : 4000;
+                await sleep(_retryCooldown);
                 _captchaHandling = false;
                 console.log('[auth.js] captchaWatcher ready for retry');
             }
