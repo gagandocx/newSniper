@@ -74,6 +74,42 @@
             return;
         }
 
+        // ── Identity verification page (liveness-check) ──────────────────────
+        // Check consent boxes and click "Start identity verification"
+        var _bodyText = document.body.innerText || '';
+        if (_bodyText.includes("Let's confirm it's you") || _bodyText.includes('liveness') || 
+            _bodyText.includes('Start identity verification') || _bodyText.includes('Provide consent')) {
+            console.log('[Createapp] Identity verification page detected — checking consent boxes');
+            
+            // Check all unchecked checkboxes
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            for (var cb = 0; cb < checkboxes.length; cb++) {
+                if (!checkboxes[cb].checked) {
+                    checkboxes[cb].click();
+                    await new Promise(function(r) { setTimeout(r, 300); });
+                    console.log('[Createapp] Checked checkbox', cb + 1);
+                }
+            }
+            
+            await new Promise(function(r) { setTimeout(r, 1000); });
+            
+            // Click "Start identity verification" button
+            var startBtn = [...document.querySelectorAll('button')]
+                .find(function(b) { return /start identity verification/i.test(b.textContent.trim()); });
+            if (startBtn) {
+                console.log('[Createapp] Clicking Start identity verification');
+                _clickBtn(startBtn);
+                // Don't go back to jobSearch — let the user complete the selfie/ID
+                console.log('[Createapp] Identity verification started — user must complete manually');
+                return; // Stop here — user does selfie + ID upload manually
+            } else {
+                console.log('[Createapp] Start button not found yet — waiting...');
+                await new Promise(function(r) { setTimeout(r, 2000); });
+                await _tryFlow();
+            }
+            return;
+        }
+
         // ── No schedules available → return to jobSearch immediately ──────────
         if (_noSchedules()) {
             console.log('[Createapp] No schedules available — returning to jobSearch in 2s');
