@@ -40,7 +40,6 @@ if exist "%~dp0extension\manifest.json" (
     goto :found_source
 )
 
-:: Look for v* folders (update_sniper.bat creates these)
 for /d %%D in ("%~dp0v*") do (
     if exist "%%D\manifest.json" set "SRC=%%D"
 )
@@ -74,33 +73,32 @@ if exist "!OUT!\_metadata" rmdir /s /q "!OUT!\_metadata"
 echo       Done.
 
 :: ── Step 2: Obfuscate JS files ──────────────────────────────────
+:: NO RC4 ENCODING on any file — it corrupts runtime strings.
+:: Using string-array (base64) + control flow flattening instead.
+:: Code is still completely unreadable but strings work at runtime.
 echo.
 echo [2/3] Obfuscating JavaScript files...
 echo       (This takes 30-60 seconds)
 echo.
 
-:: ── HEAVY obfuscation: license.js, fetch.js, content.js ─────────
-:: These don't make direct API calls — safe to use RC4 string encoding
-
 echo       - license.js
-call javascript-obfuscator "!OUT!\license.js" --output "!OUT!\license.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\license.js" --output "!OUT!\license.js" --compact true --self-defending false --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - fetch.js
-call javascript-obfuscator "!OUT!\fetch.js" --output "!OUT!\fetch.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\fetch.js" --output "!OUT!\fetch.js" --compact true --self-defending false --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.5 --dead-code-injection true --dead-code-injection-threshold 0.2 --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - content.js
-call javascript-obfuscator "!OUT!\content.js" --output "!OUT!\content.js" --compact true --self-defending false --string-array true --string-array-encoding rc4 --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false --transform-object-keys true --unicode-escape-sequence true
+call javascript-obfuscator "!OUT!\content.js" --output "!OUT!\content.js" --compact true --self-defending false --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.7 --dead-code-injection true --dead-code-injection-threshold 0.3 --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
-
-:: ── MEDIUM obfuscation: auth.js, brain.js, tokenCapture.js ──────
-:: These interact with chrome.runtime.sendMessage and specific string
-:: patterns (action names, model IDs). Use string-array WITHOUT rc4
-:: encoding to keep runtime strings working correctly.
 
 echo       - auth.js
 call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --self-defending false --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false
+if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
+
+echo       - background.js
+call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array false --control-flow-flattening false --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - brain.js
@@ -110,17 +108,6 @@ if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 echo       - tokenCapture.js
 call javascript-obfuscator "!OUT!\tokenCapture.js" --output "!OUT!\tokenCapture.js" --compact true --self-defending false --string-array true --string-array-threshold 0.5 --identifier-names-generator hexadecimal --rename-globals false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
-
-:: ── LIGHT obfuscation: background.js ────────────────────────────
-:: Service worker makes direct API calls (Groq, Telegram, Google).
-:: String encoding BREAKS 'Bearer ', 'Authorization', API URLs.
-:: Only rename variables — keep all strings intact.
-
-echo       - background.js (light — keeps API strings intact)
-call javascript-obfuscator "!OUT!\background.js" --output "!OUT!\background.js" --compact true --self-defending false --string-array false --control-flow-flattening false --dead-code-injection false --identifier-names-generator hexadecimal --rename-globals false
-if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
-
-:: ── LIGHT obfuscation: other files ──────────────────────────────
 
 echo       - notif_block.js
 call javascript-obfuscator "!OUT!\notif_block.js" --output "!OUT!\notif_block.js" --compact true --self-defending false --string-array true --identifier-names-generator hexadecimal --rename-globals false
@@ -149,12 +136,5 @@ for %%A in ("!ZIP!") do echo   Size:   %%~zA bytes
 echo.
 echo   This zip is ready to send to clients.
 echo   They extract it and Load Unpacked in Chrome.
-echo.
-echo   Security layers active:
-echo     [x] Code obfuscated (unreadable)
-echo     [x] Server heartbeat (30-min re-verify)
-echo     [x] Anti-debugging (DevTools detection)
-echo     [x] License gate + email binding
-echo     [x] 1-year expiry
 echo.
 pause
