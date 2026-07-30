@@ -777,6 +777,9 @@
     async function captchaWatcher() {
         if (_captchaHandling) return;
 
+        // ONLY detect CAPTCHAs on auth pages — jobSearch has warehouse images that false-trigger
+        if (!window.location.href.includes('auth.hiring.amazon')) return;
+
         // Detect by AWS WAF custom element OR grid images
         const hasWidget = !!document.querySelector('awswaf-captcha, [id*="awswaf"], [class*="awswaf"]');
         const bodyHas   = document.body.innerText.includes('confirm you are human');
