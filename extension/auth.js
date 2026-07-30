@@ -821,15 +821,12 @@ FINAL ANSWER: [exactly 5 numbers, e.g. 1,2,4,7,9]` }
             }
         }
 
-        // Step 9: Login successful — go directly to jobSearch
-        // Don't wait for fetch.js to handle it — auth.js runs on auth.hiring.amazon domain
-        // where fetch.js redirect logic doesn't apply
-        console.log('[auth.js] OTP flow complete — navigating to jobSearch');
+        // Step 9: Login successful — go to hiring root (Amazon handles session redirect)
+        console.log('[auth.js] OTP flow complete — navigating to hiring root');
         await sleep(1000);
-        // Check if page already navigated away from auth
         if (window.location.href.includes('auth.hiring')) {
-            // Still on auth page — force navigate to jobSearch
-            window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
+            // Go to root — Amazon will redirect to jobSearch once session is established
+            window.location.href = 'https://hiring.amazon.ca/';
         }
     }
 
