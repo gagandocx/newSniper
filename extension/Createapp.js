@@ -25,14 +25,10 @@
     function _isCaptchaVisible() {
         // Check the global flag set by auth.js captchaWatcher
         if (window['_ssCaptchaActive']) return true;
-        // Also check DOM directly (in case auth.js hasn't flagged it yet)
-        if (document.body.innerText.includes('confirm you are human')) return true;
-        const _imgs = [...document.querySelectorAll('img')].filter(function(img) {
-            const r = img.getBoundingClientRect();
-            return r.width >= 60 && r.width <= 350 && r.height >= 60 && r.bottom > 50 &&
-                   img.src && img.src.startsWith('http');
-        });
-        return _imgs.length >= 6;
+        // Only detect CAPTCHA if "confirm you are human" or "Choose all" text is present
+        var bodyText = document.body.innerText || '';
+        if (bodyText.includes('confirm you are human') || bodyText.includes('Choose all')) return true;
+        return false;
     }
 
     // Wait until no CAPTCHA is visible (polls every 500ms, max maxMs)
