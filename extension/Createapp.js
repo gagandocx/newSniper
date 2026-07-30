@@ -76,11 +76,11 @@
         }
 
         // ── Identity verification page (liveness-check) ──────────────────────
-        // Check consent boxes and click "Start identity verification"
+        // Check consent boxes, click Start, then STOP completely — user takes over
         var _bodyText = document.body.innerText || '';
         if (_bodyText.includes("Let's confirm it's you") || _bodyText.includes('liveness') || 
             _bodyText.includes('Start identity verification') || _bodyText.includes('Provide consent')) {
-            console.log('[Createapp] Identity verification page detected — checking consent boxes');
+            console.log('[Createapp] Identity verification page — checking consent + clicking Start');
             
             // Check all unchecked checkboxes
             var checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -88,7 +88,6 @@
                 if (!checkboxes[cb].checked) {
                     checkboxes[cb].click();
                     await new Promise(function(r) { setTimeout(r, 300); });
-                    console.log('[Createapp] Checked checkbox', cb + 1);
                 }
             }
             
@@ -98,16 +97,10 @@
             var startBtn = [...document.querySelectorAll('button')]
                 .find(function(b) { return /start identity verification/i.test(b.textContent.trim()); });
             if (startBtn) {
-                console.log('[Createapp] Clicking Start identity verification');
                 _clickBtn(startBtn);
-                // Don't go back to jobSearch — let the user complete the selfie/ID
-                console.log('[Createapp] Identity verification started — user must complete manually');
-                return; // Stop here — user does selfie + ID upload manually
-            } else {
-                console.log('[Createapp] Start button not found yet — waiting...');
-                await new Promise(function(r) { setTimeout(r, 2000); });
-                await _tryFlow();
+                console.log('[Createapp] Start identity verification clicked — leaving tab for user');
             }
+            // STOP completely — no more recursion, no more interference on this tab
             return;
         }
 
