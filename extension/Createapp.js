@@ -16,9 +16,10 @@
     }
 
     function _goJobSearch() {
-        setTimeout(function() {
-            window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
-        }, 10000);
+        // DISABLED: Don't redirect back to jobSearch.
+        // This tab stays for user to complete further steps (identity verification, etc).
+        // The main jobSearch tab continues scanning independently.
+        console.log('[Createapp] Application submitted — leaving tab for user to complete.');
     }
 
     function _isCaptchaVisible() {
@@ -154,7 +155,7 @@
             }
             console.log('[Createapp] Clicking Create Application');
             _clickBtn(_createBtn);
-            console.log('[Createapp] Application submitted — returning to jobSearch in 10s');
+            console.log('[Createapp] Application submitted — tab stays for user');
             _goJobSearch();
             return;
         }
