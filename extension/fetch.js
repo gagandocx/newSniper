@@ -1359,95 +1359,47 @@
 
     async function L() {
         if (!b) {
-            // ── First-time setup: gather credentials before proceeding ────────
+            // First-time wizard removed — Groq guide is shown after PIN in C()
             if (!g) {
+                // Re-check storage — g might not be loaded yet on fresh page
                 var _storedEmail = await chrome['storage']['local']['get']('__un')['then'](function(d) { return d['__un'] || null; });
                 if (_storedEmail) {
                     g = _storedEmail;
+                } else {
+                    // Truly no email — but don't redirect to login if we just came FROM login
+                    if (window.location.href.includes('redirectUrl') || window.location.href.includes('jobSearch')) {
+                        console.log('[fetch.js] L() — no email but on redirect/jobSearch page, waiting...');
+                        return;
+                    }
+                    const O = y(i);
+                    window['location']['href'] = 'https://auth.hiring.amazon.ca/#/login';
+                    return;
                 }
             }
-            if (!i) {
-                var _storedCountry = await chrome['storage']['local']['get']('__country')['then'](function(d) { return d['__country'] || null; });
-                if (_storedCountry) {
-                    i = _storedCountry;
+            if (g) {
+                const P = y(i);
+                // Flag: tell checkRedirect not to interrupt us while we fetch candidateID
+                window['_candidateIDFetching'] = true;
+                window['location']['href'] = 'https://hiring.amazon.ca/app#/contactInformation', await f();
+                let Q = null;
+                const R = document['querySelector']('input[data-test-id=\x22input-test-id-emailId\x22]');
+                if (R && R['value']) {
+                    Q = R['value'];
+                    window['location']['href'] = 'https://hiring.amazon.ca/app#/jobSearch';
                 }
-            }
-            if (!h) {
-                var _storedPin = await chrome['storage']['local']['get']('__pw')['then'](function(d) { return d['__pw'] || null; });
-                if (_storedPin) {
-                    h = _storedPin;
+                window['_candidateIDFetching'] = false;
+                if (p) {
+                    // UNLIMITED: skip server config check entirely
+                    await chrome['storage']['local']['set']({
+                        '__cr': 9999,
+                        '__isProUser': true
+                    });
+                    // Credits check bypassed — unlimited usage
                 }
-            }
-
-            // If any credentials missing, show setup wizard HERE (before login)
-            if (!i && typeof Swal !== 'undefined') {
-                i = await Swal['fire']({
-                    'title': 'CoderSnap Setup',
-                    'html': '<b>Choose your target region</b><br><small style="color:#aaa;">Select the country where you want to hunt for warehouse shifts.</small>',
-                    'input': 'select',
-                    'inputOptions': { 'Canada': 'Canada', 'United\x20States': 'United States' },
-                    'inputPlaceholder': 'Select your region',
-                    'allowEscapeKey': false, 'allowEnterKey': false, 'allowOutsideClick': false,
-                    'icon': 'warning',
-                    'confirmButtonText': 'Confirm Region →',
-                    'inputValidator': function(v) { return v ? '' : 'You need to select a country'; }
-                })['then'](function(a0) {
-                    chrome['storage']['local']['set']({ '__country': a0['value'] });
-                    return a0['value'];
-                });
-            }
-
-            if (!g && typeof Swal !== 'undefined') {
-                g = await Swal['fire']({
-                    'title': 'Account Authentication',
-                    'html': '<b>Enter your Amazon hiring account email</b>',
-                    'input': 'email',
-                    'inputLabel': 'Amazon account email',
-                    'inputPlaceholder': 'your@email.com',
-                    'allowEscapeKey': false, 'allowEnterKey': false, 'allowOutsideClick': false,
-                    'icon': 'warning',
-                    'confirmButtonText': 'Continue →'
-                })['then'](function(a0) {
-                    chrome['storage']['local']['set']({ '__un': a0['value'] });
-                    return a0['value'];
-                });
-            }
-
-            if (!h && typeof Swal !== 'undefined') {
-                h = await Swal['fire']({
-                    'title': 'Security Verification',
-                    'html': '<b>Enter your 6-digit Amazon account PIN</b>',
-                    'input': 'password',
-                    'inputLabel': 'Account PIN',
-                    'inputPlaceholder': '••••••',
-                    'inputAttributes': { 'maxlength': 6, 'pattern': '\\d*' },
-                    'allowEscapeKey': false, 'allowEnterKey': false, 'allowOutsideClick': false,
-                    'icon': 'warning',
-                    'confirmButtonText': 'Start Hunting →'
-                })['then'](function(a0) {
-                    chrome['storage']['local']['set']({ '__pw': a0['value'] });
-                    return a0['value'];
-                });
-            }
-
-            // Now all credentials gathered — proceed to login
-            if (!g) {
-                console.log('[fetch.js] L() — still no email after wizard');
-                return;
-            }
-
-            // Skip contactInformation — go directly to jobSearch or login
-            if (!window.location.href.includes('jobSearch')) {
-                window['location']['href'] = 'https://hiring.amazon.ca/app#/jobSearch';
-                return;
-            }
-
-            if (p) {
-                await chrome['storage']['local']['set']({
-                    '__cr': 9999,
-                    '__isProUser': true
-                });
-                _startScan();
+                if (p) { _startScan(); }
+                else {
+                }
+            } else {
             }
         }
     }
@@ -1459,7 +1411,7 @@
         if (O['action'] == 'activate') {
             p = O['status'];
             if (p)
-                L();
+                C();
         }
         Q(!![]);
     });
@@ -1468,7 +1420,7 @@
         if (O['action'] == 'fetch_info') {
             g = O['data']['$username'], h = O['data']['$password'], j = O['data']['$candidateID'], k = O['data']['$selectedCity'], l = O['data']['$lat'], m = O['data']['$lng'], n = O['data']['$distance'], o = O['data']['$jobType'], p = O['data']['$active'], $version = O['data']['$version'];
             if (p) {
-                L();
+                C();
                 return;
             }
         }
