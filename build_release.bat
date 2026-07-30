@@ -104,7 +104,7 @@ call javascript-obfuscator "!OUT!\content.js" --output "!OUT!\content.js" --comp
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - auth.js
-call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --string-array true --string-array-threshold 0.75 --control-flow-flattening true --control-flow-flattening-threshold 0.4 --identifier-names-generator hexadecimal --rename-globals false --self-defending false
+call javascript-obfuscator "!OUT!\auth.js" --output "!OUT!\auth.js" --compact true --string-array true --string-array-threshold 0.5 --control-flow-flattening false --identifier-names-generator hexadecimal --rename-globals false --self-defending false
 if %errorlevel% neq 0 ( echo [ERROR] Failed & pause & exit /b 1 )
 
 echo       - background.js
@@ -123,7 +123,7 @@ echo       - notif_block.js
 call javascript-obfuscator "!OUT!\notif_block.js" --output "!OUT!\notif_block.js" --compact true --string-array true --identifier-names-generator hexadecimal --rename-globals false --self-defending false
 
 echo       - Createapp.js
-call javascript-obfuscator "!OUT!\Createapp.js" --output "!OUT!\Createapp.js" --compact true --string-array true --identifier-names-generator hexadecimal --rename-globals false --self-defending false
+call javascript-obfuscator "!OUT!\Createapp.js" --output "!OUT!\Createapp.js" --compact true --string-array false --control-flow-flattening false --identifier-names-generator hexadecimal --rename-globals false --self-defending false
 
 echo.
 echo       All files obfuscated.
