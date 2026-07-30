@@ -638,33 +638,9 @@
         var url = window.location.href;
         var bodyText = (document.body && document.body.innerText) || '';
 
+        // ── NEVER intervene on auth pages — auth.js handles login/OTP/CAPTCHA ──
         if (url.includes('auth.hiring.amazon')) {
-            var captchaCount = 0;
-            var imgs = document.querySelectorAll('img');
-            for (var i = 0; i < imgs.length; i++) {
-                var r = imgs[i].getBoundingClientRect();
-                if (r.width >= 60 && r.width <= 350 && r.height >= 60 && r.height <= 350 &&
-                    r.bottom > 50 && imgs[i].src && imgs[i].src.startsWith('http')) captchaCount++;
-            }
-            if (captchaCount >= 6 || document.querySelector('awswaf-captcha, [id*="awswaf"]') ||
-                bodyText.includes('confirm you are human')) return 'AUTH_CAPTCHA';
-            if (bodyText.includes('verification code has been sent') ||
-                document.querySelector('input[data-test-id="input-test-id-code"]')) return 'AUTH_OTP';
-            if (bodyText.includes('Where should we send your verification code')) return 'AUTH_VERIFY_TYPE';
-            if (url.includes('#/login') || url.includes('/login')) {
-                var isWelcome = bodyText.includes('Welcome back') || bodyText.includes('continue where you left');
-                var hasSearch = false;
-                var els = document.querySelectorAll('button, a');
-                for (var w = 0; w < els.length; w++) { if (/search all jobs/i.test(els[w].textContent)) { hasSearch = true; break; } }
-                if (isWelcome || (hasSearch && !document.querySelector('input[data-test-id="input-test-id-login"]'))) return 'WELCOME_BACK';
-                var pin = document.querySelector('input[data-test-id="input-test-id-pin"]');
-                if (pin) return 'LOGIN_FILLING';
-                var email = document.querySelector('input[data-test-id="input-test-id-login"]');
-                if (email && email.value) return 'LOGIN_FILLING';
-                if (email) return 'LOGIN_PAGE';
-                return 'LOGIN_PAGE';
-            }
-            return 'REDIRECT';
+            return 'IDLE'; // Let auth.js handle everything on the auth domain
         }
 
         if (url.includes('hiring.amazon')) {
