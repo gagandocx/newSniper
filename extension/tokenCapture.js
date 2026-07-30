@@ -201,8 +201,11 @@
         } catch(e) {}
     }
 
-    // Start the 2-second active poll — ONLY on jobSearch page
-    // Don't poll on jobDetail or application pages (interferes with apply flow)
+    // Start the 2-second active poll — DISABLED to avoid WAF rate limiting
+    // fetch.js already handles the 2s scan cycle. tokenCapture only does PASSIVE
+    // interception (catches Amazon's own calls) + header theft (for fetch.js to use).
+    // Active polling caused double requests → WAF blocked everything.
+    /*
     setTimeout(function() {
         var url = window.location.href;
         if (url.includes('app#/jobSearch') || (url.includes('/app') && !url.includes('jobDetail') && !url.includes('application'))) {
@@ -212,6 +215,8 @@
             console.log('[SS] ℹ️ NOT polling — on apply/detail page');
         }
     }, 3000);
+    */
+    console.log('[SS] v8.9.7.5 PASSIVE MODE — intercepts Amazon calls + steals headers for fetch.js');
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Handle requests from content script (fetch.js)
@@ -250,5 +255,5 @@
         }));
     });
 
-    console.log('[SS] v8.9.7.5 HYPER MODE ready — passive intercept + active 2s poll');
+    console.log('[SS] v8.9.7.5 PASSIVE MODE ready — intercepts Amazon responses + header theft for fetch.js');
 })();
