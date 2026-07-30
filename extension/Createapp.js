@@ -133,8 +133,12 @@
         if (_nextBtn) {
             console.log('[Createapp] Clicking Next');
             _clickBtn(_nextBtn);
-            // Wait 2s for page to update, then look for Create Application
-            await new Promise(function(r) { setTimeout(r, 2000); });
+            // Poll rapidly for Create Application (every 200ms, up to 5s)
+            for (var _p = 0; _p < 25; _p++) {
+                await new Promise(function(r) { setTimeout(r, 200); });
+                var _cBtn = _getBtn('Create Application');
+                if (_cBtn) { break; }
+            }
             await _tryFlow(); // recurse to pick up Create Application button
             return;
         }
@@ -155,17 +159,16 @@
             return;
         }
 
-        // Neither button found yet — wait for DOM to update (MutationObserver)
+        // Neither button found yet — poll rapidly (every 200ms) with MutationObserver
         console.log('[Createapp] Waiting for Next or Create Application button...');
         await new Promise(function(res) {
             let _resolved = false;
             const _ob = new MutationObserver(function() {
-                // Check for no-schedules state first (avoids infinite wait)
                 if (!_resolved && _noSchedules()) {
                     _resolved = true;
                     _ob.disconnect();
-                    console.log('[Createapp] No schedules detected via MutationObserver — going to jobSearch');
-                    setTimeout(function() { window.location.href = 'https://hiring.amazon.ca/app#/jobSearch'; }, 1000);
+                    console.log('[Createapp] No schedules detected — going to jobSearch');
+                    setTimeout(function() { window.location.href = 'https://hiring.amazon.ca/app#/jobSearch'; }, 500);
                     res();
                     return;
                 }
@@ -176,10 +179,19 @@
                 }
             });
             _ob.observe(document.body, { childList: true, subtree: true });
-            // Timeout fallback: try again after 5s even if no mutation
+            // Also poll every 200ms as backup (MutationObserver might miss)
+            var _pollId = setInterval(function() {
+                if (!_resolved && (_getBtn('Next') || _getBtn('Create Application') || _noSchedules())) {
+                    _resolved = true;
+                    _ob.disconnect();
+                    clearInterval(_pollId);
+                    res();
+                }
+            }, 200);
+            // Timeout: 3s max wait (was 5s)
             setTimeout(function() {
-                if (!_resolved) { _resolved = true; _ob.disconnect(); res(); }
-            }, 5000);
+                if (!_resolved) { _resolved = true; _ob.disconnect(); clearInterval(_pollId); res(); }
+            }, 3000);
         });
 
         await _tryFlow(); // recurse after buttons appear
