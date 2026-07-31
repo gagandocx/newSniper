@@ -93,10 +93,12 @@ function handleRequest(e) {
       result = handleActivate(params);
     } else if (action === 'verify') {
       result = handleVerify(params);
+    } else if (action === 'heartbeat') {
+      result = handleHeartbeat(params);
     } else if (action === 'list') {
       result = handleList(params);
     } else {
-      result = { success: false, error: 'Unknown action. Use: activate, verify, or list' };
+      result = { success: false, error: 'Unknown action. Use: activate, verify, heartbeat, or list' };
     }
   } catch (err) {
     result = { success: false, error: 'Server error: ' + err.message };
@@ -276,4 +278,64 @@ function handleList(params) {
   }
   
   return { success: true, total: keys.length, keys: keys };
+}
+
+
+
+// ── HEARTBEAT: Receive live stats from extension ──────────────────
+// Writes to "Activity Dashboard" tab (creates it if not exists)
+function handleHeartbeat(params) {
+  var email = (params.email || '').toLowerCase().trim();
+  var key = (params.key || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  
+  if (!email || !key) return { success: false, error: 'Missing email or key' };
+  
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var dashSheet = ss.getSheetByName('Activity Dashboard');
+  
+  // Create the dashboard tab if it doesn't exist
+  if (!dashSheet) {
+    dashSheet = ss.insertSheet('Activity Dashboard');
+    dashSheet.getRange(1, 1, 1, 12).setValues([[
+      'Email', 'Key', 'Status', 'Duration', 'Shifts Found', 'Applied',
+      'CAPTCHA Solved', 'Rate Limits', 'Scans', 'City', 'Radius', 'Last Updated'
+    ]]);
+    dashSheet.getRange(1, 1, 1, 12).setFontWeight('bold');
+    dashSheet.setFrozenRows(1);
+  }
+  
+  // Find existing row for this email, or create new one
+  var data = dashSheet.getDataRange().getValues();
+  var rowIdx = -1;
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).toLowerCase().trim() === email) {
+      rowIdx = i + 1; // Sheets is 1-indexed
+      break;
+    }
+  }
+  
+  var rowData = [
+    email,
+    key,
+    params.status || 'unknown',
+    params.duration || '0min',
+    params.shiftsFound || '0',
+    params.applied || '0',
+    params.captchaSolved || '0',
+    params.rateLimitHits || '0',
+    params.scans || '0',
+    params.city || 'Any',
+    params.radius || '50',
+    new Date().toISOString()
+  ];
+  
+  if (rowIdx > 0) {
+    // Update existing row
+    dashSheet.getRange(rowIdx, 1, 1, 12).setValues([rowData]);
+  } else {
+    // Append new row
+    dashSheet.appendRow(rowData);
+  }
+  
+  return { success: true };
 }

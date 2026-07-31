@@ -1,4 +1,54 @@
 (async function (a) {
+    // ── ACTIVITY STATS — tracked and sent to Google Sheet every 5 min ────────
+    var _stats = {
+        startedAt: Date.now(),
+        shiftsFound: 0,
+        applied: 0,
+        captchaSolved: 0,
+        rateLimitHits: 0,
+        scansCompleted: 0,
+        lastShiftFoundAt: null
+    };
+    // Make stats accessible globally so other functions can increment them
+    window['__cs_stats'] = _stats;
+
+    (function _activityHeartbeat() {
+        var STATS_INTERVAL = 5 * 60 * 1000; // 5 minutes
+        var LICENSE_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
+
+        async function _sendStats() {
+            try {
+                var data = await new Promise(function(r) {
+                    chrome.storage.local.get(['__cs_license_key', '__cs_license_email', 'selectedCity', 'distance'], function(d) { r(d); });
+                });
+                if (!data['__cs_license_key'] || !data['__cs_license_email']) return;
+
+                var durationMin = Math.round((Date.now() - _stats.startedAt) / 60000);
+                var url = LICENSE_URL + '?action=heartbeat'
+                    + '&key=' + encodeURIComponent(data['__cs_license_key'])
+                    + '&email=' + encodeURIComponent(data['__cs_license_email'])
+                    + '&status=running'
+                    + '&duration=' + encodeURIComponent(durationMin + 'min')
+                    + '&shiftsFound=' + _stats.shiftsFound
+                    + '&applied=' + _stats.applied
+                    + '&captchaSolved=' + _stats.captchaSolved
+                    + '&rateLimitHits=' + _stats.rateLimitHits
+                    + '&scans=' + _stats.scansCompleted
+                    + '&city=' + encodeURIComponent(data['selectedCity'] || 'Any')
+                    + '&radius=' + encodeURIComponent(data['distance'] || '50')
+                    + '&lastShift=' + encodeURIComponent(_stats.lastShiftFoundAt || 'none');
+
+                chrome.runtime.sendMessage({ action: 'licenseRequest', url: url }, function() {});
+            } catch(e) {}
+        }
+
+        setTimeout(function() {
+            _sendStats();
+            setInterval(_sendStats, STATS_INTERVAL);
+        }, 60000);
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
+
     // ── ONLINE LICENSE CHECK — Extension won't work without verified license ──
     var _csLicenseOk = false;
     var _csLicensedEmail = null;
@@ -1004,7 +1054,8 @@
                     // 403/429: rate limited — switch to random 3-5s interval until 200 returns
                     if (!window['_rateLimited']) {
                         window['_rateLimited'] = true;
-                        window['_normalInterval'] = c; // save original interval
+                        window['_normalInterval'] = c;
+                        _stats.rateLimitHits++;
                         console.log('[fetch.js] 403/429 detected — switching to random 3-5s interval');
                     }
                     var _randomMs = (3000 + Math['floor'](Math['random']() * 2000)); // 3000-5000ms
@@ -1028,9 +1079,13 @@
                 _ringState('', 'Job Checking...', c); // Restore animation to normal scan interval
             }
             const T = await S['json'](), U = T['data']['searchJobCardsByLocation']['jobCards'];
+            _stats.scansCompleted++;
             if (U && U['length'] > 0x0) {
                 // Rich toast: show ALL found jobs (any city, any range)
                 const _ci = y(i);
+                // ── INCREMENT STATS: shifts found ──
+                _stats.shiftsFound += U['length'];
+                _stats.lastShiftFoundAt = new Date().toLocaleTimeString();
                 let _allJobsHtml = '<div style="text-align:left;font-size:12px;color:white;max-width:340px;font-family:sans-serif;">';
                 _allJobsHtml += '<div style="font-weight:bold;font-size:14px;color:#4CAF50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(76,175,80,0.4);">\uD83D\uDD0D ' + U['length'] + ' Job' + (U['length'] > 1 ? 's' : '') + ' Found!</div>';
                 U['slice'](0, 6)['forEach'](function (_job, _idx) {
@@ -1233,6 +1288,8 @@
                         'background': 'rgba(15,15,15,0.92)',
                         'html': '<div style="color:white;font-size:13px;"><b style="color:#00d4ff;">🎯 TARGET ACQUIRED!</b><br><span style="color:#aaa;font-size:12px;">Deploying application to ' + (V['city'] || 'matched city') + '...</span></div>'
                     });
+                    // ── INCREMENT STATS: applied ──
+                    _stats.applied++;
                     U = V;
                     break;
             }
