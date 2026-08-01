@@ -1055,8 +1055,17 @@
                     if (!window['_rateLimited']) {
                         window['_rateLimited'] = true;
                         window['_normalInterval'] = c;
+                        window['_rateLimitStarted'] = Date.now();
                         _stats.rateLimitHits++;
                         console.log('[fetch.js] 403/429 detected — switching to random 3-5s interval');
+                    }
+                    // If rate limited for 10+ minutes straight — full session reset
+                    if (window['_rateLimitStarted'] && (Date.now() - window['_rateLimitStarted']) > 10 * 60 * 1000) {
+                        console.log('[fetch.js] Rate limited for 10+ minutes — full session reset');
+                        window['_rateLimited'] = false;
+                        window['_rateLimitStarted'] = null;
+                        window.location.href = 'https://auth.hiring.amazon.ca/#/login';
+                        return;
                     }
                     var _randomMs = (3000 + Math['floor'](Math['random']() * 2000)); // 3000-5000ms
                     _ringState('warn', 'Rate limited — retry in ' + Math['round'](_randomMs/1000) + 's', _randomMs);
@@ -1073,6 +1082,7 @@
             // 200 OK — if we were rate limited, restore normal interval
             if (window['_rateLimited']) {
                 window['_rateLimited'] = false;
+                window['_rateLimitStarted'] = null;
                 c = window['_normalInterval'];
                 console.log('[fetch.js] 200 OK — restored normal interval:', c, 'ms');
                 _startScan();
@@ -1825,14 +1835,25 @@ chrome['runtime']['onMessage']['addListener'](function(msg, sender, sendResponse
             if ((url === 'https://hiring.amazon.ca/' || url === 'https://hiring.amazon.ca' ||
                  url.includes('hiring.amazon.ca/#') || url === 'https://hiring.amazon.com/' ||
                  url.includes('hiring.amazon.com/#')) && !url.includes('app#')) {
-                var loggedIn = document.querySelector('[data-test-id="my-account"], .hvh-header__account, [class*="myAccount"]');
-                if (loggedIn || data._pendingJobRedirect) {
-                    // Guard: fire only once per root visit — prevents double redirect that
-                    // would dismiss any popup the user is reading (resets after 10s)
+                // Try clicking "Search all jobs" button first
+                var searchAllBtn = [...document.querySelectorAll('button, a')]
+                    .find(function(el) { return /search all jobs/i.test(el.textContent.trim()); });
+                if (searchAllBtn) {
                     if (!window['_ssRootNavFired']) {
                         window['_ssRootNavFired'] = true;
                         setTimeout(function() { window['_ssRootNavFired'] = false; }, 10000);
-                        console.log('[fetch.js] On homepage after login — redirecting to jobSearch');
+                        console.log('[fetch.js] Homepage — clicking "Search all jobs"');
+                        searchAllBtn.click();
+                    }
+                    return;
+                }
+                // Fallback: redirect if logged in
+                var loggedIn = document.querySelector('[data-test-id="my-account"], .hvh-header__account, [class*="myAccount"]');
+                if (loggedIn || data._pendingJobRedirect) {
+                    if (!window['_ssRootNavFired']) {
+                        window['_ssRootNavFired'] = true;
+                        setTimeout(function() { window['_ssRootNavFired'] = false; }, 10000);
+                        console.log('[fetch.js] On homepage — redirecting to jobSearch');
                         doRedirect('homepage-post-login');
                     }
                     return;
