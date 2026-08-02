@@ -1,5 +1,7 @@
 (async function (a) {
     // ── ACTIVITY STATS — tracked and sent to Google Sheet every 5 min ────────
+    // Stats now PERSIST across restarts using chrome.storage.local
+    // Session stats track the current run; lifetime stats accumulate forever
     var _stats = {
         startedAt: Date.now(),
         shiftsFound: 0,
@@ -9,12 +11,63 @@
         scansCompleted: 0,
         lastShiftFoundAt: null
     };
+    // Lifetime stats — loaded from storage, never reset
+    var _lifetimeStats = {
+        shiftsFound: 0,
+        applied: 0,
+        captchaSolved: 0,
+        rateLimitHits: 0,
+        scansCompleted: 0,
+        totalSessions: 0,
+        firstStartedAt: null
+    };
+
+    // Load persisted lifetime stats from chrome.storage.local
+    await new Promise(function(resolve) {
+        chrome.storage.local.get(['__cs_lifetime_stats'], function(data) {
+            if (data['__cs_lifetime_stats']) {
+                var saved = data['__cs_lifetime_stats'];
+                _lifetimeStats.shiftsFound = saved.shiftsFound || 0;
+                _lifetimeStats.applied = saved.applied || 0;
+                _lifetimeStats.captchaSolved = saved.captchaSolved || 0;
+                _lifetimeStats.rateLimitHits = saved.rateLimitHits || 0;
+                _lifetimeStats.scansCompleted = saved.scansCompleted || 0;
+                _lifetimeStats.totalSessions = saved.totalSessions || 0;
+                _lifetimeStats.firstStartedAt = saved.firstStartedAt || null;
+            }
+            // Record first-ever start time if not set
+            if (!_lifetimeStats.firstStartedAt) {
+                _lifetimeStats.firstStartedAt = new Date().toISOString();
+            }
+            // Increment session count for this new run
+            _lifetimeStats.totalSessions++;
+            // Save immediately so session count is recorded
+            chrome.storage.local.set({ '__cs_lifetime_stats': _lifetimeStats });
+            resolve();
+        });
+    });
+
     // Make stats accessible globally so other functions can increment them
     window['__cs_stats'] = _stats;
+    window['__cs_lifetime_stats'] = _lifetimeStats;
+
+    // Helper: persist lifetime stats to storage (called after every heartbeat and on stat changes)
+    function _persistLifetimeStats() {
+        chrome.storage.local.set({ '__cs_lifetime_stats': _lifetimeStats });
+    }
 
     (function _activityHeartbeat() {
         var STATS_INTERVAL = 5 * 60 * 1000; // 5 minutes
         var LICENSE_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
+
+        // Track what we last sent so we only send the NEW increments each heartbeat
+        var _lastSent = {
+            shiftsFound: 0,
+            applied: 0,
+            captchaSolved: 0,
+            rateLimitHits: 0,
+            scansCompleted: 0
+        };
 
         async function _sendStats() {
             try {
@@ -23,20 +76,49 @@
                 });
                 if (!data['__cs_license_key'] || !data['__cs_license_email']) return;
 
+                // Calculate new increments since last send
+                var newShiftsFound = _stats.shiftsFound - _lastSent.shiftsFound;
+                var newApplied = _stats.applied - _lastSent.applied;
+                var newCaptcha = _stats.captchaSolved - _lastSent.captchaSolved;
+                var newRateLimit = _stats.rateLimitHits - _lastSent.rateLimitHits;
+                var newScans = _stats.scansCompleted - _lastSent.scansCompleted;
+
+                // Add new increments to lifetime totals
+                _lifetimeStats.shiftsFound += newShiftsFound;
+                _lifetimeStats.applied += newApplied;
+                _lifetimeStats.captchaSolved += newCaptcha;
+                _lifetimeStats.rateLimitHits += newRateLimit;
+                _lifetimeStats.scansCompleted += newScans;
+
+                // Update _lastSent to current session values
+                _lastSent.shiftsFound = _stats.shiftsFound;
+                _lastSent.applied = _stats.applied;
+                _lastSent.captchaSolved = _stats.captchaSolved;
+                _lastSent.rateLimitHits = _stats.rateLimitHits;
+                _lastSent.scansCompleted = _stats.scansCompleted;
+
+                // Persist lifetime stats locally
+                _persistLifetimeStats();
+
                 var durationMin = Math.round((Date.now() - _stats.startedAt) / 60000);
                 var url = LICENSE_URL + '?action=heartbeat'
                     + '&key=' + encodeURIComponent(data['__cs_license_key'])
                     + '&email=' + encodeURIComponent(data['__cs_license_email'])
                     + '&status=running'
                     + '&duration=' + encodeURIComponent(durationMin + 'min')
-                    + '&shiftsFound=' + _stats.shiftsFound
-                    + '&applied=' + _stats.applied
-                    + '&captchaSolved=' + _stats.captchaSolved
-                    + '&rateLimitHits=' + _stats.rateLimitHits
-                    + '&scans=' + _stats.scansCompleted
+                    + '&shiftsFound=' + _lifetimeStats.shiftsFound
+                    + '&applied=' + _lifetimeStats.applied
+                    + '&captchaSolved=' + _lifetimeStats.captchaSolved
+                    + '&rateLimitHits=' + _lifetimeStats.rateLimitHits
+                    + '&scans=' + _lifetimeStats.scansCompleted
                     + '&city=' + encodeURIComponent(data['selectedCity'] || 'Any')
                     + '&radius=' + encodeURIComponent(data['distance'] || '50')
-                    + '&lastShift=' + encodeURIComponent(_stats.lastShiftFoundAt || 'none');
+                    + '&lastShift=' + encodeURIComponent(_stats.lastShiftFoundAt || 'none')
+                    + '&totalSessions=' + _lifetimeStats.totalSessions
+                    + '&firstStarted=' + encodeURIComponent(_lifetimeStats.firstStartedAt || 'unknown')
+                    + '&sessionScans=' + _stats.scansCompleted
+                    + '&sessionFound=' + _stats.shiftsFound
+                    + '&sessionApplied=' + _stats.applied;
 
                 chrome.runtime.sendMessage({ action: 'licenseRequest', url: url }, function() {});
             } catch(e) {}

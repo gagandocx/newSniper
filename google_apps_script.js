@@ -284,6 +284,8 @@ function handleList(params) {
 
 // ── HEARTBEAT: Receive live stats from extension ──────────────────
 // Writes to "Activity Dashboard" tab (creates it if not exists)
+// Stats are now LIFETIME TOTALS sent from the extension — they never reset
+// The extension persists stats in chrome.storage.local and accumulates across restarts
 function handleHeartbeat(params) {
   var email = (params.email || '').toLowerCase().trim();
   var key = (params.key || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -293,15 +295,32 @@ function handleHeartbeat(params) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var dashSheet = ss.getSheetByName('Activity Dashboard');
   
-  // Create the dashboard tab if it doesn't exist
+  // Create the dashboard tab if it doesn't exist (expanded columns for lifetime + session data)
   if (!dashSheet) {
     dashSheet = ss.insertSheet('Activity Dashboard');
-    dashSheet.getRange(1, 1, 1, 12).setValues([[
-      'Email', 'Key', 'Status', 'Duration', 'Shifts Found', 'Applied',
-      'CAPTCHA Solved', 'Rate Limits', 'Scans', 'City', 'Radius', 'Last Updated'
+    dashSheet.getRange(1, 1, 1, 18).setValues([[
+      'Email', 'Key', 'Status', 'Session Duration',
+      'Total Shifts Found', 'Total Applied', 'Total CAPTCHA Solved', 'Total Rate Limits', 'Total Scans',
+      'Sessions', 'First Started',
+      'This Session Scans', 'This Session Found', 'This Session Applied',
+      'City', 'Radius', 'Last Shift', 'Last Updated'
     ]]);
-    dashSheet.getRange(1, 1, 1, 12).setFontWeight('bold');
+    dashSheet.getRange(1, 1, 1, 18).setFontWeight('bold');
     dashSheet.setFrozenRows(1);
+  } else {
+    // Migrate existing dashboard: check if headers need updating (old format had 12 cols)
+    var currentHeaders = dashSheet.getRange(1, 1, 1, 1).getValue();
+    var lastCol = dashSheet.getLastColumn();
+    if (lastCol < 18) {
+      dashSheet.getRange(1, 1, 1, 18).setValues([[
+        'Email', 'Key', 'Status', 'Session Duration',
+        'Total Shifts Found', 'Total Applied', 'Total CAPTCHA Solved', 'Total Rate Limits', 'Total Scans',
+        'Sessions', 'First Started',
+        'This Session Scans', 'This Session Found', 'This Session Applied',
+        'City', 'Radius', 'Last Shift', 'Last Updated'
+      ]]);
+      dashSheet.getRange(1, 1, 1, 18).setFontWeight('bold');
+    }
   }
   
   // Find existing row for this email, or create new one
@@ -314,6 +333,7 @@ function handleHeartbeat(params) {
     }
   }
   
+  // Extension now sends lifetime totals — just write them directly
   var rowData = [
     email,
     key,
@@ -324,14 +344,20 @@ function handleHeartbeat(params) {
     params.captchaSolved || '0',
     params.rateLimitHits || '0',
     params.scans || '0',
+    params.totalSessions || '1',
+    params.firstStarted || 'unknown',
+    params.sessionScans || '0',
+    params.sessionFound || '0',
+    params.sessionApplied || '0',
     params.city || 'Any',
     params.radius || '50',
+    params.lastShift || 'none',
     new Date().toISOString()
   ];
   
   if (rowIdx > 0) {
-    // Update existing row
-    dashSheet.getRange(rowIdx, 1, 1, 12).setValues([rowData]);
+    // Update existing row with lifetime totals
+    dashSheet.getRange(rowIdx, 1, 1, 18).setValues([rowData]);
   } else {
     // Append new row
     dashSheet.appendRow(rowData);
