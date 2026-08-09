@@ -219,21 +219,34 @@
                 // Mark as valid for fetch.js
                 chrome.storage.local.set({ '__cs_license_valid': true });
             } else {
-                // License invalid — show error and lock
-                if (badge) {
-                    badge.innerHTML = '&#128274; ' + (verification.error || 'INVALID');
-                    badge.style.cssText = 'display:inline-block;background:rgba(239,68,68,0.15);'
-                        + 'color:#f87171;border:1px solid rgba(239,68,68,0.35);font-size:8px;font-weight:800;'
-                        + 'letter-spacing:1px;padding:2px 8px;border-radius:10px;';
-                }
-                // Mark as invalid — fetch.js will not scan
-                chrome.storage.local.set({ '__cs_license_valid': false });
+                // License verification failed — but DON'T show gate for transient errors
+                var errorMsg = verification.error || '';
+                var isHardFailure = errorMsg.includes('mismatch') || errorMsg.includes('revoked') || errorMsg.includes('expired');
                 
-                // If it's a device/email mismatch or expired or revoked, clear stored data and show gate
-                if (verification.error && (verification.error.includes('mismatch') || verification.error.includes('revoked') || verification.error.includes('expired'))) {
-                    chrome.storage.local.remove(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_valid']);
+                if (isHardFailure) {
+                    // Genuine license problem — show error badge, clear keys, show gate
+                    if (badge) {
+                        badge.innerHTML = '&#128274; ' + errorMsg;
+                        badge.style.cssText = 'display:inline-block;background:rgba(239,68,68,0.15);'
+                            + 'color:#f87171;border:1px solid rgba(239,68,68,0.35);font-size:8px;font-weight:800;'
+                            + 'letter-spacing:1px;padding:2px 8px;border-radius:10px;';
+                    }
+                    chrome.storage.local.set({ '__cs_license_valid': false });
+                    chrome.storage.local.remove(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_valid', '__cs_license_days_remaining']);
                     gate.style.display = 'block';
                     app.style.display = 'none';
+                } else {
+                    // Transient error (network issue, Google redirect, timeout) — keep license active
+                    // Show a warning badge but DON'T clear keys or show gate
+                    console.warn('[license] Verify failed (transient):', errorMsg, '— keeping license active');
+                    if (badge) {
+                        badge.innerHTML = '&#10024; LICENSED (offline)';
+                        badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);'
+                            + 'color:#fff;font-size:8px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;'
+                            + 'border-radius:10px;text-transform:uppercase;';
+                    }
+                    // Keep scanning — don't invalidate on transient failures
+                    chrome.storage.local.set({ '__cs_license_valid': true });
                 }
             }
         } else {

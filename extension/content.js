@@ -238,7 +238,17 @@ document['addEventListener']('DOMContentLoaded', async function () {
     }), document['getElementById']('ais_visa_info')['addEventListener']('submit', async function (A) {
         A['preventDefault']();
         let B = document['getElementById']('reset_info');
-        B['setAttribute']('disabled', 'disabled'), await new Promise(C => setTimeout(C, 0x1f4)), await chrome['storage']['local']['clear'](), await chrome['storage']['local']['set']({
+        B['setAttribute']('disabled', 'disabled'), await new Promise(C => setTimeout(C, 0x1f4));
+        // Save license keys before clearing — they should survive a reset
+        var _savedLicense = await new Promise(function(r) {
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_date', '__cs_license_valid', '__cs_license_days_remaining', '__cs_lifetime_stats'], r);
+        });
+        await chrome['storage']['local']['clear']();
+        // Restore license keys
+        if (_savedLicense['__cs_license_key']) {
+            await new Promise(function(r) { chrome.storage.local.set(_savedLicense, r); });
+        }
+        await chrome['storage']['local']['set']({
             '__ap': !![],
             '__cr': 0x0,
             'selectedCity': 'Toronto',
