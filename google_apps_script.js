@@ -163,11 +163,21 @@ function handleActivate(params) {
   var row = keyRow + 1; // Sheets is 1-indexed
   sheet.getRange(row, 2).setValue(email);           // B: email
   sheet.getRange(row, 3).setValue(device);          // C: device_id
-  sheet.getRange(row, 4).setValue(new Date().toISOString()); // D: activated_at
+  // D: activated_at — ONLY set on first activation, NEVER overwrite
+  var existingActivatedAt = rowData[3] || '';
+  if (!existingActivatedAt || String(existingActivatedAt).trim() === '') {
+    sheet.getRange(row, 4).setValue(new Date().toISOString()); // D: activated_at (first time only)
+  }
   sheet.getRange(row, 5).setValue(new Date().toISOString()); // E: last_verified
   sheet.getRange(row, 6).setValue('active');        // F: status
   
-  return { success: true, message: 'License activated successfully', daysRemaining: 365 };
+  // Calculate actual days remaining from the locked activation date
+  var actualActivatedAt = existingActivatedAt || new Date().toISOString();
+  var activationDate = new Date(actualActivatedAt);
+  var diffMs = new Date().getTime() - activationDate.getTime();
+  var daysRemaining = Math.max(0, 365 - Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+  
+  return { success: true, message: 'License activated successfully', daysRemaining: daysRemaining };
 }
 
 // ── VERIFY: Check if license is valid ─────────────────────────────
@@ -298,28 +308,27 @@ function handleHeartbeat(params) {
   // Create the dashboard tab if it doesn't exist (expanded columns for lifetime + session data)
   if (!dashSheet) {
     dashSheet = ss.insertSheet('Activity Dashboard');
-    dashSheet.getRange(1, 1, 1, 18).setValues([[
+    dashSheet.getRange(1, 1, 1, 20).setValues([[
       'Email', 'Key', 'Status', 'Session Duration',
       'Total Shifts Found', 'Total Applied', 'Total CAPTCHA Solved', 'Total Rate Limits', 'Total Scans',
-      'Sessions', 'First Started',
+      'Sessions', 'License Activated', 'Days Left',
       'This Session Scans', 'This Session Found', 'This Session Applied',
-      'City', 'Radius', 'Last Shift', 'Last Updated'
+      'City', 'Radius', 'Last Shift', 'Last Updated', 'Alert'
     ]]);
-    dashSheet.getRange(1, 1, 1, 18).setFontWeight('bold');
+    dashSheet.getRange(1, 1, 1, 20).setFontWeight('bold');
     dashSheet.setFrozenRows(1);
   } else {
-    // Migrate existing dashboard: check if headers need updating (old format had 12 cols)
-    var currentHeaders = dashSheet.getRange(1, 1, 1, 1).getValue();
+    // Migrate existing dashboard headers if needed
     var lastCol = dashSheet.getLastColumn();
-    if (lastCol < 18) {
-      dashSheet.getRange(1, 1, 1, 18).setValues([[
+    if (lastCol < 20) {
+      dashSheet.getRange(1, 1, 1, 20).setValues([[
         'Email', 'Key', 'Status', 'Session Duration',
         'Total Shifts Found', 'Total Applied', 'Total CAPTCHA Solved', 'Total Rate Limits', 'Total Scans',
-        'Sessions', 'First Started',
+        'Sessions', 'License Activated', 'Days Left',
         'This Session Scans', 'This Session Found', 'This Session Applied',
-        'City', 'Radius', 'Last Shift', 'Last Updated'
+        'City', 'Radius', 'Last Shift', 'Last Updated', 'Alert'
       ]]);
-      dashSheet.getRange(1, 1, 1, 18).setFontWeight('bold');
+      dashSheet.getRange(1, 1, 1, 20).setFontWeight('bold');
     }
   }
   
@@ -333,7 +342,62 @@ function handleHeartbeat(params) {
     }
   }
   
-  // Extension now sends lifetime totals — just write them directly
+  // ── Get the LOCKED activation date from the Licenses sheet ──
+  // This is the TRUE activation date that NEVER changes
+  var licenseActivatedAt = '';
+  var daysLeft = '';
+  var alertMsg = '';
+  var licSheet = ss.getSheetByName('CoderSnap Licenses') || ss.getSheets()[0];
+  var licData = licSheet.getDataRange().getValues();
+  for (var j = 1; j < licData.length; j++) {
+    var rowKey = String(licData[j][0] || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (rowKey === key) {
+      licenseActivatedAt = licData[j][3] || ''; // Column D: activated_at
+      break;
+    }
+  }
+  
+  // Calculate days left from the license activation date (not extension firstStarted)
+  if (licenseActivatedAt) {
+    var actDate = new Date(licenseActivatedAt);
+    var now = new Date();
+    var diffMs = now.getTime() - actDate.getTime();
+    var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    daysLeft = Math.max(0, 365 - diffDays);
+    
+    // Alert when license is expiring
+    if (daysLeft <= 0) {
+      alertMsg = '⛔ EXPIRED';
+    } else if (daysLeft <= 7) {
+      alertMsg = '🚨 EXPIRES IN ' + daysLeft + ' DAYS!';
+    } else if (daysLeft <= 30) {
+      alertMsg = '⚠️ ' + daysLeft + ' days left';
+    } else {
+      alertMsg = '✅ OK';
+    }
+  } else {
+    daysLeft = 'N/A';
+    alertMsg = '❓ No activation date';
+  }
+  
+  // If this is an EXISTING row, preserve the License Activated date (LOCKED — never overwrite)
+  // For NEW rows, use the activation date from Licenses sheet
+  var lockedActivationDate = '';
+  if (rowIdx > 0) {
+    // Read existing "License Activated" value from column 11
+    var existingActivation = data[rowIdx - 1][10]; // 0-indexed, column K (11th)
+    if (existingActivation && String(existingActivation).trim() !== '' && String(existingActivation).trim() !== 'unknown') {
+      lockedActivationDate = existingActivation; // Keep the locked date
+    } else {
+      // First time writing — use license activation date
+      lockedActivationDate = licenseActivatedAt || new Date().toISOString();
+    }
+  } else {
+    // Brand new row — use the license activation date from Licenses sheet
+    lockedActivationDate = licenseActivatedAt || new Date().toISOString();
+  }
+  
+  // Extension now sends lifetime totals — write them directly
   var rowData = [
     email,
     key,
@@ -345,19 +409,21 @@ function handleHeartbeat(params) {
     params.rateLimitHits || '0',
     params.scans || '0',
     params.totalSessions || '1',
-    params.firstStarted || 'unknown',
+    lockedActivationDate,       // LOCKED — never changes after first write
+    daysLeft,                   // Countdown from 365
     params.sessionScans || '0',
     params.sessionFound || '0',
     params.sessionApplied || '0',
     params.city || 'Any',
     params.radius || '50',
     params.lastShift || 'none',
-    new Date().toISOString()
+    new Date().toISOString(),
+    alertMsg                    // Expiry alert
   ];
   
   if (rowIdx > 0) {
     // Update existing row with lifetime totals
-    dashSheet.getRange(rowIdx, 1, 1, 18).setValues([rowData]);
+    dashSheet.getRange(rowIdx, 1, 1, 20).setValues([rowData]);
   } else {
     // Append new row
     dashSheet.appendRow(rowData);

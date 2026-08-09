@@ -134,7 +134,12 @@
                 const result = await callServer('verify', data['__cs_license_key'], data['__cs_license_email']);
                 
                 if (result.success && result.valid) {
-                    resolve({ valid: true, daysRemaining: result.daysRemaining || null });
+                    // Store the actual days remaining from server
+                    var daysLeft = result.daysRemaining || null;
+                    if (daysLeft !== null) {
+                        chrome.storage.local.set({ '__cs_license_days_remaining': daysLeft });
+                    }
+                    resolve({ valid: true, daysRemaining: daysLeft });
                 } else {
                     resolve({ valid: false, error: result.error || 'Verification failed' });
                 }
@@ -157,7 +162,8 @@
                     '__cs_license_email': cleanEmail,
                     '__cs_license_device': getDeviceId(),
                     '__cs_license_date': new Date().toISOString(),
-                    '__cs_license_valid': true
+                    '__cs_license_valid': true,
+                    '__cs_license_days_remaining': result.daysRemaining || 365
                 }, resolve);
             });
             
@@ -166,7 +172,7 @@
                 chrome.storage.local.set({ '__un': cleanEmail }, resolve);
             });
             
-            return { success: true };
+            return { success: true, daysRemaining: result.daysRemaining || 365 };
         } else {
             return { success: false, error: result.error || 'Activation failed' };
         }
