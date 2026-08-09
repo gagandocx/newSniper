@@ -131,6 +131,32 @@
     })();
     // ─────────────────────────────────────────────────────────────────────────
 
+    // ── PROACTIVE SESSION REFRESH — Every 30 min, open auth tab to check/renew ──
+    // If session is still valid: auth page redirects instantly → tab auto-closes
+    // If session expired: auth.js handles re-login → tab auto-closes after success
+    // Main scanning tab is NEVER interrupted
+    (function _proactiveSessionRefresh() {
+        var SESSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
+
+        function _doSessionCheck() {
+            console.log('[fetch.js] Proactive session check — requesting background to open auth tab');
+            chrome.runtime.sendMessage({ action: 'proactiveSessionCheck' }, function(resp) {
+                if (resp && resp.done) {
+                    console.log('[fetch.js] Proactive check tab opened:', resp.tabId);
+                } else {
+                    console.log('[fetch.js] Proactive check failed — will retry next interval');
+                }
+            });
+        }
+
+        // First check after 30 min, then every 30 min
+        setTimeout(function() {
+            _doSessionCheck();
+            setInterval(_doSessionCheck, SESSION_CHECK_INTERVAL);
+        }, SESSION_CHECK_INTERVAL);
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
+
     // ── ONLINE LICENSE CHECK — Extension won't work without verified license ──
     var _csLicenseOk = false;
     var _csLicensedEmail = null;

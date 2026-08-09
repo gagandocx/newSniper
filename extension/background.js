@@ -599,6 +599,81 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
     }
     // ────────────────────────────────────────────────────────────────────────────
 
+    // ── PROACTIVE SESSION REFRESH — opens auth tab every 30 min to check/renew session ──
+    // If Amazon session is still valid, the auth page redirects back instantly → tab closes.
+    // If session expired, auth.js handles login automatically → tab closes after success.
+    if (a['action'] === 'proactiveSessionCheck') {
+        console.log('[bg] Proactive session check — opening auth tab in background');
+        chrome['tabs']['create']({
+            'url': 'https://auth.hiring.amazon.ca/#/login',
+            'active': false  // Background tab — doesn't interrupt scanning
+        }, function(tab) {
+            if (!tab) { c({ done: false, error: 'Failed to create tab' }); return; }
+            var _checkTabId = tab.id;
+            var _startTime = Date.now();
+            var _maxWait = 180000; // 3 min max wait for login to complete
+            
+            // Store the tab ID so brain.js can monitor it
+            chrome.storage.local.set({ '__proactive_check_tab': _checkTabId, '__proactive_check_ts': _startTime });
+            
+            // Poll until the tab navigates away from auth (login complete) or timeout
+            var _pollInterval = setInterval(function() {
+                var elapsed = Date.now() - _startTime;
+                
+                // Timeout — close tab regardless
+                if (elapsed > _maxWait) {
+                    clearInterval(_pollInterval);
+                    console.log('[bg] Proactive check timeout — closing tab');
+                    chrome.tabs.remove(_checkTabId, function() {});
+                    chrome.storage.local.remove(['__proactive_check_tab', '__proactive_check_ts']);
+                    return;
+                }
+                
+                // Check tab URL — if it's now on hiring.amazon.ca (not auth), login succeeded
+                chrome.tabs.get(_checkTabId, function(tabInfo) {
+                    if (chrome.runtime.lastError || !tabInfo) {
+                        // Tab was already closed (manually or by auth.js)
+                        clearInterval(_pollInterval);
+                        chrome.storage.local.remove(['__proactive_check_tab', '__proactive_check_ts']);
+                        return;
+                    }
+                    var tabUrl = tabInfo.url || '';
+                    // If tab landed on hiring.amazon.ca (not auth page), session is good
+                    if (tabUrl.includes('hiring.amazon.ca/app') || tabUrl.includes('hiring.amazon.com/app')) {
+                        clearInterval(_pollInterval);
+                        console.log('[bg] Proactive check: session valid — closing tab');
+                        chrome.tabs.remove(_checkTabId, function() {});
+                        chrome.storage.local.remove(['__proactive_check_tab', '__proactive_check_ts']);
+                    }
+                    // If still on auth page, auth.js is handling login — keep waiting
+                });
+            }, 3000); // Check every 3 seconds
+            
+            c({ done: true, tabId: _checkTabId });
+        });
+        return true;
+    }
+
+    // ── RELOGIN IN NEW TAB — triggered by brain.js when session expired ──
+    if (a['action'] === 'reloginInNewTab') {
+        console.log('[bg] Re-login requested — opening auth tab');
+        chrome['tabs']['create']({
+            'url': 'https://auth.hiring.amazon.ca/#/login',
+            'active': false
+        }, function(tab) {
+            if (tab) {
+                chrome.storage.local.set({ '__reloginTabId': tab.id });
+                // Auto-close after 3 min regardless
+                setTimeout(function() {
+                    chrome.tabs.remove(tab.id, function() {});
+                    chrome.storage.local.remove(['__reloginTabId']);
+                }, 180000);
+            }
+            c({ done: true, tabId: tab ? tab.id : null });
+        });
+        return true;
+    }
+
     if (a['action'] === 'start_fetch')
         chrome['runtime']['sendMessage']({ 'action': 'start_fetch' });
     else {
