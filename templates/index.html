@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_name }} - {{ site_description }}{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>{{ site_name }}</h1>
+    <p>{{ site_description }}</p>
+</div>
+
+<h2 style="margin-bottom: 0.5rem;">Latest Reviews & Comparisons</h2>
+<p style="color: var(--text-light); margin-bottom: 1rem;">Expert reviews to help you choose the right AI tools</p>
+
+<div class="article-grid">
+    {% for article in articles %}
+    <div class="article-card">
+        <span class="category">{{ article.category }}</span>
+        <h2><a href="/{{ article.slug }}.html">{{ article.title }}</a></h2>
+        <div class="meta">{{ article.date }} &middot; {{ article.word_count }} words &middot; {{ article.type }}</div>
+        <p class="excerpt">{{ article.meta_description }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+name: Daily AI Content Generation
+
+on:
+  # Run daily at 8:00 AM UTC
+  schedule:
+    - cron: '0 8 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      num_articles:
+        description: 'Number of articles to generate'
+        required: false
+        default: '3'
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run content pipeline
+        env:
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          NUM_ARTICLES=${{ github.event.inputs.num_articles || '3' }}
+          python run.py --articles $NUM_ARTICLES --skip-deploy
+
+      - name: Commit generated content
+        run: |
+          git config user.name "AI Content Bot"
+          git config user.email "bot@example.com"
+          git add output/
+          git add templates/
+          git diff --cached --quiet || git commit -m "Auto: Generate new articles $(date +%Y-%m-%d)"
+
+      - name: Push changes
+        run: git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output/site
+          publish_branch: gh-pages
+          force_orphan: false
+          commit_message: "Deploy: $(date +%Y-%m-%d) new content"

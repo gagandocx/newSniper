@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-08-09T10:27:47.019919",
+  "num_articles": 2,
+  "articles_to_write": [
+    {
+      "title": "Jasper AI vs Writesonic: Which is Better in 2026?",
+      "type": "comparison",
+      "tools": [
+        "Jasper AI",
+        "Writesonic"
+      ],
+      "category": "AI Writing",
+      "keyword": "jasper ai vs writesonic",
+      "monetization": "comparison_affiliate_links",
+      "priority": "high"
+    },
+    {
+      "title": "Best AI Tools for Coding in 2026 (Tested & Ranked)",
+      "type": "category_guide",
+      "tools": [
+        "Midjourney",
+        "Writesonic",
+        "Descript",
+        "Surfer SEO",
+        "Grammarly"
+      ],
+      "category": "Coding",
+      "keyword": "best ai tools for coding 2026",
+      "monetization": "multiple_affiliate_links",
+      "priority": "medium"
+    }
+  ],
+  "trending_context": {
+    "trending_searches": [],
+    "rss_discoveries": []
+  }
+}

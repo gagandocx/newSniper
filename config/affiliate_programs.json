@@ -1,0 +1,124 @@
+{
+  "programs": [
+    {
+      "name": "Jasper AI",
+      "category": "AI Writing",
+      "url": "https://jasper.ai",
+      "commission": "30% recurring",
+      "price_range": "$49-$125/mo",
+      "description": "AI writing assistant for marketing teams and content creators",
+      "pros": ["High-quality long-form content", "Brand voice customization", "50+ templates", "Chrome extension"],
+      "cons": ["Higher price point", "Learning curve for advanced features"],
+      "rating": 4.7,
+      "affiliate_link": "https://jasper.ai?ref=YOUR_ID"
+    },
+    {
+      "name": "Writesonic",
+      "category": "AI Writing",
+      "url": "https://writesonic.com",
+      "commission": "30% lifetime recurring",
+      "price_range": "$16-$499/mo",
+      "description": "AI writer that creates SEO-optimized content, ads, and product descriptions",
+      "pros": ["Affordable entry price", "SEO optimization built-in", "100+ use cases", "Bulk content generation"],
+      "cons": ["Quality varies on lower plans", "Word limits on cheaper tiers"],
+      "rating": 4.5,
+      "affiliate_link": "https://writesonic.com?ref=YOUR_ID"
+    },
+    {
+      "name": "Copy.ai",
+      "category": "AI Writing",
+      "url": "https://copy.ai",
+      "commission": "45% first month",
+      "price_range": "$36-$186/mo",
+      "description": "AI-powered copywriting tool for marketing and sales teams",
+      "pros": ["Great for short-form copy", "Workflow automation", "Free plan available", "Team collaboration"],
+      "cons": ["Less suited for long-form", "Limited integrations on free plan"],
+      "rating": 4.4,
+      "affiliate_link": "https://copy.ai?ref=YOUR_ID"
+    },
+    {
+      "name": "Midjourney",
+      "category": "AI Image Generation",
+      "url": "https://midjourney.com",
+      "commission": "Varies",
+      "price_range": "$10-$120/mo",
+      "description": "Industry-leading AI image generation with stunning artistic quality",
+      "pros": ["Best image quality", "Active community", "Fast generation", "Style consistency"],
+      "cons": ["Discord-only interface", "No free trial", "Steep learning curve for prompts"],
+      "rating": 4.8,
+      "affiliate_link": "https://midjourney.com?ref=YOUR_ID"
+    },
+    {
+      "name": "Synthesia",
+      "category": "AI Video",
+      "url": "https://synthesia.io",
+      "commission": "25% recurring",
+      "price_range": "$22-$330/mo",
+      "description": "Create professional AI videos with avatars in minutes without cameras or studios",
+      "pros": ["150+ AI avatars", "120+ languages", "No video skills needed", "Custom avatars"],
+      "cons": ["Limited avatar customization on starter", "Rendering can be slow"],
+      "rating": 4.6,
+      "affiliate_link": "https://synthesia.io?ref=YOUR_ID"
+    },
+    {
+      "name": "Descript",
+      "category": "AI Video & Audio",
+      "url": "https://descript.com",
+      "commission": "15% recurring",
+      "price_range": "$24-$33/mo",
+      "description": "AI-powered video and podcast editor that works like a doc",
+      "pros": ["Edit video by editing text", "AI filler word removal", "Screen recording", "Transcription included"],
+      "cons": ["Resource-intensive", "Export quality limitations on free tier"],
+      "rating": 4.5,
+      "affiliate_link": "https://descript.com?ref=YOUR_ID"
+    },
+    {
+      "name": "Semrush",
+      "category": "AI SEO",
+      "url": "https://semrush.com",
+      "commission": "$200 per sale / $10 per trial",
+      "price_range": "$130-$500/mo",
+      "description": "All-in-one SEO and digital marketing toolkit with AI-powered insights",
+      "pros": ["Comprehensive SEO suite", "Competitor analysis", "AI writing assistant", "Keyword research"],
+      "cons": ["Expensive for beginners", "Complex interface", "Limited projects on starter"],
+      "rating": 4.7,
+      "affiliate_link": "https://semrush.com?ref=YOUR_ID"
+    },
+    {
+      "name": "Surfer SEO",
+      "category": "AI SEO",
+      "url": "https://surferseo.com",
+      "commission": "25% recurring",
+      "price_range": "$69-$219/mo",
+      "description": "AI-powered content optimization tool for ranking on Google",
+      "pros": ["Content score system", "AI writing integration", "SERP analyzer", "Keyword clustering"],
+      "cons": ["Pricey for small sites", "Learning curve"],
+      "rating": 4.5,
+      "affiliate_link": "https://surferseo.com?ref=YOUR_ID"
+    },
+    {
+      "name": "Notion AI",
+      "category": "AI Productivity",
+      "url": "https://notion.so",
+      "commission": "50% for 12 months",
+      "price_range": "$10-$28/mo per member",
+      "description": "AI-enhanced workspace for notes, docs, projects, and knowledge management",
+      "pros": ["All-in-one workspace", "AI built into workflow", "Great templates", "Team collaboration"],
+      "cons": ["Can be overwhelming", "Mobile app limitations"],
+      "rating": 4.6,
+      "affiliate_link": "https://notion.so?ref=YOUR_ID"
+    },
+    {
+      "name": "Grammarly",
+      "category": "AI Writing Assistant",
+      "url": "https://grammarly.com",
+      "commission": "$25 per premium signup / $0.20 per free signup",
+      "price_range": "$12-$15/mo",
+      "description": "AI writing assistant for grammar, clarity, and tone across all platforms",
+      "pros": ["Works everywhere", "Tone detection", "Plagiarism checker", "Browser extension"],
+      "cons": ["Premium features locked", "Occasional false suggestions"],
+      "rating": 4.7,
+      "affiliate_link": "https://grammarly.com?ref=YOUR_ID"
+    }
+  ]
+}

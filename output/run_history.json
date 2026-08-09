@@ -1,0 +1,20 @@
+[
+  {
+    "date": "2026-08-09T10:27:21.152735",
+    "articles_generated": 0,
+    "errors": 0,
+    "elapsed_seconds": 0.01
+  },
+  {
+    "date": "2026-08-09T10:27:43.240068",
+    "articles_generated": 0,
+    "errors": 0,
+    "elapsed_seconds": 0.01
+  },
+  {
+    "date": "2026-08-09T10:27:47.017408",
+    "articles_generated": 0,
+    "errors": 1,
+    "elapsed_seconds": 3.08
+  }
+]

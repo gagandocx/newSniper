@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category }} - Best AI Tools | {{ site_name }}{% endblock %}
+{% block meta_description %}Discover the best {{ category }} tools. Expert reviews, comparisons, and guides.{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 0.5rem;">{{ category }}</h1>
+<p style="color: var(--text-light); margin-bottom: 2rem;">All reviews and comparisons in {{ category }}</p>
+
+<div class="article-grid">
+    {% for article in articles %}
+    <div class="article-card">
+        <span class="category">{{ article.category }}</span>
+        <h2><a href="/{{ article.slug }}.html">{{ article.title }}</a></h2>
+        <div class="meta">{{ article.date }} &middot; {{ article.word_count }} words</div>
+        <p class="excerpt">{{ article.meta_description }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

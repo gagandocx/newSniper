@@ -1,0 +1,44 @@
+{
+  "api_key": "YOUR_GEMINI_API_KEY_HERE",
+  "api_provider": "gemini",
+  "site_name": "AI Tools Hub",
+  "site_description": "Discover the best AI tools - Reviews, comparisons, and guides updated daily",
+  "site_url": "https://yourusername.github.io/ai-tools-hub",
+  "niche": "AI Tools & Software",
+  "target_keywords": [
+    "best AI writing tools",
+    "AI tools for business",
+    "AI productivity tools",
+    "best AI image generators",
+    "AI coding assistants",
+    "AI marketing tools",
+    "AI video generators",
+    "AI chatbots comparison",
+    "AI tools for students",
+    "AI automation tools"
+  ],
+  "affiliate_links": {
+    "jasper": "https://jasper.ai?ref=YOUR_ID",
+    "writesonic": "https://writesonic.com?ref=YOUR_ID",
+    "notion": "https://notion.so?ref=YOUR_ID",
+    "copy_ai": "https://copy.ai?ref=YOUR_ID",
+    "grammarly": "https://grammarly.com?ref=YOUR_ID",
+    "midjourney": "https://midjourney.com?ref=YOUR_ID",
+    "synthesia": "https://synthesia.io?ref=YOUR_ID",
+    "descript": "https://descript.com?ref=YOUR_ID",
+    "semrush": "https://semrush.com?ref=YOUR_ID",
+    "surfer_seo": "https://surferseo.com?ref=YOUR_ID"
+  },
+  "schedule": {
+    "articles_per_run": 3,
+    "run_frequency": "daily"
+  },
+  "social_media": {
+    "twitter_enabled": false,
+    "linkedin_enabled": false,
+    "twitter_api_key": "",
+    "twitter_api_secret": "",
+    "twitter_access_token": "",
+    "twitter_access_secret": ""
+  }
+}
