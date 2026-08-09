@@ -70,8 +70,15 @@ var ADMIN_PASS = 'CODERSNAP2026';
 var SHEET_ID = '1r9Ab9yDh6OXz7s3vwRIW8RHOW0OZ2T0MInlhlK2iDlY';
 
 function getSheet() {
-  return SpreadsheetApp.openById(SHEET_ID).getSheetByName('CoderSnap Licenses')
-      || SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('CoderSnap Licenses') || ss.getSheets()[0];
+  // Ensure column G header exists (days_left)
+  var headerG = sheet.getRange(1, 7).getValue();
+  if (!headerG || String(headerG).trim() === '') {
+    sheet.getRange(1, 7).setValue('days_left');
+    sheet.getRange(1, 7).setFontWeight('bold');
+  }
+  return sheet;
 }
 
 function doGet(e) {
@@ -177,6 +184,9 @@ function handleActivate(params) {
   var diffMs = new Date().getTime() - activationDate.getTime();
   var daysRemaining = Math.max(0, 365 - Math.floor(diffMs / (1000 * 60 * 60 * 24)));
   
+  // Write days_left to column G
+  sheet.getRange(row, 7).setValue(daysRemaining);
+  
   return { success: true, message: 'License activated successfully', daysRemaining: daysRemaining };
 }
 
@@ -261,6 +271,9 @@ function handleVerify(params) {
     var diffMs = new Date().getTime() - activationDate.getTime();
     daysRemaining = Math.max(0, 365 - Math.floor(diffMs / (1000 * 60 * 60 * 24)));
   }
+  
+  // Write days_left to column G (updates every verify call)
+  sheet.getRange(row, 7).setValue(daysRemaining);
   
   return { success: true, valid: true, email: existingEmail, daysRemaining: daysRemaining };
 }
