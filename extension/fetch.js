@@ -1442,16 +1442,34 @@
         }
     }
     function J() {
+        var _jPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-            S && (S['click'](), R['disconnect']());
+            if (S) { S['click'](); R['disconnect'](); clearInterval(_jPoll); }
         });
         O['observe'](document['body'], {
             'childList': !![],
             'subtree': !![]
         });
         const P = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-        P && (P['click'](), O['disconnect']());
+        if (P) { P['click'](); O['disconnect'](); return; }
+        // Polling fallback: check every 200ms for up to 10 seconds
+        // Fixes issue where button appears without DOM mutations (no loading spinner)
+        var _jAttempts = 0;
+        _jPoll = setInterval(function() {
+            _jAttempts++;
+            var btn = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
+            if (btn) {
+                btn['click']();
+                O['disconnect']();
+                clearInterval(_jPoll);
+            } else if (_jAttempts >= 50) { // 50 * 200ms = 10 seconds max
+                O['disconnect']();
+                clearInterval(_jPoll);
+                console['log']('[fetch.js] Create Application button not found after 10s — retrying J()');
+                setTimeout(function() { J(); }, 1000);
+            }
+        }, 200);
     }
     function K(O) {
         return new Promise((P, Q) => {
