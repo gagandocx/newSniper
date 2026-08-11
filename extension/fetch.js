@@ -236,11 +236,12 @@
             _rateLimitLearner.throttled = false;
         }
         // Pre-emptive throttle: if we're approaching the learned threshold
-        if (_rateLimitLearner.safeThreshold && 
+        // Only trigger ONCE per window — don't keep resetting cooldown
+        if (_rateLimitLearner.safeThreshold && !_rateLimitLearner.throttled &&
             _rateLimitLearner.currentRequestCount >= _rateLimitLearner.safeThreshold - 2) {
             _rateLimitLearner.throttled = true;
-            _rateLimitLearner.cooldownUntil = Date.now() + 5000; // 5s cooldown
-            console.log('[perf] Pre-emptive throttle — approaching rate limit threshold');
+            _rateLimitLearner.cooldownUntil = Date.now() + 10000; // 10s cooldown then resume
+            console.log('[perf] Pre-emptive throttle — cooling down 10s');
         }
     }
 
@@ -1273,6 +1274,13 @@
         if (window['_ss_banner_shown']) return;
         if (b) { clearTimeout(b); b = null; }
         if (!p) return;
+        // ── Detect "Problem loading page" error → hard refresh immediately ──
+        var _bodyText = (document.body && document.body.innerText) || '';
+        if (/problem loading page|server didn't respond|try refreshing/i.test(_bodyText)) {
+            console.log('[fetch.js] Page error detected — hard refreshing in 3s');
+            setTimeout(function() { window.location.reload(true); }, 3000);
+            return;
+        }
         D(); // D() schedules its own next call at the right time
     }
     // ─────────────────────────────────────────────────────────────
@@ -1392,6 +1400,13 @@
             if (!p) return;
             // ── PERFORMANCE ENGINE: Skip scan if throttled ──
             if (_shouldThrottle()) {
+                // But still check for page errors even when throttled
+                var _errText = (document.body && document.body.innerText) || '';
+                if (/problem loading page|server didn't respond|try refreshing/i.test(_errText)) {
+                    console.log('[fetch.js] Page error during throttle — hard refreshing');
+                    setTimeout(function() { window.location.reload(true); }, 2000);
+                    return;
+                }
                 console.log('[perf] Throttled — skipping this scan, next in 8s');
                 if (b) { clearTimeout(b); b = null; }
                 b = setTimeout(function() { b = null; if (p) D(); }, 8000);
