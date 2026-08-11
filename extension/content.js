@@ -6,6 +6,10 @@ document['addEventListener']('DOMContentLoaded', async function () {
                 'lat': 43.653524,
                 'lng': -79.383907
             },
+            'Entire BC': {
+                'lat': 49.19,
+                'lng': -122.85
+            },
             'Acheson': {
                 'lat': 53.548701,
                 'lng': -113.76261
@@ -176,6 +180,32 @@ document['addEventListener']('DOMContentLoaded', async function () {
                 distElem['dispatchEvent'](new Event('change'));
             }
         }
+        // ── ENTIRE BC: Pre-fill target cities with Lower Mainland cities ──
+        if (A === 'Entire BC') {
+            var _bcCities = ['Surrey', 'Richmond', 'Delta', 'Tsawwassen', 'Pitt Meadows', 'Coquitlam', 'Langley', 'Burnaby', 'New Westminster', 'Vancouver', 'Sidney'];
+            chrome['storage']['local']['set']({ 'cityTags': _bcCities });
+            // Set distance to 150km to cover all Lower Mainland + Fraser Valley
+            const distElem = document['getElementById']('distance');
+            if (distElem) {
+                distElem['value'] = '150';
+                distElem['dispatchEvent'](new Event('change'));
+            }
+            // Refresh the tag display in the popup
+            var _tagBox = document['getElementById']('tag-input-box');
+            if (_tagBox) {
+                // Remove existing tags
+                var _existingTags = _tagBox['querySelectorAll']('.tag');
+                _existingTags.forEach(function(tag) { tag.remove(); });
+                // Add BC city tags
+                _bcCities.forEach(function(city) {
+                    t(city, true);
+                });
+            }
+            // Show clear button
+            var _clearBtn = document['getElementById']('clear-all');
+            if (_clearBtn) _clearBtn['style']['display'] = 'inline';
+        }
+        // ─────────────────────────────────────────────────────────────────
         const {
                 lat: B,
                 lng: C
