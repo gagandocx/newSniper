@@ -1467,30 +1467,82 @@
             _onSuccessfulRequest(); // Feed performance engine
             const T = await S['json'](), U = T['data']['searchJobCardsByLocation']['jobCards'];
             _stats.scansCompleted++;
-            if (U && U['length'] > 0x0) {
+
+            // ── DUAL-SCAN: When "Any City" is selected, also scan BC Lower Mainland ──
+            // Amazon's API sorts by proximity — Toronto-centered queries miss BC shifts
+            // This fires a second request centered on Vancouver/Surrey to catch BC jobs
+            var _bcJobs = [];
+            if (parseInt(n) >= 25000) {
+                try {
+                    var _bcQuery = JSON.parse(JSON.stringify(R)); // Deep clone
+                    _bcQuery.variables.searchJobRequest.geoQueryClause = {
+                        lat: 49.19,     // Surrey/Delta — center of Lower Mainland warehouses
+                        lng: -122.85,
+                        unit: 'km',
+                        distance: 100   // 100km covers all Lower Mainland + Fraser Valley
+                    };
+                    var _bcResp = await fetch('https://hiring.amazon.ca/graphql', {
+                        'method': 'POST',
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': _tok || ''
+                        },
+                        'body': JSON.stringify(_bcQuery)
+                    });
+                    if (_bcResp.ok) {
+                        var _bcData = await _bcResp.json();
+                        _bcJobs = (_bcData.data && _bcData.data.searchJobCardsByLocation && _bcData.data.searchJobCardsByLocation.jobCards) || [];
+                        if (_bcJobs.length > 0) {
+                            console.log('[fetch.js] BC dual-scan found', _bcJobs.length, 'shifts in Lower Mainland');
+                        }
+                    }
+                } catch(_bcErr) {
+                    // Silently fail — don't break main scan
+                    console.log('[fetch.js] BC dual-scan error (non-critical):', _bcErr.message || '');
+                }
+            }
+
+            // Merge BC jobs with main results (deduplicate by jobId)
+            var _allJobs = (U || []).slice();
+            if (_bcJobs.length > 0) {
+                var _existingIds = {};
+                _allJobs.forEach(function(j) { _existingIds[j.jobId] = true; });
+                _bcJobs.forEach(function(j) {
+                    if (!_existingIds[j.jobId]) {
+                        _allJobs.push(j);
+                        _existingIds[j.jobId] = true;
+                    }
+                });
+            }
+            // Replace U with merged results
+            var U_merged = _allJobs;
+            // ─────────────────────────────────────────────────────────────────────
+
+            if (U_merged && U_merged['length'] > 0x0) {
                 // Rich toast: show ALL found jobs (any city, any range)
                 const _ci = y(i);
                 // ── INCREMENT STATS: shifts found ──
-                _stats.shiftsFound += U['length'];
+                _stats.shiftsFound += U_merged['length'];
                 _stats.lastShiftFoundAt = new Date().toLocaleTimeString();
                 // ── PERFORMANCE ENGINE: Activate burst + record for predictions ──
                 _activateBurst();
                 _recordShiftFound();
                 // Sort jobs by quality score (best first)
-                U = _sortByScore(U);
+                U_merged = _sortByScore(U_merged);
                 let _allJobsHtml = '<div style="text-align:left;font-size:12px;color:white;max-width:340px;font-family:sans-serif;">';
-                _allJobsHtml += '<div style="font-weight:bold;font-size:14px;color:#4CAF50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(76,175,80,0.4);">\uD83D\uDD0D ' + U['length'] + ' Job' + (U['length'] > 1 ? 's' : '') + ' Found!</div>';
-                U['slice'](0, 6)['forEach'](function (_job, _idx) {
+                _allJobsHtml += '<div style="font-weight:bold;font-size:14px;color:#4CAF50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(76,175,80,0.4);">\uD83D\uDD0D ' + U_merged['length'] + ' Job' + (U_merged['length'] > 1 ? 's' : '') + ' Found!</div>';
+                U_merged['slice'](0, 6)['forEach'](function (_job, _idx) {
                     const _jobUrl = 'https://' + _ci['domain'] + '/app#/jobDetail?jobId=' + _job['jobId'] + '&locale=' + _ci['locale'];
-                    const _isLast = _idx >= Math['min'](U['length'], 6) - 1;
+                    const _isLast = _idx >= Math['min'](U_merged['length'], 6) - 1;
                     _allJobsHtml += '<div style="margin-bottom:6px;padding-bottom:6px;' + (!_isLast ? 'border-bottom:1px solid rgba(255,255,255,0.08);' : '') + '">';
                     _allJobsHtml += '<div style="font-weight:bold;">' + (_job['jobTitle'] || 'Warehouse Associate') + '</div>';
                     _allJobsHtml += '<div style="color:#aaa;font-size:11px;margin-top:2px;">\uD83D\uDCCD ' + (_job['city'] || 'N/A') + (_job['distance'] ? ' &nbsp;&middot;&nbsp; ' + parseFloat(_job['distance'])['toFixed'](1) + ' km away' : '') + '</div>';
                     _allJobsHtml += '<a href="' + _jobUrl + '" style="color:#4CAF50;font-size:11px;text-decoration:none;" target="_blank">View \u2192</a>';
                     _allJobsHtml += '</div>';
                 });
-                if (U['length'] > 6) {
-                    _allJobsHtml += '<div style="color:#aaa;font-size:11px;margin-top:2px;">+' + (U['length'] - 6) + ' more jobs...</div>';
+                if (U_merged['length'] > 6) {
+                    _allJobsHtml += '<div style="color:#aaa;font-size:11px;margin-top:2px;">+' + (U_merged['length'] - 6) + ' more jobs...</div>';
                 }
                 _allJobsHtml += '</div>';
                 Swal['fire']({
@@ -1504,7 +1556,7 @@
                     'width': '370px'
                 });
                 // Send Telegram for ALL found jobs in background (non-blocking)
-                U['forEach'](function (_job) {
+                U_merged['forEach'](function (_job) {
                     fetchScheduleDetails(_job['jobId'])['then'](function (_schedules) {
                         return sendTelegramAlert(_schedules, _job);
                     })['catch'](function (_e) {
@@ -1512,7 +1564,7 @@
                     });
                 });
                 M();
-                G(U);
+                G(U_merged);
             } else {
             }
         } catch (V) {
