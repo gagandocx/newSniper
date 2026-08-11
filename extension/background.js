@@ -1,29 +1,12 @@
 // ── CoderSnap Background Service Worker ──────────────────────────────────────
 
-// ── FEATURE: SERVICE WORKER WATCHDOG — Ensures scanning never stops ──────────
-// Uses chrome.alarms to wake the service worker every 2 minutes and check
-// if the scanning tab is still alive. If not, reopens it.
-chrome.alarms.create('scanWatchdog', { periodInMinutes: 2 });
+// ── FEATURE: SERVICE WORKER WATCHDOG — Ensures session stays alive ────────────
+// Uses chrome.alarms to keep session cookies fresh. Does NOT open new tabs.
+// Only ONE tab should ever scan — if it crashes, user reopens manually or
+// the proactive session check (every 30 min) handles it.
 chrome.alarms.create('sessionKeepAlive', { periodInMinutes: 25 }); // Refresh session before expiry
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name === 'scanWatchdog') {
-        // Check if a hiring.amazon.ca tab exists and is active
-        chrome.tabs.query({ url: '*://hiring.amazon.ca/*' }, function(tabs) {
-            var hasJobSearchTab = tabs && tabs.some(function(t) {
-                return t.url && t.url.includes('jobSearch');
-            });
-            if (!hasJobSearchTab) {
-                // Check if scanning should be active
-                chrome.storage.local.get(['__ap', '__cs_license_valid'], function(d) {
-                    if (d['__ap'] && d['__cs_license_valid']) {
-                        console.log('[bg-watchdog] No jobSearch tab found — reopening');
-                        chrome.tabs.create({ url: 'https://hiring.amazon.ca/app#/jobSearch', active: false });
-                    }
-                });
-            }
-        });
-    }
     if (alarm.name === 'sessionKeepAlive') {
         // Proactive session refresh — ping Amazon to keep cookies alive
         chrome.tabs.query({ url: '*://hiring.amazon.ca/*' }, function(tabs) {
@@ -39,33 +22,6 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
         });
     }
 });
-
-// ── FEATURE: MULTI-TAB COORDINATION ─────────────────────────────────────────
-// Prevents multiple scanning tabs from competing. Only one "leader" tab scans.
-// Other tabs become "standby" — ready to take over if leader dies.
-var _leaderTabId = null;
-
-function _electLeader() {
-    chrome.tabs.query({ url: '*://hiring.amazon.ca/app*' }, function(tabs) {
-        if (!tabs || tabs.length === 0) { _leaderTabId = null; return; }
-        // Leader = the first tab (oldest)
-        _leaderTabId = tabs[0].id;
-        chrome.storage.local.set({ '__cs_leader_tab': _leaderTabId });
-    });
-}
-
-// Re-elect on tab close/create
-chrome.tabs.onRemoved.addListener(function(tabId) {
-    if (tabId === _leaderTabId) {
-        setTimeout(_electLeader, 1000); // Wait 1s then elect new leader
-    }
-});
-chrome.tabs.onCreated.addListener(function() {
-    setTimeout(_electLeader, 2000);
-});
-
-// Initial election
-_electLeader();
 // ─────────────────────────────────────────────────────────────────────────────
 
 chrome['runtime']['onConnect']['addListener'](function (a) {

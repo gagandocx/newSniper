@@ -1269,14 +1269,7 @@
         if (window['_ss_banner_shown']) return;
         if (b) { clearTimeout(b); b = null; }
         if (!p) return;
-        // ── MULTI-TAB: Only scan if this tab is the leader ──
-        chrome.storage.local.get(['__cs_leader_tab'], function(d) {
-            // If no leader set, or we can't check, scan anyway (backwards compatible)
-            // Leader is determined by background.js — if this tab isn't leader, standby
-            // Note: content scripts don't have access to their own tabId easily,
-            // so we scan regardless and let background.js handle deduplication
-            D(); // D() schedules its own next call at the right time
-        });
+        D(); // D() schedules its own next call at the right time
     }
     // ─────────────────────────────────────────────────────────────
 
