@@ -157,6 +157,270 @@
     })();
     // ─────────────────────────────────────────────────────────────────────────
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ██  PERFORMANCE ENGINE v2 — Adaptive Speed + Smart Rate Limiting  ██
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // ── FEATURE 1: ADAPTIVE SCAN INTERVAL ────────────────────────────────────
+    // Scans faster during peak shift-drop hours, slower during dead hours
+    // Peak hours: 4-7 AM, 11 AM-1 PM, 5-7 PM (when Amazon typically posts shifts)
+    var _adaptiveEngine = {
+        peakHours: [[4,7], [11,13], [17,19]], // [start, end] in 24h local time
+        peakInterval: 500,    // 500ms during peak (2x faster)
+        normalInterval: null, // set from user's configured interval
+        burstMode: false,     // activated when shift was just found
+        burstUntil: 0,        // timestamp when burst mode ends
+        burstInterval: 300    // 300ms burst after a shift is found (grab it fast!)
+    };
+
+    function _isPeakHour() {
+        var hour = new Date().getHours();
+        for (var i = 0; i < _adaptiveEngine.peakHours.length; i++) {
+            if (hour >= _adaptiveEngine.peakHours[i][0] && hour < _adaptiveEngine.peakHours[i][1]) return true;
+        }
+        return false;
+    }
+
+    function _getAdaptiveInterval(baseInterval) {
+        // Burst mode: something was just found, scan ultra-fast to grab it
+        if (_adaptiveEngine.burstMode && Date.now() < _adaptiveEngine.burstUntil) {
+            return _adaptiveEngine.burstInterval;
+        }
+        if (_adaptiveEngine.burstMode && Date.now() >= _adaptiveEngine.burstUntil) {
+            _adaptiveEngine.burstMode = false; // Burst expired
+        }
+        // Peak hours: scan at 500ms
+        if (_isPeakHour()) return _adaptiveEngine.peakInterval;
+        // Normal: use configured interval
+        return baseInterval;
+    }
+
+    // Activate burst mode (called when shifts are found)
+    function _activateBurst() {
+        _adaptiveEngine.burstMode = true;
+        _adaptiveEngine.burstUntil = Date.now() + 30000; // 30 second burst
+        console.log('[perf] BURST MODE — scanning at 300ms for 30 seconds');
+    }
+    window['__cs_activateBurst'] = _activateBurst;
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 2: RATE LIMIT LEARNING ───────────────────────────────────────
+    // Tracks rate limit patterns and auto-throttles BEFORE hitting the limit
+    var _rateLimitLearner = {
+        requestsBeforeLimit: [],  // history of how many requests before each 429
+        currentRequestCount: 0,
+        lastResetTime: Date.now(),
+        safeThreshold: null,      // learned: max safe requests per window
+        windowMs: 120000,         // 2-minute sliding window
+        throttled: false,
+        cooldownUntil: 0
+    };
+
+    // Load learned threshold from storage
+    chrome.storage.local.get(['__cs_rate_limit_threshold'], function(d) {
+        if (d['__cs_rate_limit_threshold']) {
+            _rateLimitLearner.safeThreshold = d['__cs_rate_limit_threshold'];
+            console.log('[perf] Loaded rate limit threshold:', _rateLimitLearner.safeThreshold, 'requests per 2min');
+        }
+    });
+
+    function _trackRequest() {
+        _rateLimitLearner.currentRequestCount++;
+        // Reset counter every window
+        if (Date.now() - _rateLimitLearner.lastResetTime > _rateLimitLearner.windowMs) {
+            _rateLimitLearner.currentRequestCount = 1;
+            _rateLimitLearner.lastResetTime = Date.now();
+            _rateLimitLearner.throttled = false;
+        }
+        // Pre-emptive throttle: if we're approaching the learned threshold
+        if (_rateLimitLearner.safeThreshold && 
+            _rateLimitLearner.currentRequestCount >= _rateLimitLearner.safeThreshold - 2) {
+            _rateLimitLearner.throttled = true;
+            _rateLimitLearner.cooldownUntil = Date.now() + 5000; // 5s cooldown
+            console.log('[perf] Pre-emptive throttle — approaching rate limit threshold');
+        }
+    }
+
+    function _learnRateLimit() {
+        // Called when we hit a 403/429 — learn how many requests we made before it
+        var count = _rateLimitLearner.currentRequestCount;
+        _rateLimitLearner.requestsBeforeLimit.push(count);
+        // Keep last 10 data points
+        if (_rateLimitLearner.requestsBeforeLimit.length > 10) {
+            _rateLimitLearner.requestsBeforeLimit.shift();
+        }
+        // Calculate safe threshold: minimum of all observed limits minus buffer
+        var minLimit = Math.min.apply(null, _rateLimitLearner.requestsBeforeLimit);
+        _rateLimitLearner.safeThreshold = Math.max(5, minLimit - 3); // 3 request buffer
+        // Persist
+        chrome.storage.local.set({ '__cs_rate_limit_threshold': _rateLimitLearner.safeThreshold });
+        console.log('[perf] Learned rate limit threshold:', _rateLimitLearner.safeThreshold, 
+                    '(hit at', count, ', history:', _rateLimitLearner.requestsBeforeLimit, ')');
+        // Reset counter
+        _rateLimitLearner.currentRequestCount = 0;
+        _rateLimitLearner.lastResetTime = Date.now();
+    }
+    window['__cs_learnRateLimit'] = _learnRateLimit;
+
+    function _shouldThrottle() {
+        if (_rateLimitLearner.throttled && Date.now() < _rateLimitLearner.cooldownUntil) {
+            return true;
+        }
+        _rateLimitLearner.throttled = false;
+        return false;
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 3: PREDICTIVE SHIFT TIMING ───────────────────────────────────
+    // Learns when shifts historically appear and ramps up scanning
+    var _shiftPredictor = {
+        history: [],       // array of { hour, minute, dayOfWeek }
+        nextPredicted: null,
+        ramping: false
+    };
+
+    // Load history from storage
+    chrome.storage.local.get(['__cs_shift_history'], function(d) {
+        if (d['__cs_shift_history']) {
+            _shiftPredictor.history = d['__cs_shift_history'];
+            _predictNextDrop();
+        }
+    });
+
+    function _recordShiftFound() {
+        var now = new Date();
+        _shiftPredictor.history.push({
+            hour: now.getHours(),
+            minute: now.getMinutes(),
+            dayOfWeek: now.getDay(),
+            ts: now.getTime()
+        });
+        // Keep last 100 entries
+        if (_shiftPredictor.history.length > 100) _shiftPredictor.history.shift();
+        chrome.storage.local.set({ '__cs_shift_history': _shiftPredictor.history });
+        _predictNextDrop();
+    }
+    window['__cs_recordShiftFound'] = _recordShiftFound;
+
+    function _predictNextDrop() {
+        if (_shiftPredictor.history.length < 5) return; // Need enough data
+        // Find the most common hours shifts appear
+        var hourCounts = {};
+        _shiftPredictor.history.forEach(function(entry) {
+            var h = entry.hour;
+            hourCounts[h] = (hourCounts[h] || 0) + 1;
+        });
+        // Sort hours by frequency
+        var topHours = Object.keys(hourCounts).sort(function(a, b) {
+            return hourCounts[b] - hourCounts[a];
+        }).slice(0, 5).map(Number);
+        
+        // Check if current hour is within 30 min of a top hour
+        var now = new Date();
+        var currentMin = now.getHours() * 60 + now.getMinutes();
+        for (var i = 0; i < topHours.length; i++) {
+            var targetMin = topHours[i] * 60;
+            var diff = targetMin - currentMin;
+            if (diff > -15 && diff < 30) { // Within window
+                _shiftPredictor.ramping = true;
+                return;
+            }
+        }
+        _shiftPredictor.ramping = false;
+    }
+    // Re-predict every 5 minutes
+    setInterval(_predictNextDrop, 5 * 60 * 1000);
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 4: SHIFT QUALITY SCORING ─────────────────────────────────────
+    // Scores shifts so we apply to the best ones first
+    var _shiftScorer = {
+        preferredDistance: 25,    // km — closer is better
+        preferredHours: null,     // set from user's jobType preference
+        minScore: 0               // apply to anything by default (0 = no filter)
+    };
+
+    function _scoreShift(job) {
+        var score = 100;
+        // Distance penalty: -2 points per km beyond preferred
+        var dist = parseFloat(job['distance'] || 0);
+        if (dist > _shiftScorer.preferredDistance) {
+            score -= Math.min(40, (dist - _shiftScorer.preferredDistance) * 2);
+        }
+        // Bonus: very close shifts get a boost
+        if (dist < 10) score += 10;
+        if (dist < 5) score += 10;
+        return Math.max(0, Math.min(100, score));
+    }
+
+    function _sortByScore(jobs) {
+        return jobs.slice().sort(function(a, b) {
+            return _scoreShift(b) - _scoreShift(a);
+        });
+    }
+    window['__cs_scoreShift'] = _scoreShift;
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 5: ANTI-RATE-LIMIT STRATEGIES ────────────────────────────────
+    // Exponential backoff with jitter on rate limits
+    var _backoff = {
+        level: 0,          // 0 = no backoff, each 429 increases
+        maxLevel: 5,
+        baseMs: 2000,
+        lastRateLimit: 0
+    };
+
+    function _getBackoffDelay() {
+        if (_backoff.level === 0) return 0;
+        // Exponential: 2s, 4s, 8s, 16s, 32s + random jitter ±1s
+        var delay = _backoff.baseMs * Math.pow(2, _backoff.level - 1);
+        var jitter = (Math.random() - 0.5) * 2000; // ±1000ms
+        return Math.min(delay + jitter, 35000); // Cap at 35s
+    }
+
+    function _onRateLimit() {
+        _backoff.level = Math.min(_backoff.level + 1, _backoff.maxLevel);
+        _backoff.lastRateLimit = Date.now();
+        _learnRateLimit(); // Feed data to the learning system
+    }
+
+    function _onSuccessfulRequest() {
+        // Gradually reduce backoff after successful requests
+        if (_backoff.level > 0 && Date.now() - _backoff.lastRateLimit > 30000) {
+            _backoff.level = Math.max(0, _backoff.level - 1);
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 6: SESSION PERSISTENCE (cookie/token caching) ────────────────
+    // Save auth tokens to survive page reloads faster
+    function _cacheSession() {
+        var tok = _ssAuthTok || null;
+        if (tok) {
+            try { localStorage.setItem('__ss_auth', tok); } catch(_) {}
+        }
+    }
+    // Cache session token every 5 minutes
+    setInterval(_cacheSession, 5 * 60 * 1000);
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── MASTER INTERVAL CALCULATOR ───────────────────────────────────────────
+    // Combines all performance features to determine the optimal scan interval
+    function _calculateOptimalInterval(baseInterval) {
+        // If pre-emptive throttle is active, slow down
+        if (_shouldThrottle()) return Math.max(baseInterval, 5000);
+        // If backoff is active from recent rate limit
+        var backoffDelay = _getBackoffDelay();
+        if (backoffDelay > 0) return backoffDelay;
+        // Get adaptive interval (peak hours / burst mode)
+        var adaptive = _getAdaptiveInterval(baseInterval);
+        // If shift predictor says we're in a hot window, use faster interval
+        if (_shiftPredictor.ramping && adaptive > 800) adaptive = 800;
+        return adaptive;
+    }
+    window['__cs_getOptimalInterval'] = _calculateOptimalInterval;
+    // ═══════════════════════════════════════════════════════════════════════════
+
     // ── ONLINE LICENSE CHECK — Extension won't work without verified license ──
     var _csLicenseOk = false;
     var _csLicensedEmail = null;
@@ -1005,7 +1269,14 @@
         if (window['_ss_banner_shown']) return;
         if (b) { clearTimeout(b); b = null; }
         if (!p) return;
-        D(); // D() schedules its own next call at the right time
+        // ── MULTI-TAB: Only scan if this tab is the leader ──
+        chrome.storage.local.get(['__cs_leader_tab'], function(d) {
+            // If no leader set, or we can't check, scan anyway (backwards compatible)
+            // Leader is determined by background.js — if this tab isn't leader, standby
+            // Note: content scripts don't have access to their own tabId easily,
+            // so we scan regardless and let background.js handle deduplication
+            D(); // D() schedules its own next call at the right time
+        });
     }
     // ─────────────────────────────────────────────────────────────
 
@@ -1127,7 +1398,10 @@
             // setTimeout(D, c) fires c ms later — exactly when animation completes.
             _showRing(c);
             if (b) { clearTimeout(b); b = null; }
-            b = setTimeout(function() { b = null; if (p) D(); }, c);
+            // ── PERFORMANCE ENGINE: Use optimal interval instead of fixed c ──
+            var _optInterval = _calculateOptimalInterval(c);
+            _trackRequest(); // Track for rate limit learning
+            b = setTimeout(function() { b = null; if (p) D(); }, _optInterval);
             // ─────────────────────────────────────────────────────────────────────
             const S = await fetch('https://hiring.amazon.ca/graphql', {
                     'method': 'POST',
@@ -1165,7 +1439,8 @@
                         window['_normalInterval'] = c;
                         window['_rateLimitStarted'] = Date.now();
                         _stats.rateLimitHits++;
-                        console.log('[fetch.js] 403/429 detected — switching to random 3-5s interval');
+                        _onRateLimit(); // Feed performance engine
+                        console.log('[fetch.js] 403/429 detected — switching to smart backoff');
                     }
                     // If rate limited for 10+ minutes straight — full session reset
                     if (window['_rateLimitStarted'] && (Date.now() - window['_rateLimitStarted']) > 10 * 60 * 1000) {
@@ -1196,6 +1471,7 @@
                 _startScan();
                 _ringState('', 'Job Checking...', c); // Restore animation to normal scan interval
             }
+            _onSuccessfulRequest(); // Feed performance engine
             const T = await S['json'](), U = T['data']['searchJobCardsByLocation']['jobCards'];
             _stats.scansCompleted++;
             if (U && U['length'] > 0x0) {
@@ -1204,6 +1480,11 @@
                 // ── INCREMENT STATS: shifts found ──
                 _stats.shiftsFound += U['length'];
                 _stats.lastShiftFoundAt = new Date().toLocaleTimeString();
+                // ── PERFORMANCE ENGINE: Activate burst + record for predictions ──
+                _activateBurst();
+                _recordShiftFound();
+                // Sort jobs by quality score (best first)
+                U = _sortByScore(U);
                 let _allJobsHtml = '<div style="text-align:left;font-size:12px;color:white;max-width:340px;font-family:sans-serif;">';
                 _allJobsHtml += '<div style="font-weight:bold;font-size:14px;color:#4CAF50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(76,175,80,0.4);">\uD83D\uDD0D ' + U['length'] + ' Job' + (U['length'] > 1 ? 's' : '') + ' Found!</div>';
                 U['slice'](0, 6)['forEach'](function (_job, _idx) {

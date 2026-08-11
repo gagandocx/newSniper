@@ -94,10 +94,11 @@
       "declarativeContent",
       "scripting",
       "notifications",
-      "debugger"
+      "debugger",
+      "alarms"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.7.14.12",
+   "version": "8.8.0.0",
    "web_accessible_resources": [
       {
          "matches": [
