@@ -166,11 +166,11 @@
     // Peak hours: 4-7 AM, 11 AM-1 PM, 5-7 PM (when Amazon typically posts shifts)
     var _adaptiveEngine = {
         peakHours: [[4,7], [11,13], [17,19]], // [start, end] in 24h local time
-        peakInterval: 500,    // 500ms during peak (2x faster)
+        peakInterval: 1500,   // 1.5s during peak (slightly faster, safe)
         normalInterval: null, // set from user's configured interval
         burstMode: false,     // activated when shift was just found
         burstUntil: 0,        // timestamp when burst mode ends
-        burstInterval: 300    // 300ms burst after a shift is found (grab it fast!)
+        burstInterval: 1000   // 1s burst after a shift is found
     };
 
     function _isPeakHour() {
@@ -221,6 +221,9 @@
         if (d['__cs_rate_limit_threshold']) {
             _rateLimitLearner.safeThreshold = d['__cs_rate_limit_threshold'];
             console.log('[perf] Loaded rate limit threshold:', _rateLimitLearner.safeThreshold, 'requests per 2min');
+        } else {
+            // Default safe threshold until we learn the real one
+            _rateLimitLearner.safeThreshold = 40; // Conservative: assume 40 req/2min is safe
         }
     });
 
@@ -407,16 +410,17 @@
     // ── MASTER INTERVAL CALCULATOR ───────────────────────────────────────────
     // Combines all performance features to determine the optimal scan interval
     function _calculateOptimalInterval(baseInterval) {
-        // If pre-emptive throttle is active, slow down
-        if (_shouldThrottle()) return Math.max(baseInterval, 5000);
+        // If pre-emptive throttle is active, HARD STOP — wait longer
+        if (_shouldThrottle()) return Math.max(baseInterval * 3, 8000);
         // If backoff is active from recent rate limit
         var backoffDelay = _getBackoffDelay();
         if (backoffDelay > 0) return backoffDelay;
         // Get adaptive interval (peak hours / burst mode)
         var adaptive = _getAdaptiveInterval(baseInterval);
-        // If shift predictor says we're in a hot window, use faster interval
-        if (_shiftPredictor.ramping && adaptive > 800) adaptive = 800;
-        return adaptive;
+        // If shift predictor says we're in a hot window, use slightly faster interval
+        if (_shiftPredictor.ramping && adaptive > 1500) adaptive = 1500;
+        // SAFETY: Never go below 1000ms to avoid rate limits
+        return Math.max(adaptive, 1000);
     }
     window['__cs_getOptimalInterval'] = _calculateOptimalInterval;
     // ═══════════════════════════════════════════════════════════════════════════
@@ -1386,6 +1390,13 @@
                     'query': 'query\x20searchJobCardsByLocation($searchJobRequest:\x20SearchJobRequest!)\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20searchJobCardsByLocation(searchJobRequest:\x20$searchJobRequest)\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20nextToken\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobCards\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobId\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobTitle\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20city\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20distance\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'
             };
             if (!p) return;
+            // ── PERFORMANCE ENGINE: Skip scan if throttled ──
+            if (_shouldThrottle()) {
+                console.log('[perf] Throttled — skipping this scan, next in 8s');
+                if (b) { clearTimeout(b); b = null; }
+                b = setTimeout(function() { b = null; if (p) D(); }, 8000);
+                return;
+            }
             // ── START ANIMATION + TIMER AT EXACT MOMENT REQUEST FIRES ──────────
             // User sees animation begin at the same instant the request is sent.
             // setTimeout(D, c) fires c ms later — exactly when animation completes.
