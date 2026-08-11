@@ -271,11 +271,11 @@ document['addEventListener']('DOMContentLoaded', async function () {
         B['setAttribute']('disabled', 'disabled'), await new Promise(C => setTimeout(C, 0x1f4));
         // Save license keys before clearing — they should survive a reset
         var _savedLicense = await new Promise(function(r) {
-            chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_date', '__cs_license_valid', '__cs_license_days_remaining', '__cs_lifetime_stats'], r);
+            chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_device', '__cs_license_date', '__cs_license_valid', '__cs_license_days_remaining', '__cs_lifetime_stats', '__pw', '__country', '__un', 'groq_api_key'], r);
         });
         await chrome['storage']['local']['clear']();
-        // Restore license keys
-        if (_savedLicense['__cs_license_key']) {
+        // Restore license keys + credentials (PIN, country, email, Groq key)
+        if (_savedLicense['__cs_license_key'] || _savedLicense['__pw']) {
             await new Promise(function(r) { chrome.storage.local.set(_savedLicense, r); });
         }
         await chrome['storage']['local']['set']({

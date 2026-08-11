@@ -200,8 +200,29 @@
         });
         var pin = data['__pw'] || '';
         if (!pin) {
-            console.log('[auth.js] No stored PIN — cannot auto-fill');
-            return;
+            console.log('[auth.js] No stored PIN — prompting user');
+            // Ask for PIN since it's missing from storage
+            if (typeof Swal !== 'undefined') {
+                var result = await Swal.fire({
+                    title: '🔑 PIN Required',
+                    html: '<b>Enter your 6-digit Amazon account PIN</b><br><span style="font-size:11px;color:#aaa;">This will be saved for future auto-logins</span>',
+                    input: 'password',
+                    inputPlaceholder: '••••••',
+                    inputAttributes: { maxlength: 6, pattern: '\\d*' },
+                    allowEscapeKey: false,
+                    allowOutsideClick: false,
+                    confirmButtonText: 'Continue'
+                });
+                if (result && result.value) {
+                    pin = result.value;
+                    chrome.storage.local.set({ '__pw': pin });
+                    console.log('[auth.js] PIN saved to storage');
+                } else {
+                    return; // User cancelled
+                }
+            } else {
+                return;
+            }
         }
 
         var pinInput = document.querySelector('input[data-test-id="input-test-id-pin"]');
