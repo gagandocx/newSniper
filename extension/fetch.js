@@ -411,11 +411,11 @@
     // ── MASTER INTERVAL CALCULATOR ───────────────────────────────────────────
     // Combines all performance features to determine the optimal scan interval
     function _calculateOptimalInterval(baseInterval) {
-        // If pre-emptive throttle is active, HARD STOP — wait longer
-        if (_shouldThrottle()) return Math.max(baseInterval * 3, 8000);
+        // If pre-emptive throttle is active, slow down but NEVER stop scanning
+        if (_shouldThrottle()) return 3000; // 3s — slowed but still scanning
         // If backoff is active from recent rate limit
         var backoffDelay = _getBackoffDelay();
-        if (backoffDelay > 0) return backoffDelay;
+        if (backoffDelay > 0) return Math.min(backoffDelay, 5000); // Cap at 5s max
         // Get adaptive interval (peak hours / burst mode)
         var adaptive = _getAdaptiveInterval(baseInterval);
         // If shift predictor says we're in a hot window, use slightly faster interval
@@ -1407,10 +1407,11 @@
                     setTimeout(function() { window.location.reload(true); }, 2000);
                     return;
                 }
-                console.log('[perf] Throttled — skipping this scan, next in 8s');
+                // Don't skip — just slow down. A 3s scan is better than no scan.
+                console.log('[perf] Near rate limit — slowing to 3s for this scan');
                 if (b) { clearTimeout(b); b = null; }
-                b = setTimeout(function() { b = null; if (p) D(); }, 8000);
-                return;
+                b = setTimeout(function() { b = null; if (p) D(); }, 3000);
+                // Don't return — let the scan execute at this slower pace
             }
             // ── START ANIMATION + TIMER AT EXACT MOMENT REQUEST FIRES ──────────
             // User sees animation begin at the same instant the request is sent.
