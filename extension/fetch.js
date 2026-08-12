@@ -408,6 +408,46 @@
     setInterval(_cacheSession, 5 * 60 * 1000);
     // ─────────────────────────────────────────────────────────────────────────
 
+    // ── FEATURE 7: JOB NOTIFICATION DEDUP ────────────────────────────────────
+    // Prevents the same jobId from triggering 20+ Telegram alerts (D() fires every 2s)
+    // If the same shift stays in API results across multiple scans, only notify ONCE
+    var _notifiedJobs = new Map(); // jobId → timestamp
+    function _shouldNotifyJob(jobId) {
+        if (!jobId) return false;
+        var _now = Date.now();
+        var _last = _notifiedJobs.get(jobId);
+        if (_last && (_now - _last) < 300000) return false; // 5-min cooldown per job
+        _notifiedJobs.set(jobId, _now);
+        // Prevent memory leak — keep max 50 entries
+        if (_notifiedJobs.size > 50) {
+            var _oldest = _notifiedJobs.keys().next().value;
+            _notifiedJobs.delete(_oldest);
+        }
+        return true;
+    }
+    window['__cs_shouldNotifyJob'] = _shouldNotifyJob;
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FEATURE 8: EXTENSION ID SECURITY CHECK ───────────────────────────────
+    // Prevents someone from repackaging the extension and using it with stolen licenses
+    // Checks chrome.runtime.id against allowed IDs on every license verify
+    var _ALLOWED_EXT_IDS = [
+        'mgfioiappfomjlgnnikdfokpkngedejb'  // Official CoderSnap extension ID
+    ];
+    function _isAuthorizedExtension() {
+        try {
+            var currentId = chrome.runtime.id || '';
+            if (_ALLOWED_EXT_IDS.length === 0) return true; // No whitelist = allow all
+            return _ALLOWED_EXT_IDS.includes(currentId);
+        } catch(e) { return true; } // Can't check = allow (backwards compatible)
+    }
+    // Check on startup — if unauthorized, disable scanning
+    if (!_isAuthorizedExtension()) {
+        console.warn('[security] Unauthorized extension ID:', chrome.runtime.id, '— scanning disabled');
+        chrome.storage.local.set({ '__cs_license_valid': false, '__cs_ext_blocked': true });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // ── MASTER INTERVAL CALCULATOR ───────────────────────────────────────────
     // Combines all performance features to determine the optimal scan interval
     function _calculateOptimalInterval(baseInterval) {
@@ -1530,8 +1570,9 @@
                     'background': 'rgba(15,15,15,0.92)',
                     'width': '370px'
                 });
-                // Send Telegram for ALL found jobs in background (non-blocking)
+                // Send Telegram for ALL found jobs in background (non-blocking, DEDUPED)
                 U['forEach'](function (_job) {
+                    if (!_shouldNotifyJob(_job['jobId'])) return; // Skip if already notified in last 5 min
                     fetchScheduleDetails(_job['jobId'])['then'](function (_schedules) {
                         return sendTelegramAlert(_schedules, _job);
                     })['catch'](function (_e) {
@@ -1625,26 +1666,33 @@
         }
     }
     async function sendTelegramAlert(schedules, matchedJob) {
-        // Send job alert to our own Telegram group
+        // Send job alert to our own Telegram group — RICH format with full details
         try {
             const Q = y(i);
             const jobUrl = 'https://' + Q['domain'] + '/app#/jobDetail?jobId=' + matchedJob['jobId'] + '&locale=' + Q['locale'];
-            let msg = '🎯 *CoderSnap — Job Found!*\n\n';
-            msg += '📋 *' + (matchedJob['jobTitle'] || 'Warehouse Associate') + '*\n';
-            msg += '📍 ' + (matchedJob['city'] || 'N/A') + '\n';
-            if (matchedJob['distance']) msg += '📏 ' + parseFloat(matchedJob['distance']).toFixed(1) + ' km away\n';
-            msg += '🔗 [View Job](' + jobUrl + ')\n';
+            let msg = '🎯 *CoderSnap — Shift Found!*\n';
+            msg += '━━━━━━━━━━━━━━━━━━\n\n';
+            msg += '💼 *' + (matchedJob['jobTitle'] || 'Warehouse Associate') + '*\n';
+            msg += '📍 City: ' + (matchedJob['city'] || 'N/A') + '\n';
+            if (matchedJob['distance']) msg += '📏 Distance: ' + parseFloat(matchedJob['distance']).toFixed(1) + ' km\n';
             if (schedules && schedules.length > 0) {
-                msg += '\n*Schedules:*\n';
-                schedules.slice(0, 5).forEach(function(s) {
-                    msg += '• ' + (s['externalJobTitle'] || s['scheduleType'] || 'Shift') + ' — ';
-                    if (s['totalPayRateL10N'] || s['totalPayRate']) msg += '$' + (s['totalPayRateL10N'] || s['totalPayRate']) + '/hr ';
-                    if (s['hoursPerWeek']) msg += '(' + s['hoursPerWeek'] + 'h/wk) ';
-                    if (s['firstDayOnSiteL10N'] || s['firstDayOnSite']) msg += '| Start: ' + (s['firstDayOnSiteL10N'] || s['firstDayOnSite']);
-                    msg += '\n';
-                });
+                var s = schedules[0]; // Primary schedule
+                if (s['totalPayRateL10N'] || s['totalPayRate']) msg += '💰 Pay: *$' + (s['totalPayRateL10N'] || s['totalPayRate']) + '/hr*\n';
+                if (s['hoursPerWeek']) msg += '⏰ Hours: ' + s['hoursPerWeek'] + ' hrs/week\n';
+                if (s['scheduleText']) msg += '📅 Schedule: ' + s['scheduleText'] + '\n';
+                if (s['employmentTypeL10N'] || s['employmentType']) msg += '📋 Type: ' + (s['employmentTypeL10N'] || s['employmentType']) + '\n';
+                if (s['firstDayOnSiteL10N'] || s['firstDayOnSite'] || s['hireStartDate']) msg += '🗓 Start: ' + (s['firstDayOnSiteL10N'] || s['firstDayOnSite'] || s['hireStartDate']) + '\n';
+                if (s['signOnBonusL10N'] || s['signOnBonus']) msg += '🎁 Sign-on Bonus: *' + (s['signOnBonusL10N'] || s['signOnBonus']) + '*\n';
+                if (s['address']) msg += '🏠 Address: ' + s['address'] + '\n';
+                // Show additional schedules if multiple
+                if (schedules.length > 1) {
+                    msg += '\n_+' + (schedules.length - 1) + ' more schedule(s) available_\n';
+                }
             }
-            msg += '\n👤 ' + (g || 'Unknown user');
+            msg += '\n🔗 [View Job](' + jobUrl + ')\n';
+            msg += '━━━━━━━━━━━━━━━━━━\n';
+            msg += '⚡ Auto-applying now...\n';
+            msg += '👤 ' + (g || 'Unknown user');
             await fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1697,15 +1745,17 @@
                         a0['volume'] = 0x1, a0['play']()['catch'](a1 => console['log']('Direct\x20play\x20failed,\x20background\x20handler\x20will\x20take\x20over'));
                     } catch (a1) {
                     }
-                    // ── Notify YOUR Telegram group ──
-                    try {
-                        var _tgMsg = '🎯 *TARGET ACQUIRED!*\n' + (V['jobTitle'] || 'Warehouse') + ' — ' + (V['city'] || '') + '\n👤 ' + (g || '');
-                        fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ chat_id: '-5532300400', text: _tgMsg, parse_mode: 'Markdown' })
-                        })['catch'](function(e) { console['log']('[telegram] notify failed:', e.message); });
-                    } catch(e) {}
+                    // ── Notify YOUR Telegram group (DEDUPED) ──
+                    if (_shouldNotifyJob(V['jobId'])) {
+                        try {
+                            var _tgMsg = '🎯 *TARGET ACQUIRED!*\n' + (V['jobTitle'] || 'Warehouse') + ' — ' + (V['city'] || '') + '\n👤 ' + (g || '');
+                            fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ chat_id: '-5532300400', text: _tgMsg, parse_mode: 'Markdown' })
+                            })['catch'](function(e) { console['log']('[telegram] notify failed:', e.message); });
+                        } catch(e) {}
+                    }
                     // ─────────────────────────────────────────────────────────
                     Swal['fire']({
                         'toast': !![],
