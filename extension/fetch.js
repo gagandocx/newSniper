@@ -1390,7 +1390,9 @@
             console.log('[fetch.js] Active (p):', p, '| Interval (c):', c, 'ms');
             // ─────────────────────────────────────────────────────────────────
             // ── Build query then fire animation + request SIMULTANEOUSLY ─────────
-            const O = (o && o !== 'Any' && o !== 'undefined') ? [{
+            // Safety: ensure o is always a valid string (never undefined/null)
+            if (!o || o === 'undefined' || o === 'null') o = 'Any';
+            const O = (o && o !== 'Any') ? [{
                         'key': 'jobType',
                         'val': [o]
                     }] : [];
