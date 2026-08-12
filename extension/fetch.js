@@ -1662,13 +1662,22 @@
         const P = await chrome['storage']['local']['get']([
                 'cityTags',
                 '__cr',
-                '__isProUser'
+                '__isProUser',
+                'selectedCity'
             ]), Q = P['cityTags'] || [];
         let R = P['__cr'] || 0x0;
         const S = P['__isProUser'] || ![];
-        if (Q['length'] === 0x0)
-            return;
-        const isAnyCity = Q['some'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, '') === 'anycity');
+        var _selectedRegion = P['selectedCity'] || '';
+        // If no city tags set, apply to ALL found shifts (API already filtered by distance)
+        if (Q['length'] === 0x0) {
+            console.log('[fetch.js] No city tags set — applying to first found shift');
+            // Fall through with isAnyCity = true
+        }
+        var isAnyCity = Q['length'] === 0x0 || Q['some'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, '') === 'anycity');
+        // When using "Entire BC" or "Any City" region — apply to everything within radius
+        if (_selectedRegion === 'Entire BC' || _selectedRegion === 'Any City') {
+            isAnyCity = true;
+        }
         const T = Q['map'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, ''));
         let U = null;
         for (const V of O) {

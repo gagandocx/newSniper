@@ -182,7 +182,7 @@ document['addEventListener']('DOMContentLoaded', async function () {
         }
         // ── ENTIRE BC: Pre-fill target cities with Lower Mainland cities ──
         if (A === 'Entire BC') {
-            var _bcCities = ['Surrey', 'Richmond', 'Delta', 'Tsawwassen', 'Pitt Meadows', 'Coquitlam', 'Langley', 'Burnaby', 'New Westminster', 'Vancouver', 'Sidney'];
+            var _bcCities = ['Any City', 'Surrey', 'Richmond', 'Delta', 'Tsawwassen', 'Pitt Meadows', 'Coquitlam', 'Langley', 'Burnaby', 'New Westminster', 'Vancouver', 'Sidney'];
             chrome['storage']['local']['set']({ 'cityTags': _bcCities });
             // Set distance to 150km to cover all Lower Mainland + Fraser Valley
             const distElem = document['getElementById']('distance');
