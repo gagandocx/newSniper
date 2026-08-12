@@ -1730,16 +1730,17 @@
             if (!b) _startScan();
     }
     function H() {
+        var _hPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
             if (S['length'] > 0x0) {
                 const U = Math['floor'](Math['random']() * S['length']), V = S[U];
-                V['click'](), R['disconnect']();
+                V['click'](), R['disconnect'](), clearInterval(_hPoll);
                 return;
             }
             const T = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
             if (T) {
-                T['click'](), R['disconnect'](), setTimeout(() => H(), 0x64);
+                T['click'](), R['disconnect'](), clearInterval(_hPoll), setTimeout(() => H(), 0x64);
                 return;
             }
         });
@@ -1753,18 +1754,42 @@
             P[Q]['click'](), O['disconnect']();
             return;
         }
-        setTimeout(() => {
-            O['disconnect']();
-            const R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
-            R && (R['click'](), setTimeout(() => I(), 0x64));
-        }, 0x1388);
+        // Polling fallback: check every 200ms for up to 10 seconds
+        var _hAttempts = 0;
+        _hPoll = setInterval(function() {
+            _hAttempts++;
+            var cards = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
+            if (cards['length'] > 0) {
+                var idx = Math['floor'](Math['random']() * cards['length']);
+                cards[idx]['click']();
+                O['disconnect']();
+                clearInterval(_hPoll);
+            } else {
+                var selectBtn = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
+                if (selectBtn) {
+                    selectBtn['click']();
+                    O['disconnect']();
+                    clearInterval(_hPoll);
+                    setTimeout(() => H(), 100);
+                }
+            }
+            if (_hAttempts >= 50) { // 10 seconds
+                O['disconnect']();
+                clearInterval(_hPoll);
+                // Fallback: try StencilText click
+                var R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
+                if (R) { R['click'](); setTimeout(() => I(), 100); }
+                else { console.log('[fetch.js] H() — no schedule cards found after 10s, retrying'); setTimeout(() => H(), 2000); }
+            }
+        }, 200);
     }
     function I() {
+        var _iPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('.scheduleCardLabelText');
             if (S['length'] > 0x0) {
                 const T = Math['floor'](Math['random']() * S['length']), U = S[T];
-                U['click'](), R['disconnect'](), J();
+                U['click'](), R['disconnect'](), clearInterval(_iPoll), J();
             }
         });
         O['observe'](document['body'], {
@@ -1775,7 +1800,27 @@
         if (P['length'] > 0x0) {
             const Q = Math['floor'](Math['random']() * P['length']);
             P[Q]['click'](), O['disconnect'](), J();
+            return;
         }
+        // Polling fallback: check every 200ms for up to 10 seconds
+        var _iAttempts = 0;
+        _iPoll = setInterval(function() {
+            _iAttempts++;
+            var labels = document['querySelectorAll']('.scheduleCardLabelText');
+            if (labels['length'] > 0) {
+                var idx = Math['floor'](Math['random']() * labels['length']);
+                labels[idx]['click']();
+                O['disconnect']();
+                clearInterval(_iPoll);
+                J();
+            }
+            if (_iAttempts >= 50) { // 10 seconds
+                O['disconnect']();
+                clearInterval(_iPoll);
+                console.log('[fetch.js] I() — no schedule labels found after 10s');
+                J(); // Try J() anyway — button might exist
+            }
+        }, 200);
     }
     function J() {
         var _jPoll;
