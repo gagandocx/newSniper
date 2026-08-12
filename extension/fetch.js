@@ -430,22 +430,21 @@
 
     // ── FEATURE 8: EXTENSION ID SECURITY CHECK ───────────────────────────────
     // Prevents someone from repackaging the extension and using it with stolen licenses
-    // Checks chrome.runtime.id against allowed IDs on every license verify
+    // NOTE: Disabled in content script context — chrome.runtime.id may not be accessible
+    // in MAIN world. This check should only run in popup (license.js) context.
+    // Keeping the function for future use in license.js
     var _ALLOWED_EXT_IDS = [
         'mgfioiappfomjlgnnikdfokpkngedejb'  // Official CoderSnap extension ID
     ];
     function _isAuthorizedExtension() {
         try {
             var currentId = chrome.runtime.id || '';
-            if (_ALLOWED_EXT_IDS.length === 0) return true; // No whitelist = allow all
+            if (_ALLOWED_EXT_IDS.length === 0) return true;
             return _ALLOWED_EXT_IDS.includes(currentId);
-        } catch(e) { return true; } // Can't check = allow (backwards compatible)
+        } catch(e) { return true; }
     }
-    // Check on startup — if unauthorized, disable scanning
-    if (!_isAuthorizedExtension()) {
-        console.warn('[security] Unauthorized extension ID:', chrome.runtime.id, '— scanning disabled');
-        chrome.storage.local.set({ '__cs_license_valid': false, '__cs_ext_blocked': true });
-    }
+    // ID check moved to license.js popup context only — not enforced here
+    // to avoid blocking scanning due to content script world restrictions
     // ─────────────────────────────────────────────────────────────────────────
 
     // ── MASTER INTERVAL CALCULATOR ───────────────────────────────────────────
@@ -1391,7 +1390,7 @@
             console.log('[fetch.js] Active (p):', p, '| Interval (c):', c, 'ms');
             // ─────────────────────────────────────────────────────────────────
             // ── Build query then fire animation + request SIMULTANEOUSLY ─────────
-            const O = o !== 'Any' ? [{
+            const O = (o && o !== 'Any' && o !== 'undefined') ? [{
                         'key': 'jobType',
                         'val': [o]
                     }] : [];
