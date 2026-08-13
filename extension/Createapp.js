@@ -43,10 +43,24 @@
     }
 
     function _getBtn(text) {
-        return [...document.querySelectorAll('button')].find(function(btn) {
-            return btn.querySelector('div[data-test-component="StencilReactRow"]')?.textContent?.trim() === text ||
-                   btn.textContent.trim() === text;
+        // Method 1: StencilReactRow structure
+        var found = [...document.querySelectorAll('button')].find(function(btn) {
+            var stencil = btn.querySelector('div[data-test-component="StencilReactRow"]');
+            if (stencil && stencil.textContent.trim() === text) return true;
+            if (btn.textContent.trim() === text) return true;
+            return false;
         });
+        if (found) return found;
+        // Method 2: Broader — button containing the text anywhere (case-insensitive)
+        found = [...document.querySelectorAll('button')].find(function(btn) {
+            return btn.textContent.trim().toLowerCase().includes(text.toLowerCase());
+        });
+        if (found) return found;
+        // Method 3: Any clickable element (a, input[type=submit]) with the text
+        found = [...document.querySelectorAll('a, input[type="submit"]')].find(function(el) {
+            return (el.textContent || el.value || '').trim().toLowerCase().includes(text.toLowerCase());
+        });
+        return found || null;
     }
 
     // ── Main flow ─────────────────────────────────────────────────────────────
@@ -189,4 +203,18 @@
 
     // Start
     await _tryFlow();
+
+    // ── SAFETY NET: If _tryFlow finished without clicking, poll every 500ms ──
+    // Catches cases where button was already on page when script ran
+    var _safetyAttempts = 0;
+    var _safetyPoll = setInterval(function() {
+        _safetyAttempts++;
+        if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; } // Stop after 30s
+        var btn = _getBtn('Create Application');
+        if (btn) {
+            console.log('[Createapp] Safety net found Create Application button — clicking');
+            _clickBtn(btn);
+            clearInterval(_safetyPoll);
+        }
+    }, 500);
 })();
