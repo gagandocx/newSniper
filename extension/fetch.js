@@ -1783,12 +1783,12 @@
             const S = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
             if (S['length'] > 0x0) {
                 const U = Math['floor'](Math['random']() * S['length']), V = S[U];
-                V['click'](), R['disconnect']();
+                V['click'](), R['disconnect'](), clearInterval(_hPoll);
                 return;
             }
             const T = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
             if (T) {
-                T['click'](), R['disconnect'](), setTimeout(() => H(), 0x64);
+                T['click'](), R['disconnect'](), clearInterval(_hPoll), setTimeout(() => H(), 0x64);
                 return;
             }
         });
@@ -1802,18 +1802,38 @@
             P[Q]['click'](), O['disconnect']();
             return;
         }
+        // Polling fallback: actively looks for schedule cards every 200ms
+        var _hPoll = setInterval(function() {
+            var cards = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
+            if (cards['length'] > 0) {
+                var idx = Math['floor'](Math['random']() * cards['length']);
+                cards[idx]['click']();
+                O['disconnect']();
+                clearInterval(_hPoll);
+            } else {
+                var selectBtn = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
+                if (selectBtn) {
+                    selectBtn['click']();
+                    O['disconnect']();
+                    clearInterval(_hPoll);
+                    setTimeout(() => H(), 0x64);
+                }
+            }
+        }, 200);
+        // Timeout: stop polling after 10s, try StencilText fallback
         setTimeout(() => {
+            clearInterval(_hPoll);
             O['disconnect']();
             const R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
             R && (R['click'](), setTimeout(() => I(), 0x64));
-        }, 0x1388);
+        }, 0x2710);
     }
     function I() {
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('.scheduleCardLabelText');
             if (S['length'] > 0x0) {
                 const T = Math['floor'](Math['random']() * S['length']), U = S[T];
-                U['click'](), R['disconnect'](), J();
+                U['click'](), R['disconnect'](), clearInterval(_iPoll), J();
             }
         });
         O['observe'](document['body'], {
@@ -1824,19 +1844,49 @@
         if (P['length'] > 0x0) {
             const Q = Math['floor'](Math['random']() * P['length']);
             P[Q]['click'](), O['disconnect'](), J();
+            return;
         }
+        // Polling fallback: actively looks for labels every 200ms
+        var _iPoll = setInterval(function() {
+            var labels = document['querySelectorAll']('.scheduleCardLabelText');
+            if (labels['length'] > 0) {
+                var idx = Math['floor'](Math['random']() * labels['length']);
+                labels[idx]['click']();
+                O['disconnect']();
+                clearInterval(_iPoll);
+                J();
+            }
+        }, 200);
+        setTimeout(function() { clearInterval(_iPoll); O['disconnect'](); J(); }, 10000);
     }
     function J() {
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-            S && (S['click'](), R['disconnect']());
+            if (S) { S['click'](); R['disconnect'](); clearInterval(_jPoll); }
         });
         O['observe'](document['body'], {
             'childList': !![],
             'subtree': !![]
         });
         const P = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-        P && (P['click'](), O['disconnect']());
+        if (P) { P['click'](); O['disconnect'](); return; }
+        // Polling fallback: actively looks for Create Application button every 200ms
+        var _jPoll = setInterval(function() {
+            var btn = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
+            if (btn) {
+                btn['click']();
+                O['disconnect']();
+                clearInterval(_jPoll);
+            }
+        }, 200);
+        // Timeout: retry J() after 10s if still not found
+        setTimeout(function() {
+            clearInterval(_jPoll);
+            O['disconnect']();
+            var btn = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
+            if (btn) { btn['click'](); }
+            else { setTimeout(function() { J(); }, 1000); }
+        }, 10000);
     }
     function K(O) {
         return new Promise((P, Q) => {
