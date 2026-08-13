@@ -475,14 +475,11 @@
                 if (!data['__cs_license_key'] || !data['__cs_license_email']) {
                     resolve(false); return;
                 }
-                // Use the cached validity from last popup verification
-                // The popup (license.js) does the online check and stores __cs_license_valid
-                if (data['__cs_license_valid'] === true) {
-                    _csLicensedEmail = data['__cs_license_email'].toLowerCase().trim();
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
+                // If license keys exist in storage, ALWAYS allow scanning
+                // The 30-min heartbeat will verify server-side in the background
+                // Only the popup gate should block — not the content script
+                _csLicensedEmail = data['__cs_license_email'].toLowerCase().trim();
+                resolve(true);
             });
         });
     }
@@ -566,22 +563,31 @@
                     console.log('[heartbeat] License valid. Days remaining:', result.daysRemaining || '?');
                     chrome.storage.local.set({ '__cs_license_valid': true });
                 } else {
-                    // License invalid/expired/revoked — KILL scanning
-                    console.warn('[heartbeat] License INVALID:', result.error || 'unknown');
-                    chrome.storage.local.set({ '__cs_license_valid': false, '__ap': false });
-                    // Reload to show the locked state
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            title: '&#128274; License Revoked',
-                            html: '<p style="color:rgba(199,210,254,0.8);font-size:13px;">'
-                                + (result.error || 'Your license is no longer valid.') + '</p>'
-                                + '<p style="color:rgba(199,210,254,0.4);font-size:11px;margin-top:10px;">'
-                                + 'Contact your CoderSnap administrator.</p>',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            allowEscapeKey: false,
-                            allowOutsideClick: false
-                        });
+                    // Check if this is a HARD failure (genuinely revoked/expired) or transient
+                    var _errMsg = (result && result.error) || '';
+                    var _isHardFail = _errMsg.includes('revoked') || _errMsg.includes('expired') || _errMsg.includes('mismatch');
+                    
+                    if (_isHardFail) {
+                        // Genuinely revoked/expired — kill scanning
+                        console.warn('[heartbeat] License HARD FAIL:', _errMsg);
+                        chrome.storage.local.set({ '__cs_license_valid': false, '__ap': false });
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: '&#128274; License Revoked',
+                                html: '<p style="color:rgba(199,210,254,0.8);font-size:13px;">'
+                                    + _errMsg + '</p>'
+                                    + '<p style="color:rgba(199,210,254,0.4);font-size:11px;margin-top:10px;">'
+                                    + 'Contact your CoderSnap administrator.</p>',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false
+                            });
+                        }
+                    } else {
+                        // Transient error (Google redirect, HTML response, network) — KEEP license active
+                        console.log('[heartbeat] Verify returned non-valid but NOT a hard fail:', _errMsg, '— keeping license active');
+                        // Do NOT change __cs_license_valid — leave it as true
                     }
                 }
             } catch(e) {
