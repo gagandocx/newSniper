@@ -137,6 +137,12 @@
                 }, resolve);
             });
             
+            // ── BACKUP: Also save to localStorage (survives chrome.storage wipes) ──
+            try {
+                localStorage.setItem('__cs_bk_key', cleanKey);
+                localStorage.setItem('__cs_bk_email', cleanEmail);
+            } catch(e) {}
+            
             // Also set the Amazon email for the extension
             await new Promise(function(resolve) {
                 chrome.storage.local.set({ '__un': cleanEmail }, resolve);
@@ -159,6 +165,26 @@
         const stored = await new Promise(function(resolve) {
             chrome.storage.local.get(['__cs_license_key', '__cs_license_email'], resolve);
         });
+
+        // ── BACKUP RECOVERY: If keys missing from chrome.storage, try localStorage backup ──
+        if (!stored['__cs_license_key'] || !stored['__cs_license_email']) {
+            try {
+                var _backupKey = localStorage.getItem('__cs_bk_key');
+                var _backupEmail = localStorage.getItem('__cs_bk_email');
+                if (_backupKey && _backupEmail) {
+                    console.log('[license] Keys missing from chrome.storage — restoring from localStorage backup');
+                    await new Promise(function(r) {
+                        chrome.storage.local.set({
+                            '__cs_license_key': _backupKey,
+                            '__cs_license_email': _backupEmail,
+                            '__cs_license_valid': true
+                        }, r);
+                    });
+                    stored['__cs_license_key'] = _backupKey;
+                    stored['__cs_license_email'] = _backupEmail;
+                }
+            } catch(e) {}
+        }
 
         if (stored['__cs_license_key'] && stored['__cs_license_email']) {
             // Has stored license — verify online
@@ -188,6 +214,11 @@
                 }
                 // Mark as valid for fetch.js
                 chrome.storage.local.set({ '__cs_license_valid': true });
+                // ── BACKUP: Save to localStorage as safety net ──
+                try {
+                    localStorage.setItem('__cs_bk_key', stored['__cs_license_key']);
+                    localStorage.setItem('__cs_bk_email', stored['__cs_license_email']);
+                } catch(e) {}
             } else {
                 // License verification failed — but DON'T show gate for transient errors
                 var errorMsg = verification.error || '';

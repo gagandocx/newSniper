@@ -473,6 +473,18 @@
         return new Promise(function(resolve) {
             chrome.storage.local.get(['__cs_license_key', '__cs_license_email', '__cs_license_valid', '__cs_license_device'], function(data) {
                 if (!data['__cs_license_key'] || !data['__cs_license_email']) {
+                    // Try localStorage backup before giving up
+                    try {
+                        var _bkKey = localStorage.getItem('__cs_bk_key');
+                        var _bkEmail = localStorage.getItem('__cs_bk_email');
+                        if (_bkKey && _bkEmail) {
+                            console.log('[fetch.js] License keys missing — restored from localStorage backup');
+                            chrome.storage.local.set({ '__cs_license_key': _bkKey, '__cs_license_email': _bkEmail, '__cs_license_valid': true });
+                            _csLicensedEmail = _bkEmail.toLowerCase().trim();
+                            resolve(true);
+                            return;
+                        }
+                    } catch(e) {}
                     resolve(false); return;
                 }
                 // If license keys exist in storage, ALWAYS allow scanning
