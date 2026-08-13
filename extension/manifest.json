@@ -98,7 +98,7 @@
       "alarms"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.8.1.3",
+   "version": "8.8.1.4",
    "web_accessible_resources": [
       {
          "matches": [

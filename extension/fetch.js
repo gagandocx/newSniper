@@ -565,7 +565,13 @@
                 } else {
                     // Check if this is a HARD failure (genuinely revoked/expired) or transient
                     var _errMsg = (result && result.error) || '';
-                    var _isHardFail = _errMsg.includes('revoked') || _errMsg.includes('expired') || _errMsg.includes('mismatch');
+                    var _isHardFail = _errMsg === 'License revoked' || 
+                                      _errMsg === 'License expired' ||
+                                      _errMsg === 'License expired — 1 year has passed since activation' ||
+                                      _errMsg === 'Email mismatch — key bound to different account' ||
+                                      _errMsg === 'Device mismatch — key activated on different device' ||
+                                      _errMsg === 'Email mismatch' ||
+                                      _errMsg === 'Device mismatch';
                     
                     if (_isHardFail) {
                         // Genuinely revoked/expired — kill scanning

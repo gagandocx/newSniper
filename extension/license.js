@@ -20,41 +20,11 @@
     const LICENSE_SERVER_URL = 'https://script.google.com/macros/s/AKfycbziX_IPp8afiwz7-4Cj3QisI1dz6W0IZQAqP7vpsBrBbq0yLB-vl42HNnL4hyFYxeJEMQ/exec';
     // ══════════════════════════════════════════════════════════════════
 
-    // ── ANTI-DEBUGGING: Detect DevTools and lock extension ───────────
-    // If someone right-clicks the popup → Inspect to study the code,
-    // the extension detects it and locks up permanently until reload.
-    (function _antiDebug() {
-        var _dbDetected = false;
-
-        // Method: debugger statement timing
-        // When DevTools is open, debugger pauses execution — causing timing diff
-        // Only triggers if execution takes >100ms (DevTools pauses on debugger statement)
-        function _checkDebugger() {
-            var start = performance.now();
-            debugger;
-            var diff = performance.now() - start;
-            // 100ms threshold — debugger statement is instant without DevTools
-            // but pauses indefinitely when DevTools is open
-            if (diff > 100) {
-                _lockOnDebug();
-            }
-        }
-
-        function _lockOnDebug() {
-            if (_dbDetected) return;
-            _dbDetected = true;
-            chrome.storage.local.set({ '__cs_license_valid': false, '__cs_debug_detected': true });
-            // Blank the popup
-            document.body.innerHTML = '<div style="padding:60px 20px;text-align:center;font-family:Inter,sans-serif;background:#0a0a0a;min-height:600px;">'
-                + '<div style="font-size:48px;margin-bottom:16px;">&#128007;</div>'
-                + '<h2 style="color:#f87171;margin:0 0 12px;">Access Denied</h2>'
-                + '<p style="color:rgba(199,210,254,0.5);font-size:12px;">Unauthorized inspection detected.</p></div>';
-        }
-
-        // Debugger check every 3s — only triggers when DevTools is actually open
-        setInterval(_checkDebugger, 3000);
-    })();
-    // ─────────────────────────────────────────────────────────────────
+    // ── ANTI-DEBUGGING: DISABLED ────────────────────────────────────────────
+    // Was causing false positives that set __cs_license_valid=false
+    // especially when browser is under load (100ms timing threshold too sensitive)
+    // The license server verification is sufficient protection
+    // ─────────────────────────────────────────────────────────────────────────
 
     // ── Device fingerprint: unique per Chrome profile ──
     function getDeviceId() {
@@ -221,7 +191,13 @@
             } else {
                 // License verification failed — but DON'T show gate for transient errors
                 var errorMsg = verification.error || '';
-                var isHardFailure = errorMsg.includes('mismatch') || errorMsg.includes('revoked') || errorMsg.includes('expired');
+                var isHardFailure = errorMsg === 'License revoked' || 
+                                    errorMsg === 'License expired' ||
+                                    errorMsg === 'License expired — 1 year has passed since activation' ||
+                                    errorMsg === 'Email mismatch — key bound to different account' ||
+                                    errorMsg === 'Device mismatch — key activated on different device' ||
+                                    errorMsg === 'Email mismatch' ||
+                                    errorMsg === 'Device mismatch';
                 
                 if (isHardFailure) {
                     // Genuine license problem — show error badge, clear keys, show gate
