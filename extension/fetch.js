@@ -1463,30 +1463,12 @@
                     'query': 'query\x20searchJobCardsByLocation($searchJobRequest:\x20SearchJobRequest!)\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20searchJobCardsByLocation(searchJobRequest:\x20$searchJobRequest)\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20nextToken\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobCards\x20{\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobId\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20jobTitle\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20city\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20distance\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20}'
             };
             if (!p) return;
-            // ── PERFORMANCE ENGINE: Skip scan if throttled ──
-            if (_shouldThrottle()) {
-                // But still check for page errors even when throttled
-                var _errText = (document.body && document.body.innerText) || '';
-                if (/problem loading page|server didn't respond|try refreshing/i.test(_errText)) {
-                    console.log('[fetch.js] Page error during throttle — hard refreshing');
-                    setTimeout(function() { window.location.reload(true); }, 2000);
-                    return;
-                }
-                // Don't skip — just slow down. A 3s scan is better than no scan.
-                console.log('[perf] Near rate limit — slowing to 3s for this scan');
-                if (b) { clearTimeout(b); b = null; }
-                b = setTimeout(function() { b = null; if (p) D(); }, 3000);
-                // Don't return — let the scan execute at this slower pace
-            }
             // ── START ANIMATION + TIMER AT EXACT MOMENT REQUEST FIRES ──────────
             // User sees animation begin at the same instant the request is sent.
             // setTimeout(D, c) fires c ms later — exactly when animation completes.
             _showRing(c);
             if (b) { clearTimeout(b); b = null; }
-            // ── PERFORMANCE ENGINE: Use optimal interval instead of fixed c ──
-            var _optInterval = _calculateOptimalInterval(c);
-            _trackRequest(); // Track for rate limit learning
-            b = setTimeout(function() { b = null; if (p) D(); }, _optInterval);
+            b = setTimeout(function() { b = null; if (p) D(); }, c);
             // ─────────────────────────────────────────────────────────────────────
             const S = await fetch('https://hiring.amazon.ca/graphql', {
                     'method': 'POST',
@@ -1522,21 +1504,48 @@
                     if (!window['_rateLimited']) {
                         window['_rateLimited'] = true;
                         window['_normalInterval'] = c;
-                        window['_rateLimitStarted'] = Date.now();
                         _stats.rateLimitHits++;
-                        _onRateLimit(); // Feed performance engine
-                        console.log('[fetch.js] 403/429 detected — switching to smart backoff');
+                        console.log('[fetch.js] 403/429 detected — switching to random 3-5s interval');
                     }
-                    // If rate limited for 10+ minutes straight — full session reset
-                    if (window['_rateLimitStarted'] && (Date.now() - window['_rateLimitStarted']) > 10 * 60 * 1000) {
-                        console.log('[fetch.js] Rate limited for 10+ minutes — full session reset');
-                        window['_rateLimited'] = false;
-                        window['_rateLimitStarted'] = null;
-                        window.location.href = 'https://auth.hiring.amazon.ca/#/login';
-                        return;
+
+                    // ── Smart 403 watchdog ──────────────────────────────────────────────
+                    // 429 = temporary rate limit (Amazon throttle) → keep retrying normally
+                    // 403 = session expired / bot-detected → track duration → reload at 5 min
+                    if (S['status'] === 403) {
+                        if (!window['_ss403Start']) {
+                            window['_ss403Start'] = Date.now();
+                            console.log('[fetch.js] 403 started — will reload for re-login at 5 min');
+                        }
+                        var _403elapsed = Date.now() - window['_ss403Start'];
+                        var _403min = Math.floor(_403elapsed / 60000);
+
+                        if (_403elapsed >= 300000) {
+                            // 5 minutes of continuous 403 — session is definitely expired
+                            console.log('[fetch.js] 403 for 5+ minutes — reloading page for re-authentication');
+                            window['_ss403Start'] = null;
+                            window['_rateLimited'] = false;
+                            c = window['_normalInterval'] || c;
+                            if (b) { clearTimeout(b); b = null; }
+                            _ringState('err', '⚠️ Session expired — reloading for re-login...', 4000);
+                            // Reload after 2s so user sees the toast
+                            setTimeout(function() {
+                                chrome.storage.local.set({ _pendingJobRedirect: true });
+                                window.location.reload();
+                            }, 2000);
+                            return;
+                        }
+
+                        // Still within 5 min — show countdown in ring
+                        var _403remaining = Math.ceil((300000 - _403elapsed) / 60000);
+                        _ringState('warn', '⚠️ Session error (' + _403min + '/5 min) — retrying...', 4000);
+                        console.log('[fetch.js] 403 duration:', _403min + 'min, reload in ' + _403remaining + 'min if persistent');
+                    } else {
+                        // 429: plain rate limit, no session issue
+                        _ringState('warn', 'Rate limited — retrying shortly...', 4000);
                     }
+                    // ────────────────────────────────────────────────────────────────────
+
                     var _randomMs = (3000 + Math['floor'](Math['random']() * 2000)); // 3000-5000ms
-                    _ringState('warn', 'Rate limited — retry in ' + Math['round'](_randomMs/1000) + 's', _randomMs);
                     if (b) { clearTimeout(b); b = null; }
                     b = setTimeout(function() { b = null; if (p) D(); }, _randomMs);
                 } else {
@@ -1547,16 +1556,18 @@
                 }
                 return;
             }
-            // 200 OK — if we were rate limited, restore normal interval
+            // 200 OK — clear session error tracker and restore normal interval
+            if (window['_ss403Start']) {
+                console.log('[fetch.js] 403 cleared — session healthy again');
+                window['_ss403Start'] = null;
+            }
             if (window['_rateLimited']) {
                 window['_rateLimited'] = false;
-                window['_rateLimitStarted'] = null;
                 c = window['_normalInterval'];
                 console.log('[fetch.js] 200 OK — restored normal interval:', c, 'ms');
                 _startScan();
-                _ringState('', 'Job Checking...', c); // Restore animation to normal scan interval
+                _ringState('', 'Job Checking...', c);
             }
-            _onSuccessfulRequest(); // Feed performance engine
             const T = await S['json'](), U = T['data']['searchJobCardsByLocation']['jobCards'];
             _stats.scansCompleted++;
             if (U && U['length'] > 0x0) {
@@ -1565,11 +1576,6 @@
                 // ── INCREMENT STATS: shifts found ──
                 _stats.shiftsFound += U['length'];
                 _stats.lastShiftFoundAt = new Date().toLocaleTimeString();
-                // ── PERFORMANCE ENGINE: Activate burst + record for predictions ──
-                _activateBurst();
-                _recordShiftFound();
-                // Sort jobs by quality score (best first)
-                U = _sortByScore(U);
                 let _allJobsHtml = '<div style="text-align:left;font-size:12px;color:white;max-width:340px;font-family:sans-serif;">';
                 _allJobsHtml += '<div style="font-weight:bold;font-size:14px;color:#4CAF50;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(76,175,80,0.4);">\uD83D\uDD0D ' + U['length'] + ' Job' + (U['length'] > 1 ? 's' : '') + ' Found!</div>';
                 U['slice'](0, 6)['forEach'](function (_job, _idx) {
