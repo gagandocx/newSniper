@@ -1735,22 +1735,13 @@
         const P = await chrome['storage']['local']['get']([
                 'cityTags',
                 '__cr',
-                '__isProUser',
-                'selectedCity'
+                '__isProUser'
             ]), Q = P['cityTags'] || [];
         let R = P['__cr'] || 0x0;
         const S = P['__isProUser'] || ![];
-        var _selectedRegion = P['selectedCity'] || '';
-        // If no city tags set, apply to ALL found shifts (API already filtered by distance)
-        if (Q['length'] === 0x0) {
-            console.log('[fetch.js] No city tags set — applying to first found shift');
-            // Fall through with isAnyCity = true
-        }
-        var isAnyCity = Q['length'] === 0x0 || Q['some'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, '') === 'anycity');
-        // When using "Entire BC" or "Any City" region — apply to everything within radius
-        if (_selectedRegion === 'Entire BC' || _selectedRegion === 'Any City') {
-            isAnyCity = true;
-        }
+        if (Q['length'] === 0x0)
+            return;
+        const isAnyCity = Q['some'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, '') === 'anycity');
         const T = Q['map'](V => V['toLowerCase']()['replace'](/[^a-zA-Z]/g, ''));
         let U = null;
         for (const V of O) {
@@ -1758,8 +1749,6 @@
                 const W = await chrome['storage']['local']['get'](['cityTags']), X = W['cityTags'] || [], Y = X['map'](Z => Z['toLowerCase']()['replace'](/[^a-zA-Z]/g, ''));
                 T['push'](...Y);
             }
-            // City match only — distance is already filtered by the API geoQueryClause
-            // Work hours (jobType) is filtered by containFilters in the API call
             const cityMatched = isAnyCity || (V['city'] && T['some'](a0 => V['city']['toLowerCase']()['replace'](/[^a-zA-Z]/g, '')['includes'](a0)));
             console.log('[fetch.js] Job:', V['jobTitle'], '| City:', V['city'] || 'N/A', '| CityMatch:', cityMatched);
             if (cityMatched) {
@@ -1769,18 +1758,6 @@
                         a0['volume'] = 0x1, a0['play']()['catch'](a1 => console['log']('Direct\x20play\x20failed,\x20background\x20handler\x20will\x20take\x20over'));
                     } catch (a1) {
                     }
-                    // ── Notify YOUR Telegram group (DEDUPED) ──
-                    if (_shouldNotifyJob(V['jobId'])) {
-                        try {
-                            var _tgMsg = '🎯 *TARGET ACQUIRED!*\n' + (V['jobTitle'] || 'Warehouse') + ' — ' + (V['city'] || '') + '\n👤 ' + (g || '');
-                            fetch('https://api.telegram.org/bot8863800330:AAE48axXq3pJCf3140YoqP-VPF7yesG2zS4/sendMessage', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ chat_id: '-5532300400', text: _tgMsg, parse_mode: 'Markdown' })
-                            })['catch'](function(e) { console['log']('[telegram] notify failed:', e.message); });
-                        } catch(e) {}
-                    }
-                    // ─────────────────────────────────────────────────────────
                     Swal['fire']({
                         'toast': !![],
                         'position': 'bottom-start',
@@ -1790,7 +1767,6 @@
                         'background': 'rgba(15,15,15,0.92)',
                         'html': '<div style="color:white;font-size:13px;"><b style="color:#00d4ff;">🎯 TARGET ACQUIRED!</b><br><span style="color:#aaa;font-size:12px;">Deploying application to ' + (V['city'] || 'matched city') + '...</span></div>'
                     });
-                    // ── INCREMENT STATS: applied ──
                     _stats.applied++;
                     U = V;
                     break;
@@ -1798,23 +1774,21 @@
         }
         if (U) {
             const a2 = y(i), a3 = 'https://' + a2['domain'] + '/app#/jobDetail?jobId=' + U['jobId'] + '&locale=' + a2['locale'];
-            // Telegram already sent for all jobs (including this one) in the D() fetch loop above.
             window['location']['href'] = a3, H();
         } else
             if (!b) _startScan();
     }
     function H() {
-        var _hPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
             if (S['length'] > 0x0) {
                 const U = Math['floor'](Math['random']() * S['length']), V = S[U];
-                V['click'](), R['disconnect'](), clearInterval(_hPoll);
+                V['click'](), R['disconnect']();
                 return;
             }
             const T = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
             if (T) {
-                T['click'](), R['disconnect'](), clearInterval(_hPoll), setTimeout(() => H(), 0x64);
+                T['click'](), R['disconnect'](), setTimeout(() => H(), 0x64);
                 return;
             }
         });
@@ -1828,42 +1802,18 @@
             P[Q]['click'](), O['disconnect']();
             return;
         }
-        // Polling fallback: check every 200ms for up to 10 seconds
-        var _hAttempts = 0;
-        _hPoll = setInterval(function() {
-            _hAttempts++;
-            var cards = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
-            if (cards['length'] > 0) {
-                var idx = Math['floor'](Math['random']() * cards['length']);
-                cards[idx]['click']();
-                O['disconnect']();
-                clearInterval(_hPoll);
-            } else {
-                var selectBtn = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
-                if (selectBtn) {
-                    selectBtn['click']();
-                    O['disconnect']();
-                    clearInterval(_hPoll);
-                    setTimeout(() => H(), 100);
-                }
-            }
-            if (_hAttempts >= 50) { // 10 seconds
-                O['disconnect']();
-                clearInterval(_hPoll);
-                // Fallback: try StencilText click
-                var R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
-                if (R) { R['click'](); setTimeout(() => I(), 100); }
-                else { console.log('[fetch.js] H() — no schedule cards found after 10s, retrying'); setTimeout(() => H(), 2000); }
-            }
-        }, 200);
+        setTimeout(() => {
+            O['disconnect']();
+            const R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
+            R && (R['click'](), setTimeout(() => I(), 0x64));
+        }, 0x1388);
     }
     function I() {
-        var _iPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('.scheduleCardLabelText');
             if (S['length'] > 0x0) {
                 const T = Math['floor'](Math['random']() * S['length']), U = S[T];
-                U['click'](), R['disconnect'](), clearInterval(_iPoll), J();
+                U['click'](), R['disconnect'](), J();
             }
         });
         O['observe'](document['body'], {
@@ -1874,57 +1824,19 @@
         if (P['length'] > 0x0) {
             const Q = Math['floor'](Math['random']() * P['length']);
             P[Q]['click'](), O['disconnect'](), J();
-            return;
         }
-        // Polling fallback: check every 200ms for up to 10 seconds
-        var _iAttempts = 0;
-        _iPoll = setInterval(function() {
-            _iAttempts++;
-            var labels = document['querySelectorAll']('.scheduleCardLabelText');
-            if (labels['length'] > 0) {
-                var idx = Math['floor'](Math['random']() * labels['length']);
-                labels[idx]['click']();
-                O['disconnect']();
-                clearInterval(_iPoll);
-                J();
-            }
-            if (_iAttempts >= 50) { // 10 seconds
-                O['disconnect']();
-                clearInterval(_iPoll);
-                console.log('[fetch.js] I() — no schedule labels found after 10s');
-                J(); // Try J() anyway — button might exist
-            }
-        }, 200);
     }
     function J() {
-        var _jPoll;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-            if (S) { S['click'](); R['disconnect'](); clearInterval(_jPoll); }
+            S && (S['click'](), R['disconnect']());
         });
         O['observe'](document['body'], {
             'childList': !![],
             'subtree': !![]
         });
         const P = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-        if (P) { P['click'](); O['disconnect'](); return; }
-        // Polling fallback: check every 200ms for up to 10 seconds
-        // Fixes issue where button appears without DOM mutations (no loading spinner)
-        var _jAttempts = 0;
-        _jPoll = setInterval(function() {
-            _jAttempts++;
-            var btn = document['querySelector']('button[data-test-id=\x22jobDetailApplyButtonDesktop\x22]');
-            if (btn) {
-                btn['click']();
-                O['disconnect']();
-                clearInterval(_jPoll);
-            } else if (_jAttempts >= 50) { // 50 * 200ms = 10 seconds max
-                O['disconnect']();
-                clearInterval(_jPoll);
-                console['log']('[fetch.js] Create Application button not found after 10s — retrying J()');
-                setTimeout(function() { J(); }, 1000);
-            }
-        }, 200);
+        P && (P['click'](), O['disconnect']());
     }
     function K(O) {
         return new Promise((P, Q) => {
