@@ -1337,13 +1337,6 @@
         if (window['_ss_banner_shown']) return;
         if (b) { clearTimeout(b); b = null; }
         if (!p) return;
-        // ── Detect "Problem loading page" error → hard refresh immediately ──
-        var _bodyText = (document.body && document.body.innerText) || '';
-        if (/problem loading page|server didn't respond|try refreshing/i.test(_bodyText)) {
-            console.log('[fetch.js] Page error detected — hard refreshing in 3s');
-            setTimeout(function() { window.location.reload(true); }, 3000);
-            return;
-        }
         D(); // D() schedules its own next call at the right time
     }
     // ─────────────────────────────────────────────────────────────
