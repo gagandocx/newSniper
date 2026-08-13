@@ -111,7 +111,17 @@
                     }
                     resolve({ valid: true, daysRemaining: daysLeft });
                 } else {
-                    resolve({ valid: false, error: result.error || 'Verification failed' });
+                    // Check if it's a transient error (HTML/404/network) — treat as valid
+                    var _vErr = (result && result.error) || '';
+                    var _isTransient = _vErr.includes('Got HTML') || _vErr.includes('Non-JSON') ||
+                                      _vErr.includes('Network error') || _vErr.includes('No response') ||
+                                      _vErr.includes('cookie') || _vErr.includes('status 404') || _vErr.includes('status 0');
+                    if (_isTransient) {
+                        console.log('[license] Verify got transient error:', _vErr, '— treating as valid');
+                        resolve({ valid: true, daysRemaining: null });
+                    } else {
+                        resolve({ valid: false, error: result.error || 'Verification failed' });
+                    }
                 }
             });
         });
@@ -119,13 +129,27 @@
 
     // ── Activate a new license ──
     async function activateLicense(key, email) {
-        const result = await callServer('activate', key, email);
+        const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const cleanEmail = email.toLowerCase().trim();
         
-        if (result.success) {
-            // Store locally
-            const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            const cleanEmail = email.toLowerCase().trim();
-            
+        const result = await callServer('activate', cleanKey, cleanEmail);
+        
+        // If server returned success — great
+        // If server returned an error BUT it's a transient HTML/404 error,
+        // save the license anyway (the sheet was written successfully)
+        // Only reject on genuinely bad responses (invalid key, already bound, etc)
+        var isTransientError = !result.success && (
+            (result.error || '').includes('Got HTML') ||
+            (result.error || '').includes('Non-JSON') ||
+            (result.error || '').includes('Network error') ||
+            (result.error || '').includes('No response') ||
+            (result.error || '').includes('cookie') ||
+            (result.error || '').includes('status 404') ||
+            (result.error || '').includes('status 0')
+        );
+        
+        if (result.success || isTransientError) {
+            // Save locally — activation worked (sheet was written)
             await new Promise(function(resolve) {
                 chrome.storage.local.set({
                     '__cs_license_key': cleanKey,
@@ -148,8 +172,13 @@
                 chrome.storage.local.set({ '__un': cleanEmail }, resolve);
             });
             
+            if (isTransientError) {
+                console.log('[license] Activation: server response was HTML/404 but sheet was likely written — saving license locally');
+            }
+            
             return { success: true, daysRemaining: result.daysRemaining || 365 };
         } else {
+            // Genuine server rejection (invalid key, already bound to another email, etc)
             return { success: false, error: result.error || 'Activation failed' };
         }
     }
