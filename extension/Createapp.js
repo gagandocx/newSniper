@@ -66,6 +66,40 @@
     // ── Main flow ─────────────────────────────────────────────────────────────
     console.log('[Createapp] Starting application flow — CAPTCHA watchdog ON');
 
+    // ── INSTANT CHECK: Click Create Application IMMEDIATELY if present ────────
+    // Don't wait for _tryFlow() complex logic — click it NOW
+    var _instantBtn = _getBtn('Create Application');
+    if (_instantBtn && !_isCaptchaVisible()) {
+        console.log('[Createapp] INSTANT — Create Application button found on load, clicking NOW');
+        _clickBtn(_instantBtn);
+        _goJobSearch();
+        return; // Done — no need for complex flow
+    }
+    // Also check for "Next" button immediately
+    var _instantNext = _getBtn('Next');
+    if (_instantNext && !_isCaptchaVisible()) {
+        console.log('[Createapp] INSTANT — Next button found on load, clicking NOW');
+        _clickBtn(_instantNext);
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── AGGRESSIVE POLL: Start looking for the button every 200ms RIGHT NOW ──
+    var _quickFound = false;
+    var _quickPoll = setInterval(function() {
+        if (_quickFound) return;
+        var btn = _getBtn('Create Application');
+        if (btn && !_isCaptchaVisible()) {
+            _quickFound = true;
+            clearInterval(_quickPoll);
+            console.log('[Createapp] Quick poll found Create Application — clicking');
+            _clickBtn(btn);
+            _goJobSearch();
+        }
+    }, 200);
+    // Stop quick poll after 30s (safety net below takes over)
+    setTimeout(function() { clearInterval(_quickPoll); }, 30000);
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Detect "0 schedules found" / "no schedules match" → return to jobSearch
     function _noSchedules() {
         var _t = document.body.innerText || '';
