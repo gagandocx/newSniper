@@ -3,8 +3,8 @@ document['addEventListener']('DOMContentLoaded', async function () {
     document['getElementById']('version')['innerText'] = '(version\x20v' + a + ')';
     const b = {
             'Any City': {
-                'lat': 52.939916,
-                'lng': -97.140533
+                'lat': 43.653524,
+                'lng': -79.383907
             },
             'Entire BC': {
                 'lat': 49.19,
