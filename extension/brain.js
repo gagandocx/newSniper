@@ -45,6 +45,11 @@
             return 'LOGIN_REDIRECT_STUCK';
         }
 
+        // Contact us / wrong page — not part of scanning flow
+        if (url.includes('/contact-us') || url.includes('/faq') || url.includes('/help')) {
+            return 'WRONG_PAGE';
+        }
+
         // Welcome back / "Search all jobs" page
         if (url.includes('#/login') || url.includes('hiring.amazon.ca/') && !url.includes('app#')) {
             var isWelcome = bodyText.includes('Welcome back') || bodyText.includes('Looking for the perfect job');
@@ -58,9 +63,11 @@
 
         // Homepage without app# (not logged into SPA)
         if (url.match(/hiring\.amazon\.(ca|com)\/?$/) || 
-            (url.includes('hiring.amazon') && !url.includes('app#') && !url.includes('#/login'))) {
+            (url.includes('hiring.amazon') && !url.includes('app#') && !url.includes('#/login') && !url.includes('/application/'))) {
             var hasHomepage = bodyText.includes('Ready to earn') || bodyText.includes('Find jobs') || bodyText.includes('Hourly opportunities');
             if (hasHomepage) return 'HOMEPAGE';
+            // If no homepage content but also not on app# — still wrong page
+            return 'WRONG_PAGE';
         }
 
         // Problem loading page error
@@ -86,6 +93,12 @@
                 window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
                 break;
 
+            case 'WRONG_PAGE':
+                _log('Wrong page (contact-us/faq/other) — navigating to jobSearch');
+                _act();
+                window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
+                break;
+
             case 'WELCOME_BACK':
                 _log('Welcome back page — clicking Search all jobs');
                 _act();
@@ -99,7 +112,6 @@
                     }
                 }
                 if (!clicked) {
-                    // Fallback: just navigate directly
                     window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
                 }
                 break;
