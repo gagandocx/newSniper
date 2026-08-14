@@ -45,10 +45,8 @@
             return 'LOGIN_REDIRECT_STUCK';
         }
 
-        // Contact us / wrong page — not part of scanning flow
-        if (url.includes('/contact-us') || url.includes('/faq') || url.includes('/help')) {
-            return 'WRONG_PAGE';
-        }
+        // Contact us page — could be part of application process, leave it alone
+        // (Amazon added this as a step in their application flow)
 
         // Welcome back / "Search all jobs" page
         if (url.includes('#/login') || url.includes('hiring.amazon.ca/') && !url.includes('app#')) {
