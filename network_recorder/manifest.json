@@ -1,26 +1,35 @@
 {
   "manifest_version": 3,
   "name": "CoderSnap Network Recorder",
-  "version": "1.0.0",
-  "description": "Records all network requests during Amazon shift application for reverse-engineering",
+  "version": "1.0.1",
+  "description": "Records network requests during Amazon shift application",
   "permissions": [
-    "webRequest",
     "storage",
     "tabs",
     "downloads",
-    "scripting"
+    "scripting",
+    "activeTab"
   ],
   "host_permissions": [
     "https://hiring.amazon.ca/*",
     "https://hiring.amazon.com/*",
-    "*://*.amazonaws.com/*",
-    "*://*.amazon.ca/*",
-    "*://*.amazon.com/*"
+    "https://*.amazonaws.com/*"
   ],
   "background": {
     "service_worker": "recorder_bg.js"
   },
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://hiring.amazon.ca/*",
+        "https://hiring.amazon.com/*"
+      ],
+      "js": ["interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ]
 }

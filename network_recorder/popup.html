@@ -2,180 +2,123 @@
 <html>
 <head>
     <style>
-        body {
-            width: 320px;
-            padding: 20px;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #0a0a16;
-            color: #e2e8f0;
-            margin: 0;
-        }
-        h1 {
-            font-size: 16px;
-            color: #22d3ee;
-            margin: 0 0 4px 0;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-        .subtitle {
-            font-size: 11px;
-            color: rgba(199,210,254,0.5);
-            margin-bottom: 16px;
-        }
-        .status {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        .status.recording {
-            border-color: rgba(239,68,68,0.5);
-            background: rgba(239,68,68,0.08);
-        }
-        .status.idle {
-            border-color: rgba(34,211,238,0.3);
-        }
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-            vertical-align: middle;
-        }
-        .dot.red { background: #ef4444; animation: pulse 1s infinite; }
-        .dot.green { background: #22d3ee; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-        .count {
-            font-size: 24px;
-            font-weight: 900;
-            color: #fff;
-            margin: 8px 0 4px;
-        }
-        .count-label {
-            font-size: 10px;
-            color: rgba(199,210,254,0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-        }
-        .btn-start {
-            background: linear-gradient(135deg, #22d3ee, #3b82f6);
-            color: #fff;
-        }
-        .btn-stop {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: #fff;
-        }
-        .btn-download {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
-        }
-        .btn-start:hover { transform: scale(1.02); }
-        .btn-stop:hover { transform: scale(1.02); }
-        .btn-download:hover { transform: scale(1.02); }
-        .instructions {
-            font-size: 11px;
-            color: rgba(199,210,254,0.5);
-            line-height: 1.6;
-            margin-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding-top: 12px;
-        }
-        .instructions b { color: #22d3ee; }
+        body { width: 320px; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; background: #0a0a16; color: #e2e8f0; margin: 0; }
+        h1 { font-size: 16px; color: #22d3ee; margin: 0 0 4px; font-weight: 900; }
+        .sub { font-size: 11px; color: rgba(199,210,254,0.5); margin-bottom: 16px; }
+        .box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; margin-bottom: 16px; text-align: center; }
+        .box.rec { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.08); }
+        .num { font-size: 28px; font-weight: 900; color: #fff; margin: 6px 0 2px; }
+        .lbl { font-size: 10px; color: rgba(199,210,254,0.4); text-transform: uppercase; letter-spacing: 1px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 8px; color: #fff; }
+        .g { background: linear-gradient(135deg, #22d3ee, #3b82f6); }
+        .r { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .d { background: linear-gradient(135deg, #10b981, #059669); }
+        .pull { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .info { font-size: 11px; color: rgba(199,210,254,0.5); line-height: 1.6; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; }
+        .info b { color: #22d3ee; }
+        #msg { font-size: 11px; color: #fbbf24; margin-top: 8px; text-align: center; }
     </style>
 </head>
 <body>
     <h1>NETWORK RECORDER</h1>
-    <div class="subtitle">Captures Amazon apply flow for API bot</div>
+    <div class="sub">Captures Amazon apply flow for API bot</div>
     
-    <div class="status idle" id="status-box">
-        <span class="dot green" id="status-dot"></span>
-        <span id="status-text">Ready to record</span>
-        <div class="count" id="count">0</div>
-        <div class="count-label">requests captured</div>
+    <div class="box" id="box">
+        <div id="st">Ready</div>
+        <div class="num" id="num">0</div>
+        <div class="lbl">requests captured</div>
     </div>
     
-    <button class="btn-start" id="btn-start" onclick="startRec()">Start Recording</button>
-    <button class="btn-stop" id="btn-stop" onclick="stopRec()" style="display:none">Stop Recording</button>
-    <button class="btn-download" id="btn-download" onclick="downloadData()" style="display:none">Download Captured Data</button>
+    <button class="g" id="b1" onclick="doStart()">Start Recording</button>
+    <button class="r" id="b2" onclick="doStop()" style="display:none">Stop Recording</button>
+    <button class="pull" id="b3" onclick="doPull()" style="display:none">Pull Data from Page</button>
+    <button class="d" id="b4" onclick="doDownload()" style="display:none">Download JSON</button>
+    <div id="msg"></div>
     
-    <div class="instructions">
+    <div class="info">
         <b>How to use:</b><br>
-        1. Click "Start Recording"<br>
-        2. Go to hiring.amazon.ca<br>
-        3. Find a shift and manually apply<br>
-        4. Complete the FULL flow (schedule → create application)<br>
-        5. Come back here → "Stop Recording"<br>
-        6. Click "Download" → share the JSON file
+        1. Open hiring.amazon.ca first<br>
+        2. Click "Start Recording"<br>
+        3. Manually apply for a shift (full flow)<br>
+        4. Click "Stop Recording"<br>
+        5. Click "Pull Data from Page"<br>
+        6. Click "Download JSON" → share file
     </div>
     
     <script>
-        function updateUI() {
-            chrome.runtime.sendMessage({ action: 'getStatus' }, function(resp) {
-                if (chrome.runtime.lastError || !resp) return;
-                var box = document.getElementById('status-box');
-                var dot = document.getElementById('status-dot');
-                var text = document.getElementById('status-text');
-                var count = document.getElementById('count');
-                
-                count.textContent = resp.count || 0;
-                
-                if (resp.recording) {
-                    box.className = 'status recording';
-                    dot.className = 'dot red';
-                    text.textContent = 'RECORDING...';
-                    document.getElementById('btn-start').style.display = 'none';
-                    document.getElementById('btn-stop').style.display = 'block';
-                    document.getElementById('btn-download').style.display = 'none';
-                } else if (resp.count > 0) {
-                    box.className = 'status idle';
-                    dot.className = 'dot green';
-                    text.textContent = 'Recording complete';
-                    document.getElementById('btn-start').style.display = 'block';
-                    document.getElementById('btn-stop').style.display = 'none';
-                    document.getElementById('btn-download').style.display = 'block';
-                }
+        var _data = [];
+        
+        function msg(t) { document.getElementById('msg').textContent = t; }
+        
+        function doStart() {
+            chrome.runtime.sendMessage({ action: 'startRecording' }, function(r) {
+                if (chrome.runtime.lastError) { msg('Error: ' + chrome.runtime.lastError.message); return; }
+                document.getElementById('box').className = 'box rec';
+                document.getElementById('st').textContent = 'RECORDING...';
+                document.getElementById('b1').style.display = 'none';
+                document.getElementById('b2').style.display = 'block';
+                msg('Recording started — go apply for a shift');
             });
         }
         
-        function startRec() {
-            document.getElementById('status-text').textContent = 'Starting...';
-            chrome.runtime.sendMessage({ action: 'startRecording' }, function(resp) {
-                if (chrome.runtime.lastError) {
-                    document.getElementById('status-text').textContent = 'Error: ' + chrome.runtime.lastError.message;
-                    return;
-                }
-                updateUI();
+        function doStop() {
+            chrome.runtime.sendMessage({ action: 'stopRecording' }, function(r) {
+                if (chrome.runtime.lastError) { msg('Error: ' + chrome.runtime.lastError.message); return; }
+                document.getElementById('box').className = 'box';
+                document.getElementById('st').textContent = 'Stopped';
+                document.getElementById('b2').style.display = 'none';
+                document.getElementById('b3').style.display = 'block';
+                msg('Stopped. Now click "Pull Data from Page"');
             });
         }
         
-        function stopRec() {
-            chrome.runtime.sendMessage({ action: 'stopRecording' }, function(resp) {
-                if (chrome.runtime.lastError) return;
-                updateUI();
+        function doPull() {
+            // Read __recorderData from the active Amazon tab
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                if (!tabs || !tabs[0]) { msg('No active tab found'); return; }
+                chrome.scripting.executeScript({
+                    target: { tabId: tabs[0].id },
+                    func: function() { return window.__recorderData || []; },
+                    world: 'MAIN'
+                }, function(results) {
+                    if (chrome.runtime.lastError) { msg('Error: ' + chrome.runtime.lastError.message); return; }
+                    if (results && results[0] && results[0].result) {
+                        _data = results[0].result;
+                        document.getElementById('num').textContent = _data.length;
+                        document.getElementById('b3').style.display = 'none';
+                        document.getElementById('b4').style.display = 'block';
+                        msg('Got ' + _data.length + ' requests! Click Download.');
+                    } else {
+                        msg('No data found. Make sure you applied on this tab.');
+                    }
+                });
             });
         }
         
-        function downloadData() {
-            chrome.runtime.sendMessage({ action: 'downloadData' });
+        function doDownload() {
+            var json = JSON.stringify({
+                meta: { recordedAt: new Date().toISOString(), total: _data.length },
+                requests: _data
+            }, null, 2);
+            
+            chrome.downloads.download({
+                url: 'data:application/json;charset=utf-8,' + encodeURIComponent(json),
+                filename: 'amazon_apply_flow_' + Date.now() + '.json',
+                saveAs: true
+            });
+            msg('Downloading...');
         }
         
-        // Wait for service worker to be ready
-        setTimeout(updateUI, 300);
-        setInterval(updateUI, 2000);
+        // Check status on open
+        chrome.runtime.sendMessage({ action: 'getStatus' }, function(r) {
+            if (chrome.runtime.lastError || !r) return;
+            if (r.recording) {
+                document.getElementById('box').className = 'box rec';
+                document.getElementById('st').textContent = 'RECORDING...';
+                document.getElementById('b1').style.display = 'none';
+                document.getElementById('b2').style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
