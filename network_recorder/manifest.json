@@ -1,23 +1,17 @@
 {
   "manifest_version": 3,
   "name": "CoderSnap Network Recorder",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Records network requests during Amazon shift application",
   "permissions": [
-    "storage",
-    "tabs",
+    "activeTab",
     "downloads",
-    "scripting",
-    "activeTab"
+    "scripting"
   ],
   "host_permissions": [
     "https://hiring.amazon.ca/*",
-    "https://hiring.amazon.com/*",
-    "https://*.amazonaws.com/*"
+    "https://hiring.amazon.com/*"
   ],
-  "background": {
-    "service_worker": "recorder_bg.js"
-  },
   "action": {
     "default_popup": "popup.html"
   },
@@ -29,7 +23,8 @@
       ],
       "js": ["interceptor.js"],
       "run_at": "document_start",
-      "world": "MAIN"
+      "world": "MAIN",
+      "all_frames": true
     }
   ]
 }
