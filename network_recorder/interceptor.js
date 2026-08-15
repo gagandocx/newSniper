@@ -115,4 +115,18 @@
         
         return _origSend.apply(this, arguments);
     };
+    // At the end, also store data in a DOM element for easy retrieval
+    setInterval(function() {
+        try {
+            var el = document.getElementById('__recorder_data');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = '__recorder_data';
+                el.style.display = 'none';
+                document.body.appendChild(el);
+            }
+            el.setAttribute('data-count', window.__recorderData.length);
+            el.textContent = JSON.stringify(window.__recorderData);
+        } catch(_) {}
+    }, 2000);
 })();

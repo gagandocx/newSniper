@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-    <h1>NETWORK RECORDER <span style="font-size:10px;color:rgba(199,210,254,0.4);font-weight:400;">v1.0.2</span></h1>
+    <h1>NETWORK RECORDER <span style="font-size:10px;color:rgba(199,210,254,0.4);font-weight:400;">v1.0.3</span></h1>
     <div class="sub">Captures Amazon apply flow — no Start needed</div>
     
     <div class="box">
@@ -49,21 +49,29 @@
                 
                 chrome.scripting.executeScript({
                     target: { tabId: tabs[0].id },
-                    func: function() { return window.__recorderData || []; },
-                    world: 'MAIN'
+                    func: function() {
+                        var el = document.getElementById('__recorder_data');
+                        if (!el) return null;
+                        return el.textContent || null;
+                    }
                 }, function(results) {
                     if (chrome.runtime.lastError) {
                         document.getElementById('msg').textContent = 'Error: ' + chrome.runtime.lastError.message;
                         return;
                     }
-                    if (results && results[0] && results[0].result && results[0].result.length > 0) {
-                        _capturedData = results[0].result;
-                        document.getElementById('num').textContent = _capturedData.length;
-                        document.getElementById('dlBtn').style.display = 'block';
-                        document.getElementById('msg').textContent = 'Got ' + _capturedData.length + ' requests! Click Download.';
+                    var raw = results && results[0] && results[0].result;
+                    if (raw) {
+                        try {
+                            _capturedData = JSON.parse(raw);
+                            document.getElementById('num').textContent = _capturedData.length;
+                            document.getElementById('dlBtn').style.display = 'block';
+                            document.getElementById('msg').textContent = 'Got ' + _capturedData.length + ' requests! Click Download.';
+                        } catch(e) {
+                            document.getElementById('msg').textContent = 'Error parsing data: ' + e.message;
+                        }
                     } else {
                         document.getElementById('num').textContent = '0';
-                        document.getElementById('msg').textContent = 'No data yet. Apply for a shift on this tab first.';
+                        document.getElementById('msg').textContent = 'No data yet. Apply for a shift on this tab first, then try again.';
                     }
                 });
             });

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CoderSnap Network Recorder",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Records network requests during Amazon shift application",
   "permissions": [
     "activeTab",
