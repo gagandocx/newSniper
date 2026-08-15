@@ -1,17 +1,9 @@
-/**
- * Intercepts ALL fetch/XHR requests on Amazon hiring pages.
- * Runs in MAIN world so it can override fetch() and XMLHttpRequest.
- * Stores captured data in window.__recorder array for the popup to read.
- */
 (function() {
     'use strict';
     if (window.__recorderInjected) return;
     window.__recorderInjected = true;
     window.__recorderData = [];
     
-    console.log('[recorder] Interceptor active on:', window.location.href);
-    
-    // ── Intercept fetch() ────────────────────────────────────────────────────
     var _origFetch = window.fetch;
     window.fetch = async function() {
         var url = (typeof arguments[0] === 'string') ? arguments[0] : (arguments[0] && arguments[0].url) || '';
@@ -21,7 +13,7 @@
         
         if (options.body) {
             if (typeof options.body === 'string') body = options.body;
-            else { try { body = JSON.stringify(options.body); } catch(_) { body = '[non-string body]'; } }
+            else { try { body = JSON.stringify(options.body); } catch(_) {} }
         }
         
         var headers = {};
@@ -33,18 +25,9 @@
             }
         }
         
-        var entry = {
-            timestamp: Date.now(),
-            type: 'fetch',
-            method: method,
-            url: url,
-            requestHeaders: headers,
-            requestBody: body,
-            requestBodyParsed: null
-        };
-        try { if (body) entry.requestBodyParsed = JSON.parse(body); } catch(_) {}
+        var entry = { t: Date.now(), type: 'fetch', method: method, url: url, reqHeaders: headers, reqBody: body };
+        try { if (body) entry.reqParsed = JSON.parse(body); } catch(_) {}
         
-        // Call original
         var response;
         try {
             response = await _origFetch.apply(this, arguments);
@@ -54,79 +37,50 @@
             throw err;
         }
         
-        entry.responseStatus = response.status;
-        entry.responseUrl = response.url;
+        entry.status = response.status;
         
-        // Capture response body for API calls
-        if (url.includes('graphql') || url.includes('/api/') || url.includes('appsync') || url.includes('/application')) {
+        if (url.includes('graphql') || url.includes('/api/') || url.includes('/application')) {
             try {
                 var clone = response.clone();
                 var text = await clone.text();
-                entry.responseBody = text;
-                try { entry.responseBodyParsed = JSON.parse(text); } catch(_) {}
+                entry.resBody = text;
+                try { entry.resParsed = JSON.parse(text); } catch(_) {}
             } catch(_) {}
         }
         
         window.__recorderData.push(entry);
+        
+        // Write count to a hidden element
+        var el = document.getElementById('__rec_count');
+        if (!el) { el = document.createElement('span'); el.id = '__rec_count'; el.style.display = 'none'; document.documentElement.appendChild(el); }
+        el.textContent = window.__recorderData.length;
+        
         return response;
     };
     
-    // ── Intercept XMLHttpRequest ──────────────────────────────────────────────
     var _origOpen = XMLHttpRequest.prototype.open;
     var _origSend = XMLHttpRequest.prototype.send;
-    var _origSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+    var _origSetH = XMLHttpRequest.prototype.setRequestHeader;
     
-    XMLHttpRequest.prototype.open = function(method, url) {
-        this.__rec = { method: method, url: url, headers: {} };
-        return _origOpen.apply(this, arguments);
-    };
-    
-    XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
-        if (this.__rec) this.__rec.headers[name] = value;
-        return _origSetHeader.apply(this, arguments);
-    };
-    
+    XMLHttpRequest.prototype.open = function(m, u) { this.__r = { method: m, url: u, h: {} }; return _origOpen.apply(this, arguments); };
+    XMLHttpRequest.prototype.setRequestHeader = function(n, v) { if (this.__r) this.__r.h[n] = v; return _origSetH.apply(this, arguments); };
     XMLHttpRequest.prototype.send = function(body) {
         var self = this;
-        if (this.__rec) {
-            this.__rec.requestBody = (typeof body === 'string') ? body : null;
-            try { if (body) this.__rec.requestBodyParsed = JSON.parse(body); } catch(_) {}
-        }
-        
+        if (this.__r) this.__r.body = (typeof body === 'string') ? body : null;
         this.addEventListener('load', function() {
-            if (!self.__rec) return;
-            var entry = {
-                timestamp: Date.now(),
-                type: 'xhr',
-                method: self.__rec.method,
-                url: self.__rec.url,
-                requestHeaders: self.__rec.headers,
-                requestBody: self.__rec.requestBody,
-                requestBodyParsed: self.__rec.requestBodyParsed,
-                responseStatus: self.status,
-                responseBody: null
-            };
-            if (self.__rec.url && (self.__rec.url.includes('graphql') || self.__rec.url.includes('/api/'))) {
-                entry.responseBody = self.responseText;
-                try { entry.responseBodyParsed = JSON.parse(self.responseText); } catch(_) {}
-            }
+            if (!self.__r) return;
+            var entry = { t: Date.now(), type: 'xhr', method: self.__r.method, url: self.__r.url, reqHeaders: self.__r.h, reqBody: self.__r.body, status: self.status };
+            if (self.__r.url && self.__r.url.includes('graphql')) { entry.resBody = self.responseText; try { entry.resParsed = JSON.parse(self.responseText); } catch(_) {} }
             window.__recorderData.push(entry);
         });
-        
         return _origSend.apply(this, arguments);
     };
-    // At the end, also store data in a DOM element for easy retrieval
-    setInterval(function() {
-        try {
-            var el = document.getElementById('__recorder_data');
-            if (!el) {
-                el = document.createElement('div');
-                el.id = '__recorder_data';
-                el.style.display = 'none';
-                document.body.appendChild(el);
-            }
-            el.setAttribute('data-count', window.__recorderData.length);
-            el.textContent = JSON.stringify(window.__recorderData);
-        } catch(_) {}
-    }, 2000);
+    
+    // Expose a function for the popup to call via DOM event
+    window.addEventListener('__pullRecorderData', function() {
+        var el = document.getElementById('__rec_json');
+        if (!el) { el = document.createElement('textarea'); el.id = '__rec_json'; el.style.display = 'none'; document.documentElement.appendChild(el); }
+        el.value = JSON.stringify(window.__recorderData);
+        el.setAttribute('data-ready', 'true');
+    });
 })();

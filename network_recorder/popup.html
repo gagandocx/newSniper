@@ -17,80 +17,109 @@
     </style>
 </head>
 <body>
-    <h1>NETWORK RECORDER <span style="font-size:10px;color:rgba(199,210,254,0.4);font-weight:400;">v1.0.3</span></h1>
-    <div class="sub">Captures Amazon apply flow — no Start needed</div>
+    <h1>NETWORK RECORDER <span style="font-size:10px;color:rgba(199,210,254,0.4);font-weight:400;">v1.0.4</span></h1>
+    <div class="sub">Captures Amazon apply flow - no Start needed</div>
     
     <div class="box">
-        <div class="num" id="num">—</div>
+        <div class="num" id="num">0</div>
         <div class="lbl">requests captured</div>
     </div>
     
-    <button class="pull" onclick="pullData()">Pull Data from This Tab</button>
+    <button class="pull" id="pullBtn" onclick="pullData()">Pull Data from This Tab</button>
     <button class="dl" id="dlBtn" onclick="downloadData()" style="display:none">Download JSON</button>
-    <div id="msg">The interceptor is already recording on Amazon pages.<br>Apply for a shift, then click "Pull Data".</div>
+    <div id="msg">Interceptor runs automatically on Amazon pages.<br>Apply for a shift, then click Pull Data.</div>
     
     <div class="info">
-        <b>How it works:</b><br>
-        1. interceptor.js runs automatically on all Amazon pages<br>
-        2. It captures every API call (fetch + XHR)<br>
-        3. After you apply, click "Pull Data from This Tab"<br>
-        4. Download the JSON file and share it
+        <b>Steps:</b><br>
+        1. Navigate Amazon and apply for a shift<br>
+        2. Click "Pull Data from This Tab"<br>
+        3. Download the JSON and share it
     </div>
     
     <script>
-        var _capturedData = [];
+        var _data = [];
         
         function pullData() {
+            document.getElementById('msg').textContent = 'Pulling...';
+            
             chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                if (!tabs || !tabs[0]) {
-                    document.getElementById('msg').textContent = 'Error: No active tab';
-                    return;
+                if (!tabs || !tabs[0]) { 
+                    document.getElementById('msg').textContent = 'No active tab found'; 
+                    return; 
                 }
+                var tabId = tabs[0].id;
                 
+                // First inject reader.js to trigger data dump
                 chrome.scripting.executeScript({
-                    target: { tabId: tabs[0].id },
-                    func: function() {
-                        var el = document.getElementById('__recorder_data');
-                        if (!el) return null;
-                        return el.textContent || null;
-                    }
-                }, function(results) {
+                    target: { tabId: tabId },
+                    files: ['reader.js']
+                }, function() {
                     if (chrome.runtime.lastError) {
                         document.getElementById('msg').textContent = 'Error: ' + chrome.runtime.lastError.message;
                         return;
                     }
-                    var raw = results && results[0] && results[0].result;
-                    if (raw) {
-                        try {
-                            _capturedData = JSON.parse(raw);
-                            document.getElementById('num').textContent = _capturedData.length;
-                            document.getElementById('dlBtn').style.display = 'block';
-                            document.getElementById('msg').textContent = 'Got ' + _capturedData.length + ' requests! Click Download.';
-                        } catch(e) {
-                            document.getElementById('msg').textContent = 'Error parsing data: ' + e.message;
-                        }
-                    } else {
-                        document.getElementById('num').textContent = '0';
-                        document.getElementById('msg').textContent = 'No data yet. Apply for a shift on this tab first, then try again.';
-                    }
+                    
+                    // Wait for reader.js to dump data into title
+                    setTimeout(function() {
+                        chrome.tabs.get(tabId, function(tab) {
+                            if (tab.title && tab.title.startsWith('__RECORDER__')) {
+                                var json = tab.title.substring('__RECORDER__'.length);
+                                try {
+                                    _data = JSON.parse(json);
+                                    document.getElementById('num').textContent = _data.length;
+                                    document.getElementById('dlBtn').style.display = 'block';
+                                    document.getElementById('msg').textContent = 'Got ' + _data.length + ' requests! Click Download.';
+                                } catch(e) {
+                                    document.getElementById('msg').textContent = 'Parse error. Data may be too large for title.';
+                                    // Fallback: try reading from DOM directly
+                                    tryDomFallback(tabId);
+                                }
+                            } else {
+                                // Title method failed — try DOM fallback
+                                tryDomFallback(tabId);
+                            }
+                        });
+                    }, 500);
                 });
+            });
+        }
+        
+        function tryDomFallback(tabId) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabId },
+                func: function() {
+                    var el = document.getElementById('__rec_count');
+                    return el ? el.textContent : '0';
+                }
+            }, function(results) {
+                if (chrome.runtime.lastError) {
+                    document.getElementById('msg').textContent = 'Error: ' + chrome.runtime.lastError.message;
+                    return;
+                }
+                var count = (results && results[0] && results[0].result) || '0';
+                document.getElementById('num').textContent = count;
+                if (parseInt(count) > 0) {
+                    document.getElementById('msg').textContent = count + ' requests recorded. Data too large for popup transfer. Use DevTools console on the Amazon tab and run: copy(JSON.stringify(window.__recorderData))';
+                } else {
+                    document.getElementById('msg').textContent = 'No data captured yet. Make sure you are on an Amazon hiring page and have navigated around.';
+                }
             });
         }
         
         function downloadData() {
             var json = JSON.stringify({
-                meta: { recordedAt: new Date().toISOString(), total: _capturedData.length, pageUrl: '' },
-                requests: _capturedData
+                meta: { recordedAt: new Date().toISOString(), total: _data.length },
+                requests: _data
             }, null, 2);
             
             var blob = new Blob([json], { type: 'application/json' });
-            var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
-            a.href = url;
+            a.href = URL.createObjectURL(blob);
             a.download = 'amazon_apply_flow_' + Date.now() + '.json';
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(url);
-            document.getElementById('msg').textContent = 'Downloaded! Share the JSON file.';
+            document.body.removeChild(a);
+            document.getElementById('msg').textContent = 'Downloaded!';
         }
     </script>
 </body>
