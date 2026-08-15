@@ -46,19 +46,19 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         });
         
         sendResponse({ status: 'recording' });
-        return;
+        return true;
     }
     
     if (msg.action === 'stopRecording') {
         _recording = false;
         console.log('[recorder] Stopped recording —', _requests.length, 'requests captured');
         sendResponse({ status: 'stopped', count: _requests.length });
-        return;
+        return true;
     }
     
     if (msg.action === 'getStatus') {
         sendResponse({ recording: _recording, count: _requests.length });
-        return;
+        return true;
     }
     
     if (msg.action === 'downloadData') {
@@ -72,10 +72,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
             requests: _requests
         };
         
-        // Create a downloadable blob
         var json = JSON.stringify(data, null, 2);
-        var blob = new Blob([json], { type: 'application/json' });
-        var url = URL.createObjectURL(blob);
         
         chrome.downloads.download({
             url: 'data:application/json;charset=utf-8,' + encodeURIComponent(json),
@@ -84,12 +81,14 @@ chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
         });
         
         sendResponse({ status: 'downloading' });
-        return;
+        return true;
     }
     
     // Receive intercepted request body from content script
     if (msg.action === 'requestBodyCaptured') {
-        _requestBodies[msg.url] = msg.body;
+        if (_recording) {
+            _requestBodies[msg.url] = msg.body;
+        }
         return;
     }
 });

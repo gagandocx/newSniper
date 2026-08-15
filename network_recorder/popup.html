@@ -125,7 +125,7 @@
     <script>
         function updateUI() {
             chrome.runtime.sendMessage({ action: 'getStatus' }, function(resp) {
-                if (!resp) return;
+                if (chrome.runtime.lastError || !resp) return;
                 var box = document.getElementById('status-box');
                 var dot = document.getElementById('status-dot');
                 var text = document.getElementById('status-text');
@@ -152,13 +152,19 @@
         }
         
         function startRec() {
-            chrome.runtime.sendMessage({ action: 'startRecording' }, function() {
+            document.getElementById('status-text').textContent = 'Starting...';
+            chrome.runtime.sendMessage({ action: 'startRecording' }, function(resp) {
+                if (chrome.runtime.lastError) {
+                    document.getElementById('status-text').textContent = 'Error: ' + chrome.runtime.lastError.message;
+                    return;
+                }
                 updateUI();
             });
         }
         
         function stopRec() {
-            chrome.runtime.sendMessage({ action: 'stopRecording' }, function() {
+            chrome.runtime.sendMessage({ action: 'stopRecording' }, function(resp) {
+                if (chrome.runtime.lastError) return;
                 updateUI();
             });
         }
@@ -167,8 +173,9 @@
             chrome.runtime.sendMessage({ action: 'downloadData' });
         }
         
-        updateUI();
-        setInterval(updateUI, 1000);
+        // Wait for service worker to be ready
+        setTimeout(updateUI, 300);
+        setInterval(updateUI, 2000);
     </script>
 </body>
 </html>
