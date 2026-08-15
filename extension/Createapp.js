@@ -66,16 +66,20 @@
     // ── Main flow ─────────────────────────────────────────────────────────────
     console.log('[Createapp] Starting application flow — CAPTCHA watchdog ON');
 
-    // ── INSTANT CHECK: Click Create Application IMMEDIATELY if present ────────
+    // ── INSTANT CHECK: Click buttons IMMEDIATELY if present ──────────────────
     // Don't wait for _tryFlow() complex logic — click it NOW
+    var _instantAgree = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+    if (_instantAgree) {
+        console.log('[Createapp] INSTANT — I Agree button found on load, clicking NOW');
+        _clickBtn(_instantAgree);
+    }
     var _instantBtn = _getBtn('Create Application');
     if (_instantBtn && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Create Application button found on load, clicking NOW');
         _clickBtn(_instantBtn);
         _goJobSearch();
-        return; // Done — no need for complex flow
+        return;
     }
-    // Also check for "Next" button immediately
     var _instantNext = _getBtn('Next');
     if (_instantNext && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Next button found on load, clicking NOW');
@@ -83,10 +87,20 @@
     }
     // ─────────────────────────────────────────────────────────────────────────
 
-    // ── AGGRESSIVE POLL: Start looking for the button every 200ms RIGHT NOW ──
+    // ── AGGRESSIVE POLL: Start looking for buttons every 200ms RIGHT NOW ─────
     var _quickFound = false;
     var _quickPoll = setInterval(function() {
         if (_quickFound) return;
+        // Check I Agree button
+        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+        if (agreeBtn) {
+            _quickFound = true;
+            clearInterval(_quickPoll);
+            console.log('[Createapp] Quick poll found I Agree — clicking');
+            _clickBtn(agreeBtn);
+            return;
+        }
+        // Check Create Application button
         var btn = _getBtn('Create Application');
         if (btn && !_isCaptchaVisible()) {
             _quickFound = true;
@@ -96,7 +110,6 @@
             _goJobSearch();
         }
     }, 200);
-    // Stop quick poll after 30s (safety net below takes over)
     setTimeout(function() { clearInterval(_quickPoll); }, 30000);
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -118,6 +131,24 @@
             _goJobSearch();
             return;
         }
+
+        // ── Application Integrity Notice — click "I Agree" button ─────────────
+        // Amazon's new step after Create Application. Must click "I Agree" to proceed.
+        var _integrityBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+        if (!_integrityBtn) {
+            // Also try finding by text content
+            _integrityBtn = [...document.querySelectorAll('button')].find(function(b) {
+                return b.textContent.trim() === 'I Agree' && !b.textContent.includes('Exit');
+            });
+        }
+        if (_integrityBtn) {
+            console.log('[Createapp] Application Integrity Notice — clicking I Agree');
+            _clickBtn(_integrityBtn);
+            await new Promise(function(r) { setTimeout(r, 2000); });
+            await _tryFlow(); // recurse to handle next step
+            return;
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         // ── Identity verification page (liveness-check) ──────────────────────
         // Check consent boxes, click Start, then STOP completely — user takes over
@@ -239,11 +270,19 @@
     await _tryFlow();
 
     // ── SAFETY NET: If _tryFlow finished without clicking, poll every 500ms ──
-    // Catches cases where button was already on page when script ran
     var _safetyAttempts = 0;
     var _safetyPoll = setInterval(function() {
         _safetyAttempts++;
-        if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; } // Stop after 30s
+        if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; }
+        // Check I Agree button first
+        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+        if (agreeBtn) {
+            console.log('[Createapp] Safety net found I Agree button — clicking');
+            _clickBtn(agreeBtn);
+            clearInterval(_safetyPoll);
+            return;
+        }
+        // Then Create Application
         var btn = _getBtn('Create Application');
         if (btn) {
             console.log('[Createapp] Safety net found Create Application button — clicking');
