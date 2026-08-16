@@ -11,8 +11,7 @@
     function _clickBtn(btn) {
         const e = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
         btn.dispatchEvent(e);
-        // Belt-and-suspenders: also fire a native click 500ms later
-        setTimeout(function() { try { btn.click(); } catch(_) {} }, 500);
+        // Single click only — no delayed second click (was causing page to go back)
     }
 
     function _goJobSearch() {
@@ -43,7 +42,12 @@
     }
 
     function _getBtn(text) {
-        // Method 1: StencilReactRow structure
+        // Method 1: Exact data-test-id match for known buttons
+        if (text === 'Create Application') {
+            var exact = document.querySelector('button[data-test-id="createApplicationButton"]');
+            if (exact) return exact;
+        }
+        // Method 2: StencilReactRow structure (exact text)
         var found = [...document.querySelectorAll('button')].find(function(btn) {
             var stencil = btn.querySelector('div[data-test-component="StencilReactRow"]');
             if (stencil && stencil.textContent.trim() === text) return true;
@@ -51,14 +55,11 @@
             return false;
         });
         if (found) return found;
-        // Method 2: Broader — button containing the text anywhere (case-insensitive)
+        // Method 3: Button whose ONLY text content matches (no partial/includes)
         found = [...document.querySelectorAll('button')].find(function(btn) {
-            return btn.textContent.trim().toLowerCase().includes(text.toLowerCase());
-        });
-        if (found) return found;
-        // Method 3: Any clickable element (a, input[type=submit]) with the text
-        found = [...document.querySelectorAll('a, input[type="submit"]')].find(function(el) {
-            return (el.textContent || el.value || '').trim().toLowerCase().includes(text.toLowerCase());
+            var btnText = btn.textContent.trim();
+            // Must be exact or very close (no "Exit Application" matching "Create Application")
+            return btnText === text || btnText.toLowerCase() === text.toLowerCase();
         });
         return found || null;
     }
@@ -70,11 +71,14 @@
     // Don't wait for _tryFlow() complex logic — click it NOW
     var _alreadyClicked = {}; // Track what we've already clicked
 
+    // PRIORITY: I Agree button first (if on integrity notice page, don't look for anything else)
     var _instantAgree = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
     if (_instantAgree) {
         console.log('[Createapp] INSTANT — I Agree button found on load, clicking NOW');
         _clickBtn(_instantAgree);
         _alreadyClicked['agree'] = true;
+        // STOP — don't look for Create Application on this page
+        return;
     }
     var _instantBtn = _getBtn('Create Application');
     if (_instantBtn && !_isCaptchaVisible() && !_alreadyClicked['create']) {
