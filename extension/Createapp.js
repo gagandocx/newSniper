@@ -68,15 +68,19 @@
 
     // ── INSTANT CHECK: Click buttons IMMEDIATELY if present ──────────────────
     // Don't wait for _tryFlow() complex logic — click it NOW
+    var _alreadyClicked = {}; // Track what we've already clicked
+
     var _instantAgree = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
     if (_instantAgree) {
         console.log('[Createapp] INSTANT — I Agree button found on load, clicking NOW');
         _clickBtn(_instantAgree);
+        _alreadyClicked['agree'] = true;
     }
     var _instantBtn = _getBtn('Create Application');
-    if (_instantBtn && !_isCaptchaVisible()) {
+    if (_instantBtn && !_isCaptchaVisible() && !_alreadyClicked['create']) {
         console.log('[Createapp] INSTANT — Create Application button found on load, clicking NOW');
         _clickBtn(_instantBtn);
+        _alreadyClicked['create'] = true;
         _goJobSearch();
         return;
     }
@@ -84,6 +88,7 @@
     if (_instantNext && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Next button found on load, clicking NOW');
         _clickBtn(_instantNext);
+        _alreadyClicked['next'] = true;
     }
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -93,8 +98,9 @@
         if (_quickFound) return;
         // Check I Agree button
         var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (agreeBtn) {
+        if (agreeBtn && !_alreadyClicked['agree']) {
             _quickFound = true;
+            _alreadyClicked['agree'] = true;
             clearInterval(_quickPoll);
             console.log('[Createapp] Quick poll found I Agree — clicking');
             _clickBtn(agreeBtn);
@@ -102,8 +108,9 @@
         }
         // Check Create Application button
         var btn = _getBtn('Create Application');
-        if (btn && !_isCaptchaVisible()) {
+        if (btn && !_isCaptchaVisible() && !_alreadyClicked['create']) {
             _quickFound = true;
+            _alreadyClicked['create'] = true;
             clearInterval(_quickPoll);
             console.log('[Createapp] Quick poll found Create Application — clicking');
             _clickBtn(btn);
@@ -276,16 +283,18 @@
         if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; }
         // Check I Agree button first
         var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (agreeBtn) {
+        if (agreeBtn && !_alreadyClicked['agree']) {
             console.log('[Createapp] Safety net found I Agree button — clicking');
+            _alreadyClicked['agree'] = true;
             _clickBtn(agreeBtn);
             clearInterval(_safetyPoll);
             return;
         }
         // Then Create Application
         var btn = _getBtn('Create Application');
-        if (btn) {
+        if (btn && !_alreadyClicked['create']) {
             console.log('[Createapp] Safety net found Create Application button — clicking');
+            _alreadyClicked['create'] = true;
             _clickBtn(btn);
             clearInterval(_safetyPoll);
         }
