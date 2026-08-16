@@ -11,7 +11,8 @@
     function _clickBtn(btn) {
         const e = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
         btn.dispatchEvent(e);
-        // Single click only — no delayed second click (was causing page to go back)
+        // Belt-and-suspenders: also fire a native click 500ms later
+        setTimeout(function() { try { btn.click(); } catch(_) {} }, 500);
     }
 
     function _goJobSearch() {
@@ -42,12 +43,7 @@
     }
 
     function _getBtn(text) {
-        // Method 1: Exact data-test-id match for known buttons
-        if (text === 'Create Application') {
-            var exact = document.querySelector('button[data-test-id="createApplicationButton"]');
-            if (exact) return exact;
-        }
-        // Method 2: StencilReactRow structure (exact text)
+        // Method 1: StencilReactRow structure
         var found = [...document.querySelectorAll('button')].find(function(btn) {
             var stencil = btn.querySelector('div[data-test-component="StencilReactRow"]');
             if (stencil && stencil.textContent.trim() === text) return true;
@@ -55,11 +51,14 @@
             return false;
         });
         if (found) return found;
-        // Method 3: Button whose ONLY text content matches (no partial/includes)
+        // Method 2: Broader — button containing the text anywhere (case-insensitive)
         found = [...document.querySelectorAll('button')].find(function(btn) {
-            var btnText = btn.textContent.trim();
-            // Must be exact or very close (no "Exit Application" matching "Create Application")
-            return btnText === text || btnText.toLowerCase() === text.toLowerCase();
+            return btn.textContent.trim().toLowerCase().includes(text.toLowerCase());
+        });
+        if (found) return found;
+        // Method 3: Any clickable element (a, input[type=submit]) with the text
+        found = [...document.querySelectorAll('a, input[type="submit"]')].find(function(el) {
+            return (el.textContent || el.value || '').trim().toLowerCase().includes(text.toLowerCase());
         });
         return found || null;
     }
@@ -67,60 +66,37 @@
     // ── Main flow ─────────────────────────────────────────────────────────────
     console.log('[Createapp] Starting application flow — CAPTCHA watchdog ON');
 
-    // ── INSTANT CHECK: Click buttons IMMEDIATELY if present ──────────────────
+    // ── INSTANT CHECK: Click Create Application IMMEDIATELY if present ────────
     // Don't wait for _tryFlow() complex logic — click it NOW
-    var _alreadyClicked = {}; // Track what we've already clicked
-
-    // PRIORITY: I Agree button first (if on integrity notice page, don't look for anything else)
-    var _instantAgree = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-    if (_instantAgree) {
-        console.log('[Createapp] INSTANT — I Agree button found on load, clicking NOW');
-        _clickBtn(_instantAgree);
-        _alreadyClicked['agree'] = true;
-        // STOP — don't look for Create Application on this page
-        return;
-    }
     var _instantBtn = _getBtn('Create Application');
-    if (_instantBtn && !_isCaptchaVisible() && !_alreadyClicked['create']) {
+    if (_instantBtn && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Create Application button found on load, clicking NOW');
         _clickBtn(_instantBtn);
-        _alreadyClicked['create'] = true;
         _goJobSearch();
-        return;
+        return; // Done — no need for complex flow
     }
+    // Also check for "Next" button immediately
     var _instantNext = _getBtn('Next');
     if (_instantNext && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Next button found on load, clicking NOW');
         _clickBtn(_instantNext);
-        _alreadyClicked['next'] = true;
     }
     // ─────────────────────────────────────────────────────────────────────────
 
-    // ── AGGRESSIVE POLL: Start looking for buttons every 200ms RIGHT NOW ─────
+    // ── AGGRESSIVE POLL: Start looking for the button every 200ms RIGHT NOW ──
     var _quickFound = false;
     var _quickPoll = setInterval(function() {
         if (_quickFound) return;
-        // Check I Agree button
-        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (agreeBtn && !_alreadyClicked['agree']) {
-            _quickFound = true;
-            _alreadyClicked['agree'] = true;
-            clearInterval(_quickPoll);
-            console.log('[Createapp] Quick poll found I Agree — clicking');
-            _clickBtn(agreeBtn);
-            return;
-        }
-        // Check Create Application button
         var btn = _getBtn('Create Application');
-        if (btn && !_isCaptchaVisible() && !_alreadyClicked['create']) {
+        if (btn && !_isCaptchaVisible()) {
             _quickFound = true;
-            _alreadyClicked['create'] = true;
             clearInterval(_quickPoll);
             console.log('[Createapp] Quick poll found Create Application — clicking');
             _clickBtn(btn);
             _goJobSearch();
         }
     }, 200);
+    // Stop quick poll after 30s (safety net below takes over)
     setTimeout(function() { clearInterval(_quickPoll); }, 30000);
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -142,24 +118,6 @@
             _goJobSearch();
             return;
         }
-
-        // ── Application Integrity Notice — click "I Agree" button ─────────────
-        // Amazon's new step after Create Application. Must click "I Agree" to proceed.
-        var _integrityBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (!_integrityBtn) {
-            // Also try finding by text content
-            _integrityBtn = [...document.querySelectorAll('button')].find(function(b) {
-                return b.textContent.trim() === 'I Agree' && !b.textContent.includes('Exit');
-            });
-        }
-        if (_integrityBtn) {
-            console.log('[Createapp] Application Integrity Notice — clicking I Agree');
-            _clickBtn(_integrityBtn);
-            await new Promise(function(r) { setTimeout(r, 2000); });
-            await _tryFlow(); // recurse to handle next step
-            return;
-        }
-        // ─────────────────────────────────────────────────────────────────────
 
         // ── Identity verification page (liveness-check) ──────────────────────
         // Check consent boxes, click Start, then STOP completely — user takes over
@@ -281,24 +239,14 @@
     await _tryFlow();
 
     // ── SAFETY NET: If _tryFlow finished without clicking, poll every 500ms ──
+    // Catches cases where button was already on page when script ran
     var _safetyAttempts = 0;
     var _safetyPoll = setInterval(function() {
         _safetyAttempts++;
-        if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; }
-        // Check I Agree button first
-        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (agreeBtn && !_alreadyClicked['agree']) {
-            console.log('[Createapp] Safety net found I Agree button — clicking');
-            _alreadyClicked['agree'] = true;
-            _clickBtn(agreeBtn);
-            clearInterval(_safetyPoll);
-            return;
-        }
-        // Then Create Application
+        if (_safetyAttempts > 60) { clearInterval(_safetyPoll); return; } // Stop after 30s
         var btn = _getBtn('Create Application');
-        if (btn && !_alreadyClicked['create']) {
+        if (btn) {
             console.log('[Createapp] Safety net found Create Application button — clicking');
-            _alreadyClicked['create'] = true;
             _clickBtn(btn);
             clearInterval(_safetyPoll);
         }
