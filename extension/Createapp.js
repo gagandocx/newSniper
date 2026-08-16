@@ -61,6 +61,15 @@
 
     // ── INSTANT CHECK: Click Create Application IMMEDIATELY if present ────────
     // Don't wait for _tryFlow() complex logic — click it NOW
+    // ── INSTANT: Check for I Agree button FIRST (integrity notice page) ─────
+    var _agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+    if (_agreeBtn) {
+        console.log('[Createapp] INSTANT — I Agree button found, clicking NOW');
+        _clickBtn(_agreeBtn);
+        console.log('[Createapp] Application complete!');
+        return; // Done — application finished
+    }
+
     var _instantBtn = _getBtn('Create Application');
     if (_instantBtn && !_isCaptchaVisible()) {
         console.log('[Createapp] INSTANT — Create Application button found on load, clicking NOW');
@@ -80,6 +89,15 @@
     var _quickFound = false;
     var _quickPoll = setInterval(function() {
         if (_quickFound) return;
+        // Check I Agree first
+        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+        if (agreeBtn) {
+            _quickFound = true;
+            clearInterval(_quickPoll);
+            console.log('[Createapp] Quick poll found I Agree — clicking');
+            _clickBtn(agreeBtn);
+            return;
+        }
         var btn = _getBtn('Create Application');
         if (btn && !_isCaptchaVisible()) {
             _quickFound = true;
