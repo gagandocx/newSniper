@@ -43,22 +43,15 @@
     }
 
     function _getBtn(text) {
-        // Method 1: StencilReactRow structure
+        // Method 1: Find button with EXACT StencilReactRow text match
+        // Must be a real action button (not logo/header), check it has no img inside
         var found = [...document.querySelectorAll('button')].find(function(btn) {
+            // Skip buttons that contain images (logo/nav buttons)
+            if (btn.querySelector('img')) return false;
             var stencil = btn.querySelector('div[data-test-component="StencilReactRow"]');
             if (stencil && stencil.textContent.trim() === text) return true;
             if (btn.textContent.trim() === text) return true;
             return false;
-        });
-        if (found) return found;
-        // Method 2: Broader — button containing the text anywhere (case-insensitive)
-        found = [...document.querySelectorAll('button')].find(function(btn) {
-            return btn.textContent.trim().toLowerCase().includes(text.toLowerCase());
-        });
-        if (found) return found;
-        // Method 3: Any clickable element (a, input[type=submit]) with the text
-        found = [...document.querySelectorAll('a, input[type="submit"]')].find(function(el) {
-            return (el.textContent || el.value || '').trim().toLowerCase().includes(text.toLowerCase());
         });
         return found || null;
     }
