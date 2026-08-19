@@ -2027,6 +2027,18 @@
 
 
 
+    // ── AUTO-RESUME: If on jobDetail page after reload, call H() to select schedule ──
+    // This catches the case where page reloaded due to "no schedules" and now
+    // schedules might be available. Start H() to look for and click them.
+    (function() {
+        var url = window.location.href;
+        if (url.includes('app#/jobDetail') && p) {
+            console.log('[fetch.js] On jobDetail page after load — starting H() to find schedules');
+            setTimeout(function() { H(); }, 2000);
+        }
+    })();
+
+
     // ── Login page detection: wait 30s then reload for fresh login ──
     (function() {
         var url = window.location.href;
