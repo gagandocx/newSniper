@@ -1779,54 +1779,56 @@
             if (!b) _startScan();
     }
     function H() {
+        var _hRefreshCount = 0;
+        var _hMaxRefreshes = 5;
+        var _hPoll;
+        var _hRefreshTimer;
         const O = new MutationObserver((Q, R) => {
             const S = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
             if (S['length'] > 0x0) {
                 const U = Math['floor'](Math['random']() * S['length']), V = S[U];
-                V['click'](), R['disconnect'](), clearInterval(_hPoll);
+                V['click'](), R['disconnect'](), clearInterval(_hPoll), clearInterval(_hRefreshTimer);
                 return;
             }
             const T = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
             if (T) {
-                T['click'](), R['disconnect'](), clearInterval(_hPoll), setTimeout(() => H(), 0x64);
+                T['click'](), R['disconnect'](), clearInterval(_hPoll), clearInterval(_hRefreshTimer), setTimeout(() => H(), 0x64);
                 return;
             }
         });
-        O['observe'](document['body'], {
-            'childList': !![],
-            'subtree': !![]
-        });
+        O['observe'](document['body'], { 'childList': !![], 'subtree': !![] });
         const P = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
         if (P['length'] > 0x0) {
             const Q = Math['floor'](Math['random']() * P['length']);
             P[Q]['click'](), O['disconnect']();
             return;
         }
-        // Polling fallback: actively looks for schedule cards every 200ms
-        var _hPoll = setInterval(function() {
+        // Poll every 200ms for schedule cards
+        _hPoll = setInterval(function() {
             var cards = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
             if (cards['length'] > 0) {
                 var idx = Math['floor'](Math['random']() * cards['length']);
                 cards[idx]['click']();
-                O['disconnect']();
-                clearInterval(_hPoll);
+                O['disconnect'](); clearInterval(_hPoll); clearInterval(_hRefreshTimer);
             } else {
                 var selectBtn = document['querySelector']('button[data-test-id=\x22jobDetailSelectScheduleButton\x22]');
-                if (selectBtn) {
-                    selectBtn['click']();
-                    O['disconnect']();
-                    clearInterval(_hPoll);
-                    setTimeout(() => H(), 0x64);
-                }
+                if (selectBtn) { selectBtn['click'](); O['disconnect'](); clearInterval(_hPoll); clearInterval(_hRefreshTimer); setTimeout(() => H(), 0x64); }
             }
         }, 200);
-        // Timeout: stop polling after 10s, try StencilText fallback
-        setTimeout(() => {
-            clearInterval(_hPoll);
-            O['disconnect']();
-            const R = document['querySelector']('div[data-test-component=\x22StencilText\x22]\x20em');
-            R && (R['click'](), setTimeout(() => I(), 0x64));
-        }, 0x2710);
+        // Every 2s: if no schedules found, refresh same page (don't go back)
+        _hRefreshTimer = setInterval(function() {
+            _hRefreshCount++;
+            var cards = document['querySelectorAll']('button[data-test-id=\x22ScheduleCardSelectScheduleLink\x22]');
+            if (cards['length'] > 0) { clearInterval(_hRefreshTimer); return; }
+            if (_hRefreshCount >= _hMaxRefreshes) {
+                clearInterval(_hRefreshTimer); clearInterval(_hPoll); O['disconnect']();
+                console.log('[fetch.js] H() — no schedules after ' + _hMaxRefreshes + ' refreshes, back to scan');
+                if (!b) _startScan();
+                return;
+            }
+            console.log('[fetch.js] H() — no schedules, refreshing (' + _hRefreshCount + '/' + _hMaxRefreshes + ')');
+            window.location.reload();
+        }, 2000);
     }
     function I() {
         const O = new MutationObserver((Q, R) => {
