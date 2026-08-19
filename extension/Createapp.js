@@ -7,12 +7,18 @@
 (async function () {
     'use strict';
 
+    // Prevent running twice (manifest injects + background.js injects)
+    if (window.__createappRan) return;
+    window.__createappRan = true;
+
     // ── Helpers ───────────────────────────────────────────────────────────────
     function _clickBtn(btn) {
-        const e = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
-        btn.dispatchEvent(e);
-        // Belt-and-suspenders: also fire a native click 500ms later
-        setTimeout(function() { try { btn.click(); } catch(_) {} }, 500);
+        // Native .click() first — React responds to this
+        try { btn.click(); } catch(_) {}
+        // Also dispatch proper mouse events for full React compatibility
+        btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+        btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     }
 
     function _goJobSearch() {
