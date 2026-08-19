@@ -7,9 +7,10 @@
 (async function () {
     'use strict';
 
-    // Prevent running twice (manifest injects + background.js injects)
-    if (window.__createappRan) return;
+    // Prevent running twice on same page — but RESET on URL changes (SPA navigation)
+    if (window.__createappRan && window.__createappUrl === window.location.href) return;
     window.__createappRan = true;
+    window.__createappUrl = window.location.href;
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function _clickBtn(btn) {
