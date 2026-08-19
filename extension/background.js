@@ -1,5 +1,27 @@
 // ── CoderSnap Background Service Worker ──────────────────────────────────────
 
+// ── Inject Createapp.js on SPA navigation (webNavigation API) ────────────────
+// tabs.onUpdated doesn't fire on SPA hash navigations. webNavigation does.
+chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
+    if (details.url && (details.url.includes('/application/') || details.url.includes('#/consent') || details.url.includes('#/application-integrity'))) {
+        chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ['Createapp.js']
+        }).catch(function() {});
+    }
+}, { url: [{ hostContains: 'hiring.amazon' }] });
+
+// Also catch reference fragment (hash) changes
+chrome.webNavigation.onReferenceFragmentUpdated.addListener(function(details) {
+    if (details.url && (details.url.includes('/application/') || details.url.includes('#/consent') || details.url.includes('#/application-integrity'))) {
+        chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ['Createapp.js']
+        }).catch(function() {});
+    }
+}, { url: [{ hostContains: 'hiring.amazon' }] });
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ── FEATURE: SERVICE WORKER WATCHDOG — Ensures session stays alive ────────────
 // Uses chrome.alarms to keep session cookies fresh. Does NOT open new tabs.
 // Only ONE tab should ever scan — if it crashes, user reopens manually or

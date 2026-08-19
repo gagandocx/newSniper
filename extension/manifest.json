@@ -95,10 +95,11 @@
       "scripting",
       "notifications",
       "debugger",
-      "alarms"
+      "alarms",
+      "webNavigation"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.8.4.7",
+   "version": "8.8.4.8",
    "web_accessible_resources": [
       {
          "matches": [
