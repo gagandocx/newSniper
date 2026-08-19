@@ -9,7 +9,8 @@
       {
          "js": [
             "notif_block.js",
-            "tokenCapture.js"
+            "tokenCapture.js",
+            "clickHelper.js"
          ],
          "matches": [
             "https://hiring.amazon.ca/*",
@@ -99,7 +100,7 @@
       "webNavigation"
    ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "8.8.4.8",
+   "version": "8.8.4.9",
    "web_accessible_resources": [
       {
          "matches": [

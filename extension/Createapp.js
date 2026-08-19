@@ -14,21 +14,31 @@
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function _clickBtn(btn) {
-        // Execute click in MAIN world via inline script injection
-        // React event handlers only respond to events from the MAIN world
+        // Use data-attribute bridge to click in MAIN world (bypasses CSP)
+        // clickHelper.js (MAIN world) watches for data-cs-click attribute changes
         var dataTestId = btn.getAttribute('data-test-id');
-        var clickCode = '';
+        var selector = '';
         if (dataTestId) {
-            clickCode = 'document.querySelector(\'button[data-test-id="' + dataTestId + '"]\').click();';
+            selector = 'button[data-test-id="' + dataTestId + '"]';
         } else {
-            // Find by text content
-            var text = btn.textContent.trim();
-            clickCode = '[...document.querySelectorAll("button")].find(function(b){return b.textContent.trim()==="' + text + '"&&!b.querySelector("img")}).click();';
+            // Find by text — use nth-of-type based on button index
+            var allBtns = document.querySelectorAll('button');
+            for (var i = 0; i < allBtns.length; i++) {
+                if (allBtns[i] === btn) {
+                    selector = 'document.querySelectorAll("button")[' + i + ']';
+                    break;
+                }
+            }
+            // Fallback: find by text content
+            if (!selector) {
+                var text = btn.textContent.trim();
+                selector = '[...document.querySelectorAll("button")].find(b=>b.textContent.trim()==="' + text + '")';
+            }
         }
-        var s = document.createElement('script');
-        s.textContent = 'try{' + clickCode + '}catch(e){}';
-        document.documentElement.appendChild(s);
-        s.remove();
+        // Signal clickHelper.js to click this selector in MAIN world
+        document.documentElement.setAttribute('data-cs-click', selector);
+        // Also try direct click as fallback
+        try { btn.click(); } catch(_) {}
     }
 
     function _goJobSearch() {
