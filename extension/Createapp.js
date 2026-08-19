@@ -13,12 +13,21 @@
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function _clickBtn(btn) {
-        // Native .click() first — React responds to this
-        try { btn.click(); } catch(_) {}
-        // Also dispatch proper mouse events for full React compatibility
-        btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-        btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-        btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        // Execute click in MAIN world via inline script injection
+        // React event handlers only respond to events from the MAIN world
+        var dataTestId = btn.getAttribute('data-test-id');
+        var clickCode = '';
+        if (dataTestId) {
+            clickCode = 'document.querySelector(\'button[data-test-id="' + dataTestId + '"]\').click();';
+        } else {
+            // Find by text content
+            var text = btn.textContent.trim();
+            clickCode = '[...document.querySelectorAll("button")].find(function(b){return b.textContent.trim()==="' + text + '"&&!b.querySelector("img")}).click();';
+        }
+        var s = document.createElement('script');
+        s.textContent = 'try{' + clickCode + '}catch(e){}';
+        document.documentElement.appendChild(s);
+        s.remove();
     }
 
     function _goJobSearch() {
