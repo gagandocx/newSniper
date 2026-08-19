@@ -64,11 +64,14 @@ chrome['runtime']['onConnect']['addListener'](function (a) {
         }
     });
 }), chrome['tabs']['onUpdated']['addListener']((a, b, c) => {
-    b['status'] === 'complete' && ((c['url']['includes']('hiring.amazon.ca/application/') || c['url']['includes']('hiring.amazon.com/application/')) && chrome['scripting']['executeScript']({
-        'target': { 'tabId': a },
-        'files': ['Createapp.js']
-    }, () => {
-    }));
+    // Inject Createapp.js on /application/ pages (full load)
+    if (b['status'] === 'complete' && c['url'] && (c['url']['includes']('hiring.amazon.ca/application/') || c['url']['includes']('hiring.amazon.com/application/'))) {
+        chrome['scripting']['executeScript']({ 'target': { 'tabId': a }, 'files': ['Createapp.js'] }, () => {});
+    }
+    // Also inject on URL changes (SPA hash navigation to /application/ or #/consent)
+    if (b['url'] && (b['url']['includes']('/application/') || b['url']['includes']('#/consent') || b['url']['includes']('#/application-integrity'))) {
+        chrome['scripting']['executeScript']({ 'target': { 'tabId': a }, 'files': ['Createapp.js'] }, () => {});
+    }
 }), chrome['runtime']['onMessage']['addListener']((a, b, c) => {
     // ── LICENSE SERVER PROXY ─────────────────────────────────────────────────────
     // ROOT CAUSE: Chrome's service worker shares Google account cookies.
