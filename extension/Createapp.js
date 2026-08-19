@@ -167,12 +167,10 @@
             return;
         }
 
-        // ── No schedules available → return to jobSearch immediately ──────────
+        // ── No schedules available → RELOAD same page (don't go back) ──────────
         if (_noSchedules()) {
-            console.log('[Createapp] No schedules available — returning to jobSearch in 2s');
-            setTimeout(function() {
-                window.location.href = 'https://hiring.amazon.ca/app#/jobSearch';
-            }, 2000);
+            console.log('[Createapp] No schedules available — reloading page instantly');
+            window.location.reload();
             return;
         }
         // ─────────────────────────────────────────────────────────────────────
