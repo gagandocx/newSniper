@@ -39,21 +39,17 @@
         }
     }
     
-    // Try immediately
-    tryClick();
-    
-    // Poll every 300ms until clicked or 30s passes
-    var _attempts = 0;
-    var _poll = setInterval(function() {
-        _attempts++;
-        if (_clicked || _attempts > 100) { clearInterval(_poll); return; }
+    // DON'T click immediately — wait for React to attach event handlers
+    // React hydration takes 1-2 seconds after DOM is ready
+    setTimeout(function() {
         tryClick();
-    }, 300);
-    
-    // Also watch for DOM changes
-    var _obs = new MutationObserver(function() { tryClick(); });
-    if (document.body) _obs.observe(document.body, { childList: true, subtree: true });
-    else document.addEventListener('DOMContentLoaded', function() {
-        _obs.observe(document.body, { childList: true, subtree: true });
-    });
+        // If still not clicked, keep trying every 500ms
+        if (!_clicked) {
+            var _poll = setInterval(function() {
+                if (_clicked) { clearInterval(_poll); return; }
+                tryClick();
+            }, 500);
+            setTimeout(function() { clearInterval(_poll); }, 30000);
+        }
+    }, 2000); // 2 second delay for React to initialize
 })();
