@@ -7,28 +7,34 @@
     if (!window.location.href.includes('/application/')) return;
     
     var _clicked = false;
+    var _isIntegrityPage = window.location.href.includes('application-integrity');
     
     function tryClick() {
         if (_clicked) return;
         
-        // Priority 1: I Agree button (integrity notice)
-        var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
-        if (agreeBtn) {
-            _clicked = true;
-            agreeBtn.click();
-            console.log('[clickHelper] Clicked I Agree');
-            return;
+        // Priority 1: I Agree button — ONLY on integrity notice page
+        if (_isIntegrityPage) {
+            var agreeBtn = document.querySelector('button[data-test-id="integrity-notice-agree-button"]');
+            if (agreeBtn) {
+                _clicked = true;
+                agreeBtn.click();
+                console.log('[clickHelper] Clicked I Agree');
+                return;
+            }
         }
         
         // Priority 2: Create Application button (no img, exact text match)
-        var buttons = document.querySelectorAll('button');
-        for (var i = 0; i < buttons.length; i++) {
-            if (buttons[i].querySelector('img')) continue; // skip logo
-            if (buttons[i].textContent.trim() === 'Create Application') {
-                _clicked = true;
-                buttons[i].click();
-                console.log('[clickHelper] Clicked Create Application');
-                return;
+        // ONLY if NOT on integrity page
+        if (!_isIntegrityPage) {
+            var buttons = document.querySelectorAll('button');
+            for (var i = 0; i < buttons.length; i++) {
+                if (buttons[i].querySelector('img')) continue;
+                if (buttons[i].textContent.trim() === 'Create Application') {
+                    _clicked = true;
+                    buttons[i].click();
+                    console.log('[clickHelper] Clicked Create Application');
+                    return;
+                }
             }
         }
     }
