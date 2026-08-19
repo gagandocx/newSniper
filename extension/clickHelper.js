@@ -31,8 +31,19 @@
                 if (buttons[i].querySelector('img')) continue;
                 if (buttons[i].textContent.trim() === 'Create Application') {
                     _clicked = true;
-                    buttons[i].click();
-                    console.log('[clickHelper] Clicked Create Application');
+                    var btn = buttons[i];
+                    // Full event sequence that React 17/18 responds to
+                    var rect = btn.getBoundingClientRect();
+                    var x = rect.left + rect.width / 2;
+                    var y = rect.top + rect.height / 2;
+                    var opts = { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y };
+                    btn.dispatchEvent(new PointerEvent('pointerdown', opts));
+                    btn.dispatchEvent(new MouseEvent('mousedown', opts));
+                    btn.dispatchEvent(new PointerEvent('pointerup', opts));
+                    btn.dispatchEvent(new MouseEvent('mouseup', opts));
+                    btn.dispatchEvent(new MouseEvent('click', opts));
+                    btn.click();
+                    console.log('[clickHelper] Clicked Create Application (full event sequence)');
                     return;
                 }
             }
