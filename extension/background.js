@@ -1,12 +1,17 @@
 // ── CoderSnap Background Service Worker ──────────────────────────────────────
 
-// ── Inject Createapp.js on SPA navigation (webNavigation API) ────────────────
+// ── Inject Createapp.js + clickHelper.js on SPA navigation (webNavigation API) ──
 // tabs.onUpdated doesn't fire on SPA hash navigations. webNavigation does.
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
     if (details.url && (details.url.includes('/application/') || details.url.includes('#/consent') || details.url.includes('#/application-integrity'))) {
         chrome.scripting.executeScript({
             target: { tabId: details.tabId },
             files: ['Createapp.js']
+        }).catch(function() {});
+        chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ['clickHelper.js'],
+            world: 'MAIN'
         }).catch(function() {});
     }
 }, { url: [{ hostContains: 'hiring.amazon' }] });
@@ -17,6 +22,11 @@ chrome.webNavigation.onReferenceFragmentUpdated.addListener(function(details) {
         chrome.scripting.executeScript({
             target: { tabId: details.tabId },
             files: ['Createapp.js']
+        }).catch(function() {});
+        chrome.scripting.executeScript({
+            target: { tabId: details.tabId },
+            files: ['clickHelper.js'],
+            world: 'MAIN'
         }).catch(function() {});
     }
 }, { url: [{ hostContains: 'hiring.amazon' }] });
